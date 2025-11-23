@@ -63,7 +63,8 @@ export const UNIVERSITIES: Record<string, University> = {
   NTNU: { code: '1150', name: 'Norges teknisk-naturvitenskapelige universitet', shortName: 'NTNU' },
   UiB: { code: '1120', name: 'Universitetet i Bergen', shortName: 'UiB' },
   NHH: { code: '1240', name: 'Norges handelshøyskole', shortName: 'NHH' },
-  // OsloMet and BI removed - no data files available
+  BI: { code: '8241', name: 'Handelshøyskolen BI', shortName: 'BI' },
+  // OsloMet removed - no data files available
 };
 
 export function createSearchPayload(

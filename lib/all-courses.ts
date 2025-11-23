@@ -13,7 +13,8 @@ const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
   NTNU: { file: 'ntnu-all-courses.json', code: '1150' },
   UiB: { file: 'uib-all-courses.json', code: '1120' },
   NHH: { file: 'nhh-all-courses.json', code: '1240' },
-  // OsloMet and BI removed - no data files available
+  BI: { file: 'bi-all-courses.json', code: '8241' },
+  // OsloMet removed - no data files available
 };
 
 /**

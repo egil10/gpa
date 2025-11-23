@@ -23,7 +23,7 @@ export default function Footer() {
             <p>
               Inneholder data fra{' '}
               <a 
-                href="https://dbh.hkdir.no" 
+                href="https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

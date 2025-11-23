@@ -17,6 +17,7 @@
     "discover-uio": "tsx scripts/discover-uio-courses.ts",
     "discover-uib": "tsx scripts/discover-uib-courses.ts",
     "discover-ntnu": "tsx scripts/discover-ntnu-courses.ts",
+    "discover-bi": "tsx scripts/discover-bi-courses.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {

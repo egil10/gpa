@@ -25,6 +25,7 @@ const filesToCopy = [
   { source: 'uib-all-courses.json', dest: 'uib-all-courses.json', optional: true },
   { source: 'nhh-all-courses.json', dest: 'nhh-all-courses.json', optional: false },
   { source: 'nhh-bachelor-courses.json', dest: 'nhh-bachelor-courses.json', optional: true },
+  { source: 'bi-all-courses.json', dest: 'bi-all-courses.json', optional: true },
 ];
 
 filesToCopy.forEach(({ source, dest, optional }) => {
@@ -40,7 +41,8 @@ filesToCopy.forEach(({ source, dest, optional }) => {
     const institutionCode = source.includes('uio') ? '1110' :
                            source.includes('ntnu') ? '1150' :
                            source.includes('uib') ? '1120' :
-                           source.includes('nhh') ? '1240' : '0000';
+                           source.includes('nhh') ? '1240' :
+                           source.includes('bi') ? '8241' : '0000';
     fs.writeFileSync(destFile, JSON.stringify({ i: institutionCode, courses: [] }));
   }
 });
