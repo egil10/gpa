@@ -26,6 +26,14 @@ const filesToCopy = [
   { source: 'nhh-all-courses.json', dest: 'nhh-all-courses.json', optional: false },
   { source: 'nhh-bachelor-courses.json', dest: 'nhh-bachelor-courses.json', optional: true },
   { source: 'bi-all-courses.json', dest: 'bi-all-courses.json', optional: true },
+  { source: 'oslomet-all-courses.json', dest: 'oslomet-all-courses.json', optional: true },
+  { source: 'nord-all-courses.json', dest: 'nord-all-courses.json', optional: true },
+  { source: 'nmbu-all-courses.json', dest: 'nmbu-all-courses.json', optional: true },
+  { source: 'uia-all-courses.json', dest: 'uia-all-courses.json', optional: true },
+  { source: 'inn-all-courses.json', dest: 'inn-all-courses.json', optional: true },
+  { source: 'uis-all-courses.json', dest: 'uis-all-courses.json', optional: true },
+  { source: 'usn-all-courses.json', dest: 'usn-all-courses.json', optional: true },
+  { source: 'uit-all-courses.json', dest: 'uit-all-courses.json', optional: true },
 ];
 
 filesToCopy.forEach(({ source, dest, optional }) => {
@@ -42,7 +50,15 @@ filesToCopy.forEach(({ source, dest, optional }) => {
                            source.includes('ntnu') ? '1150' :
                            source.includes('uib') ? '1120' :
                            source.includes('nhh') ? '1240' :
-                           source.includes('bi') ? '8241' : '0000';
+                           source.includes('bi') ? '8241' :
+                           source.includes('oslomet') ? '1175' :
+                           source.includes('nord') ? '1174' :
+                           source.includes('nmbu') ? '1173' :
+                           source.includes('uia') ? '1171' :
+                           source.includes('inn') ? '1177' :
+                           source.includes('uis') ? '1160' :
+                           source.includes('usn') ? '1176' :
+                           source.includes('uit') ? '1130' : '0000';
     fs.writeFileSync(destFile, JSON.stringify({ i: institutionCode, courses: [] }));
   }
 });

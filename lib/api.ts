@@ -64,7 +64,14 @@ export const UNIVERSITIES: Record<string, University> = {
   UiB: { code: '1120', name: 'Universitetet i Bergen', shortName: 'UiB' },
   NHH: { code: '1240', name: 'Norges handelshøyskole', shortName: 'NHH' },
   BI: { code: '8241', name: 'Handelshøyskolen BI', shortName: 'BI' },
-  // OsloMet removed - no data files available
+  OsloMet: { code: '1175', name: 'OsloMet – storbyuniversitetet', shortName: 'OsloMet' },
+  Nord: { code: '1174', name: 'Nord universitet', shortName: 'Nord' },
+  NMBU: { code: '1173', name: 'Norges miljø- og biovitenskapelige universitet', shortName: 'NMBU' },
+  UiA: { code: '1171', name: 'Universitetet i Agder', shortName: 'UiA' },
+  INN: { code: '1177', name: 'Universitetet i Innlandet', shortName: 'INN' },
+  UiS: { code: '1160', name: 'Universitetet i Stavanger', shortName: 'UiS' },
+  USN: { code: '1176', name: 'Universitetet i Sørøst-Norge', shortName: 'USN' },
+  UiT: { code: '1130', name: 'Universitetet i Tromsø – Norges arktiske universitet', shortName: 'UiT' },
 };
 
 export function createSearchPayload(

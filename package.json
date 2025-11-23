@@ -18,6 +18,14 @@
     "discover-uib": "tsx scripts/discover-uib-courses.ts",
     "discover-ntnu": "tsx scripts/discover-ntnu-courses.ts",
     "discover-bi": "tsx scripts/discover-bi-courses.ts",
+    "discover-oslomet": "tsx scripts/discover-oslomet-courses.ts",
+    "discover-nord": "tsx scripts/discover-nord-courses.ts",
+    "discover-nmbu": "tsx scripts/discover-nmbu-courses.ts",
+    "discover-uia": "tsx scripts/discover-uia-courses.ts",
+    "discover-inn": "tsx scripts/discover-inn-courses.ts",
+    "discover-uis": "tsx scripts/discover-uis-courses.ts",
+    "discover-usn": "tsx scripts/discover-usn-courses.ts",
+    "discover-uit": "tsx scripts/discover-uit-courses.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {

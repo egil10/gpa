@@ -14,7 +14,14 @@ const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
   UiB: { file: 'uib-all-courses.json', code: '1120' },
   NHH: { file: 'nhh-all-courses.json', code: '1240' },
   BI: { file: 'bi-all-courses.json', code: '8241' },
-  // OsloMet removed - no data files available
+  OsloMet: { file: 'oslomet-all-courses.json', code: '1175' },
+  Nord: { file: 'nord-all-courses.json', code: '1174' },
+  NMBU: { file: 'nmbu-all-courses.json', code: '1173' },
+  UiA: { file: 'uia-all-courses.json', code: '1171' },
+  INN: { file: 'inn-all-courses.json', code: '1177' },
+  UiS: { file: 'uis-all-courses.json', code: '1160' },
+  USN: { file: 'usn-all-courses.json', code: '1176' },
+  UiT: { file: 'uit-all-courses.json', code: '1130' },
 };
 
 /**
