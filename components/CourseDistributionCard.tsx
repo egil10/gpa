@@ -77,12 +77,10 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
 
       <div className={styles.stats}>
         <div className={styles.stat}>
-          <span className={styles.statLabel}>Kandidater</span>
-          <span className={styles.statValue}>{course.totalStudents}</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Mest vanlig</span>
-          <span className={styles.statValue}>{topGrade.grade}</span>
+          <span className={styles.statLabel}>A-er</span>
+          <span className={styles.statValue}>
+            {course.distributions.find(d => d.grade === 'A')?.percentage || 0}%
+          </span>
         </div>
         {course.averageGrade && (
           <div className={styles.stat}>
@@ -90,6 +88,10 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
             <span className={styles.statValue}>{course.averageGrade.toFixed(1)}</span>
           </div>
         )}
+        <div className={styles.stat}>
+          <span className={styles.statLabel}>Kandidater</span>
+          <span className={styles.statValue}>{course.totalStudents}</span>
+        </div>
       </div>
     </div>
   );

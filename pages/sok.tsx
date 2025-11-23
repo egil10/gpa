@@ -11,7 +11,7 @@ import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processMultiYearData, combineAllYears } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { CourseInfo, getInstitutionForCourse } from '@/lib/courses';
-import { stripCourseCodeSuffix } from '@/lib/all-courses';
+import { stripCourseCodeSuffix, loadAllCourses } from '@/lib/all-courses';
 import styles from '@/styles/Search.module.css';
 
 export default function SearchPage() {
@@ -25,7 +25,19 @@ export default function SearchPage() {
   const [institutionLocked, setInstitutionLocked] = useState(false);
   const [showExplorer, setShowExplorer] = useState(false);
   const [showDepartmentBrowser, setShowDepartmentBrowser] = useState(false);
+  const [randomCourses, setRandomCourses] = useState<CourseInfo[]>([]);
 
+
+  // Load all courses and generate random courses on mount
+  useEffect(() => {
+    loadAllCourses().then(courses => {
+      // Generate 9 random courses
+      const shuffled = [...courses].sort(() => Math.random() - 0.5);
+      setRandomCourses(shuffled.slice(0, 9));
+    }).catch(err => {
+      console.error('Failed to load courses:', err);
+    });
+  }, []);
 
   const handleExplorerCourseSelect = (course: CourseInfo) => {
     setCourseCode(course.code);
@@ -170,36 +182,26 @@ export default function SearchPage() {
           <div className={styles.quickActions}>
             <h3>Rask søk</h3>
             <div className={styles.quickButtons}>
-              <button
-                type="button"
-                onClick={() => {
-                  setCourseCode('IN2010');
-                  setInstitution('UiO');
-                }}
-                className={styles.quickButton}
-              >
-                IN2010 (UiO)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCourseCode('TDT4100');
-                  setInstitution('NTNU');
-                }}
-                className={styles.quickButton}
-              >
-                TDT4100 (NTNU)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCourseCode('ECON1100');
-                  setInstitution('UiO');
-                }}
-                className={styles.quickButton}
-              >
-                ECON1100 (UiO)
-              </button>
+              {randomCourses.map((course) => (
+                <button
+                  key={`${course.code}-${course.institution}`}
+                  type="button"
+                  onClick={() => {
+                    setCourseCode(course.code);
+                    setInstitution(course.institution);
+                    setInstitutionLocked(true);
+                    setSelectedCourse(course);
+                    // Auto-trigger search
+                    setTimeout(() => {
+                      handleSearch();
+                    }, 100);
+                  }}
+                  className={styles.quickButton}
+                  title={course.name}
+                >
+                  {course.code} ({UNIVERSITIES[course.institution]?.shortName || course.institution})
+                </button>
+              ))}
               <button
                 type="button"
                 onClick={() => {
@@ -265,97 +267,96 @@ export default function SearchPage() {
             />
           )}
 
-          <form onSubmit={handleSearch} className={styles.searchForm}>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="courseCode">Emnekode</label>
-                <CourseAutocomplete
-                  value={courseCode}
-                  onChange={(code) => {
-                    setCourseCode(code);
-                    setError(null);
-                    
-                    // Check if code has known institution
-                    if (code.trim()) {
-                      const courseInstitution = getInstitutionForCourse(code);
-                      if (courseInstitution) {
-                        setInstitution(courseInstitution);
-                        setInstitutionLocked(true);
-                      } else if (!selectedCourse) {
-                        // Only unlock if no course is selected
-                        setInstitutionLocked(false);
-                      }
-                    } else {
-                      setInstitutionLocked(false);
-                      setSelectedCourse(null);
-                    }
-                  }}
-                  onCourseSelect={(course) => {
-                    setSelectedCourse(course);
-                    if (course) {
-                      setInstitution(course.institution);
+          <div className={styles.centeredSearch}>
+            <div className={styles.searchCard}>
+              <CourseAutocomplete
+                value={courseCode}
+                onChange={(code) => {
+                  setCourseCode(code);
+                  setError(null);
+                  
+                  // Check if code has known institution
+                  if (code.trim()) {
+                    const courseInstitution = getInstitutionForCourse(code);
+                    if (courseInstitution) {
+                      setInstitution(courseInstitution);
                       setInstitutionLocked(true);
-                    } else if (!courseCode.trim()) {
-                      // Only unlock if course code is cleared
+                    } else if (!selectedCourse) {
+                      // Only unlock if no course is selected
                       setInstitutionLocked(false);
                     }
-                  }}
-                  institution={institutionLocked ? institution : undefined}
-                  placeholder="Søk etter emnekode eller navn..."
-                  disabled={loading}
-                />
-                {selectedCourse && (
-                  <div className={styles.courseInfo}>
-                    <span className={styles.courseInfoText}>
-                      {selectedCourse.name} • {UNIVERSITIES[selectedCourse.institution]?.name}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="institution">
-                  Institusjon
-                  {institutionLocked && (
-                    <span className={styles.lockedIndicator} title="Låst basert på valgt emne">
-                      🔒
-                    </span>
-                  )}
-                </label>
-                <select
-                  id="institution"
-                  value={institution}
-                  onChange={(e) => {
-                    if (!institutionLocked) {
-                      setInstitution(e.target.value);
-                    }
-                  }}
-                  className={styles.select}
-                  disabled={institutionLocked || loading}
-                >
-                  {Object.entries(UNIVERSITIES).map(([key, uni]) => (
-                    <option key={key} value={key}>
-                      {uni.shortName}
-                    </option>
-                  ))}
-                </select>
-                {institutionLocked && (
-                  <p className={styles.lockedMessage}>
-                    Institusjonen er låst basert på valgt emne
-                  </p>
-                )}
-              </div>
-
-
-              <button
-                type="submit"
+                  } else {
+                    setInstitutionLocked(false);
+                    setSelectedCourse(null);
+                  }
+                }}
+                onCourseSelect={(course) => {
+                  setSelectedCourse(course);
+                  if (course) {
+                    setInstitution(course.institution);
+                    setInstitutionLocked(true);
+                    // Auto-trigger search when course is selected
+                    setTimeout(() => {
+                      handleSearch();
+                    }, 100);
+                  } else if (!courseCode.trim()) {
+                    // Only unlock if course code is cleared
+                    setInstitutionLocked(false);
+                  }
+                }}
+                institution={institutionLocked ? institution : undefined}
+                placeholder="Søk etter emnekode eller navn..."
                 disabled={loading}
-                className={styles.submitButton}
-              >
-                {loading ? 'Laster...' : 'Søk'}
-              </button>
+              />
+              
+              {selectedCourse && (
+                <div className={styles.selectedCourseInfo}>
+                  <span className={styles.courseName}>{selectedCourse.name}</span>
+                  <span className={styles.courseInstitution}>
+                    {UNIVERSITIES[selectedCourse.institution]?.name}
+                  </span>
+                </div>
+              )}
+
+              <div className={styles.searchActions}>
+                <div className={styles.institutionSelector}>
+                  <label htmlFor="institution">
+                    {institutionLocked && (
+                      <span className={styles.lockedIcon} title="Låst basert på valgt emne">
+                        🔒
+                      </span>
+                    )}
+                    Institusjon
+                  </label>
+                  <select
+                    id="institution"
+                    value={institution}
+                    onChange={(e) => {
+                      if (!institutionLocked) {
+                        setInstitution(e.target.value);
+                      }
+                    }}
+                    className={styles.institutionSelect}
+                    disabled={institutionLocked || loading}
+                  >
+                    {Object.entries(UNIVERSITIES).map(([key, uni]) => (
+                      <option key={key} value={key}>
+                        {uni.shortName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  disabled={loading || !courseCode.trim()}
+                  className={styles.searchButton}
+                >
+                  {loading ? 'Laster...' : 'Søk'}
+                </button>
+              </div>
             </div>
-          </form>
+          </div>
 
           {error && (
             <div className={styles.error}>

@@ -26,7 +26,8 @@
 }
 
 .courseCode {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-xl);
   font-weight: 600;
   margin: 0;
@@ -61,7 +62,8 @@
 .statValue {
   font-size: var(--text-lg);
   font-weight: 600;
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 

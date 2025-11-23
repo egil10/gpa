@@ -4,9 +4,36 @@
  */
 
 import { GradeData } from '@/types';
-import { getCachedData } from './cache';
 import { formatCourseCode } from './api';
 import { loadInstitutionCourses } from './all-courses';
+
+// Cache helper - only loads on server-side to avoid bundling fs module
+function getCachedDataSafe(
+  institutionCode: string,
+  courseCode: string
+): GradeData[] | null {
+  // Only try to use cache on server-side
+  // Check multiple ways to ensure we're on server
+  if (typeof window !== 'undefined' || typeof process === 'undefined' || !process.versions?.node) {
+    return null;
+  }
+
+  try {
+    // Use Function constructor to make require truly dynamic
+    // This prevents webpack from analyzing the require call
+    const requireFunc = new Function('modulePath', 'return require(modulePath)');
+    const cacheModule = requireFunc('./cache');
+    if (cacheModule && typeof cacheModule.getCachedData === 'function') {
+      return cacheModule.getCachedData(institutionCode, courseCode);
+    }
+  } catch (e) {
+    // Cache not available or error loading - silently fail
+    // This is expected on client-side where cache module is ignored by webpack
+    return null;
+  }
+  
+  return null;
+}
 
 // Client-side cache (in-memory)
 const clientCache: Map<string, GradeData[]> = new Map();
@@ -57,8 +84,15 @@ export async function getGradeDataFromCache(
     }
   }
   
-  // Check server-side cache
-  const cached = getCachedData(institutionCode, formattedCode);
+  // Check server-side cache (wrapped in try-catch for safety)
+  let cached: GradeData[] | null = null;
+  try {
+    cached = getCachedDataSafe(institutionCode, formattedCode);
+  } catch (e) {
+    // Silently fail if cache access fails (expected on client-side)
+    cached = null;
+  }
+  
   if (cached && cached.length > 0) {
     // Also store in client cache if on client
     if (typeof window !== 'undefined') {

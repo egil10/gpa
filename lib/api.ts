@@ -6,7 +6,8 @@ function getCachedDataSafe(
   courseCode: string
 ): GradeData[] | null {
   // Only try to use cache on server-side
-  if (typeof window !== 'undefined') {
+  // Check multiple ways to ensure we're on server
+  if (typeof window !== 'undefined' || typeof process === 'undefined' || !process.versions?.node) {
     return null;
   }
 
@@ -15,11 +16,16 @@ function getCachedDataSafe(
     // This prevents webpack from analyzing the require call
     const requireFunc = new Function('modulePath', 'return require(modulePath)');
     const cacheModule = requireFunc('./cache');
-    return cacheModule.getCachedData(institutionCode, courseCode);
+    if (cacheModule && typeof cacheModule.getCachedData === 'function') {
+      return cacheModule.getCachedData(institutionCode, courseCode);
+    }
   } catch (e) {
-    // Cache not available, return null
+    // Cache not available or error loading - silently fail
+    // This is expected on client-side where cache module is ignored by webpack
     return null;
   }
+  
+  return null;
 }
 
 // NSD API URL - CORS issues in production require a proxy
@@ -269,8 +275,15 @@ export async function fetchGradeData(
     }
   }
   
-  // Fall back to server-side cache
-  const cached = getCachedDataSafe(institutionCode, courseCode);
+  // Fall back to server-side cache (wrapped in try-catch for safety)
+  let cached: GradeData[] | null = null;
+  try {
+    cached = getCachedDataSafe(institutionCode, courseCode);
+  } catch (e) {
+    // Silently fail if cache access fails (expected on client-side)
+    cached = null;
+  }
+  
   if (cached && cached.length > 0) {
     // Filter by year if specified
     if (year) {
@@ -314,8 +327,15 @@ export async function fetchAllYearsData(
     }
   }
   
-  // Fall back to server-side cache
-  const cached = getCachedDataSafe(institutionCode, courseCode);
+  // Fall back to server-side cache (wrapped in try-catch for safety)
+  let cached: GradeData[] | null = null;
+  try {
+    cached = getCachedDataSafe(institutionCode, courseCode);
+  } catch (e) {
+    // Silently fail if cache access fails (expected on client-side)
+    cached = null;
+  }
+  
   if (cached && cached.length > 0) {
     return cached;
   }

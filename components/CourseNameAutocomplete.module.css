@@ -142,7 +142,8 @@
 }
 
 .suggestionCode {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-xs);
   color: var(--color-text-light);
 }
@@ -154,7 +155,8 @@
 }
 
 .duplicateBadge {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-xs);
   color: var(--color-accent);
   font-weight: 600;

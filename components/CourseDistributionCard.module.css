@@ -33,10 +33,11 @@
 }
 
 .courseCode {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .institution {
@@ -83,8 +84,9 @@
 .statValue {
   font-size: 1rem;
   font-weight: 600;
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 @media (max-width: 768px) {

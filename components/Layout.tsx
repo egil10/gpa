@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import BottomSearchBar from './BottomSearchBar';
@@ -11,6 +12,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, title, description }: LayoutProps) {
+  const router = useRouter();
+  const isSearchPage = router.pathname === '/sok';
   const siteTitle = title ? `${title} | Karakterstatistikk` : 'Karakterstatistikk';
   const siteDescription = description || 
     'Utforsk karakterstatistikk for norske universitetsemner. Data fra NSD.';
@@ -29,7 +32,7 @@ export default function Layout({ children, title, description }: LayoutProps) {
           {children}
         </main>
         <Footer />
-        <BottomSearchBar />
+        {!isSearchPage && <BottomSearchBar />}
       </div>
     </>
   );

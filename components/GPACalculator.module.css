@@ -124,8 +124,9 @@
   align-items: center;
   gap: var(--space-xs);
   font-size: var(--text-5xl);
-  font-weight: 700;
-  font-family: var(--font-mono);
+  font-weight: 600;
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   color: var(--color-primary);
   line-height: 1;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -164,7 +165,8 @@
   display: block;
   font-size: var(--text-xl);
   font-weight: 600;
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
 }
 
 .bonusPointsSection {
@@ -217,7 +219,8 @@
   flex: 1;
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border);
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-lg);
   font-weight: 600;
   text-align: center;
@@ -271,7 +274,8 @@
 .bonusPointsEffect {
   color: var(--color-accent);
   font-weight: 600;
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
 }
 
 .coursesSection {
@@ -321,7 +325,7 @@
 .addButton::before {
   content: '+';
   font-size: var(--text-xl);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -446,7 +450,8 @@
 }
 
 .courseNumber {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-sm);
   color: var(--color-text-light);
   font-weight: 600;
@@ -548,7 +553,8 @@
   flex: 1;
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border);
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-base);
   font-weight: 600;
   background-color: var(--color-background);
@@ -570,7 +576,8 @@
 }
 
 .coursePoints {
-  font-family: var(--font-mono);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
   font-size: var(--text-sm);
   color: var(--color-text-light);
   font-weight: 600;

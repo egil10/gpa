@@ -48,8 +48,9 @@
 
 .value {
   font-size: var(--text-3xl);
-  font-weight: 700;
-  font-family: var(--font-mono);
+  font-weight: 600;
+  font-family: var(--font-inter);
+  letter-spacing: -0.02em;
   margin-bottom: var(--space-sm);
   color: var(--text-primary);
 }
