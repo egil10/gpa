@@ -599,6 +599,9 @@ export default function Home() {
 
   // Check if there are more courses to load or display
   const hasMoreCourses = useMemo(() => {
+    // Don't show "Load More" while still loading initial courses
+    if (loading) return false;
+    
     // Check if we have more courses already loaded that we haven't displayed
     if (displayCount < filteredAndSortedCourses.length) {
       return true;
@@ -641,18 +644,28 @@ export default function Home() {
       return coursesWithData.length < matchingCourses.length;
     }
     
-    // Check if there are more courses that need data loaded
+    // Check if there are more courses that need data loaded (on initial load or after filtering)
     const filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
     
+    // Count courses that have data loaded
     const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
       return coursesDataRef.current.has(key);
     });
     
+    // On initial load (before initialLoadComplete), show button once we have at least one batch loaded
+    // and there are more courses available
+    if (!initialLoadComplete) {
+      // Wait until we have at least COURSES_PER_PAGE courses loaded before showing button
+      // This ensures we don't show the button while still loading the initial batch
+      return coursesWithData.length >= COURSES_PER_PAGE && coursesWithData.length < filtered.length;
+    }
+    
+    // After initial load is complete, show button if there are more courses to load
     return coursesWithData.length < filtered.length;
-  }, [allCourses, selectedInstitution, searchQuery, displayCount, filteredAndSortedCourses.length]);
+  }, [allCourses, selectedInstitution, searchQuery, displayCount, filteredAndSortedCourses.length, loading, initialLoadComplete]);
 
   return (
     <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">

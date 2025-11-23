@@ -14,6 +14,7 @@ export default function BottomSearchBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [searchBarOpacity, setSearchBarOpacity] = useState(1);
+  const [notFoundMessage, setNotFoundMessage] = useState<string | null>(null);
   const router = useRouter();
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -100,10 +101,15 @@ export default function BottomSearchBar() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
     setQuery(newValue);
+    // Clear not found message when user types
+    if (notFoundMessage) {
+      setNotFoundMessage(null);
+    }
   };
 
   const handleSelectCourse = (course: CourseInfo) => {
     // Navigate directly to course charts (use code without suffix in URL)
+    setNotFoundMessage(null);
     router.push(`/sok?code=${encodeURIComponent(course.code)}&uni=${course.institution}`);
     setQuery('');
     setShowSuggestions(false);
@@ -116,6 +122,7 @@ export default function BottomSearchBar() {
     setQuery(course.code);
     setSelectedCourse(course);
     setShowSuggestions(false);
+    setNotFoundMessage(null);
     inputRef.current?.focus();
   };
 
@@ -123,19 +130,34 @@ export default function BottomSearchBar() {
     e.preventDefault();
     if (selectedCourse) {
       // If we have a selected course, navigate to it
+      setNotFoundMessage(null);
       handleSelectCourse(selectedCourse);
     } else if (query.trim()) {
       // Strip suffix from query before searching/navigating
       const cleanQuery = stripCourseCodeSuffix(query.trim());
       getCourseByCode(cleanQuery, undefined).then(course => {
         if (course) {
+          setNotFoundMessage(null);
           handleSelectCourse(course);
         } else {
-          // Navigate to search page with query (without suffix)
-          router.push(`/sok?code=${encodeURIComponent(cleanQuery)}`);
-          setQuery('');
+          // Show not found message instead of navigating
+          setNotFoundMessage(`Emnekode "${cleanQuery}" ikke funnet`);
           setShowSuggestions(false);
+          
+          // Clear message after 3 seconds
+          setTimeout(() => {
+            setNotFoundMessage(null);
+          }, 3000);
         }
+      }).catch(() => {
+        // Show error message
+        setNotFoundMessage(`Kunne ikke søke etter "${cleanQuery}"`);
+        setShowSuggestions(false);
+        
+        // Clear message after 3 seconds
+        setTimeout(() => {
+          setNotFoundMessage(null);
+        }, 3000);
       });
     }
   };
@@ -144,6 +166,7 @@ export default function BottomSearchBar() {
     setQuery('');
     setShowSuggestions(false);
     setSuggestions([]);
+    setNotFoundMessage(null);
     inputRef.current?.focus();
   };
 
@@ -240,6 +263,10 @@ export default function BottomSearchBar() {
                     placeholder="Søk etter emnekode eller navn..."
                     className={styles.input}
                     autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    enterKeyHint="search"
                   />
                 </div>
                 <div className={styles.actions}>
@@ -263,6 +290,13 @@ export default function BottomSearchBar() {
                   </button>
                 </div>
               </div>
+              
+              {/* Not found message */}
+              {notFoundMessage && (
+                <div className={styles.notFoundMessage}>
+                  {notFoundMessage}
+                </div>
+              )}
               
               {showSuggestions && suggestions.length > 0 && searchBarOpacity > 0.3 && (
                 <div ref={suggestionsRef} className={styles.suggestions}>

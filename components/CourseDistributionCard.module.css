@@ -9,6 +9,9 @@
   flex-direction: column;
   gap: var(--space-md);
   will-change: transform, border-color, box-shadow;
+  /* Better touch interaction on mobile */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
 }
 
 .card:hover {
@@ -92,14 +95,63 @@
 @media (max-width: 768px) {
   .card {
     padding: var(--space-md);
+    border-radius: 1.25rem;
+    /* Active state for touch feedback */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .card:active {
+    transform: scale(0.98);
+    background: var(--surface-hover);
   }
   
   .chartContainer {
     height: 100px;
+    margin: var(--space-xs) 0;
+  }
+  
+  .header {
+    gap: var(--space-xs);
+  }
+  
+  .courseCode {
+    font-size: 0.9375rem;
+  }
+  
+  .institution {
+    font-size: 0.7rem;
+  }
+  
+  .year {
+    font-size: 0.8125rem;
+  }
+  
+  .stats {
+    gap: var(--space-xs);
+    padding-top: var(--space-xs);
+  }
+  
+  .stat {
+    gap: 0.125rem;
+  }
+  
+  .statLabel {
+    font-size: 0.7rem;
   }
   
   .statValue {
     font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: var(--space-sm);
+    border-radius: 1rem;
+  }
+  
+  .chartContainer {
+    height: 90px;
   }
 }
 

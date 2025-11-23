@@ -25,12 +25,14 @@ export default function Layout({ children, title, description }: LayoutProps) {
       <Head>
         <title>{siteTitle}</title>
         <meta name="description" content={siteDescription} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </Head>
       <div className="min-h-screen bg-white flex flex-col">
         <HomeButton />
-        <main className="flex-1 relative z-10 pb-32">
+        <main className="flex-1 relative z-10 pb-32" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}>
           {children}
         </main>
         <Footer />

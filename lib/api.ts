@@ -32,9 +32,12 @@ function getCachedDataSafe(
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 
 // Multiple CORS proxy options as fallback (only used if Vercel proxy unavailable)
+// These are unreliable and may fail - that's expected behavior
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
+  // Additional fallback option
+  'https://cors-anywhere.herokuapp.com/',
 ];
 
 // Use proxy in production, direct API in development
@@ -200,12 +203,8 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
         const data: GradeData[] = await response.json();
         return data;
       } catch (error) {
-        // If Vercel proxy fails, fall back to public proxies
-        // Only log warning if it's not a 405 (which means proxy doesn't exist)
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (!errorMessage.includes('405')) {
-          console.warn('Vercel proxy failed, falling back to public proxies:', error);
-        }
+        // If Vercel proxy fails, silently fall back to public proxies
+        // No logging needed - expected when proxy doesn't exist or fails
         return fetchWithProxy(payload, 0, false);
       }
     }
@@ -218,13 +217,21 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     'Content-Type': 'application/json',
   };
 
+  // Build URL based on proxy type
   if (proxy.includes('allorigins.win')) {
     url = `${proxy}${encodeURIComponent(DIRECT_API)}`;
+  } else if (proxy.includes('cors-anywhere.herokuapp.com')) {
+    // cors-anywhere format: https://cors-anywhere.herokuapp.com/https://example.com
+    url = `${proxy}${DIRECT_API}`;
   } else {
+    // Default format (corsproxy.io, etc.)
     url = `${proxy}${encodeURIComponent(DIRECT_API)}`;
   }
 
   try {
+    // Note: Browser CORS errors in console cannot be suppressed - they're browser security features.
+    // These errors are expected when public proxies fail and will appear in the console.
+    // The only way to eliminate them is to deploy your own proxy (see docs/CORS_SOLUTION.md).
     const response = await fetch(url, {
       method: 'POST',
       headers,
@@ -243,7 +250,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     let data: GradeData[];
     if (proxy.includes('allorigins.win')) {
       const text = await response.text();
-      data = JSON.parse(text);
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        throw new Error(`Failed to parse response from proxy ${proxyIndex}`);
+      }
     } else {
       data = await response.json();
     }
@@ -260,17 +271,25 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       );
     }
 
-    // Try next proxy if available
+    // Suppress noisy proxy failure logs - they're expected when public proxies are down
+    // Only log when all proxies have failed
     if (proxyIndex < CORS_PROXIES.length - 1) {
-      console.warn(`Proxy ${proxyIndex} failed, trying next...`);
+      // Silently try next proxy - don't spam console
       return fetchWithProxy(payload, proxyIndex + 1, false);
     }
     
-    throw new Error(
-      `Kunne ikke hente data fra NSD API. ` +
-      `Dette skyldes CORS-restriksjoner. ` +
-      `Original feil: ${errorMessage}`
-    );
+    // All proxies failed - provide helpful error message
+    const helpfulError = isGitHubPages
+      ? `Kunne ikke hente data fra NSD API på grunn av CORS-restriksjoner. ` +
+        `Offentlige CORS-proxies er ustabile. ` +
+        `For å løse dette permanent, deploy api/proxy.js til Vercel (gratis). ` +
+        `Se dokumentasjonen: https://github.com/egil10/gpa/blob/main/docs/CORS_SOLUTION.md`
+      : `Kunne ikke hente data fra NSD API. ` +
+        `Dette skyldes CORS-restriksjoner. ` +
+        `Alle proxy-tjenester mislyktes. ` +
+        `Original feil: ${errorMessage}`;
+    
+    throw new Error(helpfulError);
   }
 }
 

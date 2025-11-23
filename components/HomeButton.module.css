@@ -24,10 +24,13 @@
 
 @media (max-width: 768px) {
   .homeButton {
-    top: var(--space-md);
-    left: var(--space-md);
-    width: 2.25rem;
-    height: 2.25rem;
+    top: calc(var(--space-md) + env(safe-area-inset-top));
+    left: calc(var(--space-md) + env(safe-area-inset-left));
+    width: 2.75rem;
+    height: 2.75rem;
+    /* Better touch target */
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 

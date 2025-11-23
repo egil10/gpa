@@ -25,9 +25,14 @@
 @media (max-width: 768px) {
   .calculatorPage {
     padding: var(--space-2xl) 0;
+    padding-top: calc(var(--space-2xl) + env(safe-area-inset-top));
+    min-height: 70vh;
   }
   
   .intro {
     margin-bottom: var(--space-2xl);
+    padding: 0 var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
   }
 }

@@ -3,6 +3,10 @@
   background-color: var(--bg-secondary);
   margin-top: var(--space-3xl);
   padding: var(--space-2xl) 0 calc(var(--space-lg) + 5rem);
+  /* iOS safe area support */
+  padding-bottom: calc(var(--space-lg) + 5rem + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .footerContent {
@@ -76,6 +80,10 @@
   will-change: transform, color;
   padding: 0.5rem;
   border-radius: 0.5rem;
+  /* Better touch target */
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
 }
 
 .footerLink:hover {
@@ -120,16 +128,34 @@
 @media (max-width: 768px) {
   .footer {
     padding: var(--space-xl) 0 var(--space-md);
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
   }
   
   .footerContent {
     grid-template-columns: 1fr;
     gap: var(--space-lg);
+    /* Account for safe area */
+    padding-left: max(calc(var(--space-lg) + env(safe-area-inset-left)), var(--space-md));
+    padding-right: max(calc(var(--space-lg) + env(safe-area-inset-right)), var(--space-md));
   }
   
   .footerBottom {
     flex-direction: column;
     text-align: center;
     gap: var(--space-sm);
+    padding-left: max(calc(var(--space-lg) + env(safe-area-inset-left)), var(--space-md));
+    padding-right: max(calc(var(--space-lg) + env(safe-area-inset-right)), var(--space-md));
+  }
+  
+  .footerLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+  
+  .footerLink,
+  .githubLink {
+    min-width: auto;
+    padding: 0.625rem 0.875rem;
   }
 }

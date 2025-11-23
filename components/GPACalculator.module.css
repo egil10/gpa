@@ -678,6 +678,16 @@
 }
 
 @media (max-width: 768px) {
+  .calculator {
+    padding: 0 var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+  
+  .title {
+    font-size: var(--text-xl);
+  }
+  
   .gpaNumber {
     font-size: var(--text-4xl);
   }
@@ -690,18 +700,64 @@
   
   .addButton {
     width: 100%;
+    min-height: 44px;
+    padding: 0.875rem 1rem;
+    touch-action: manipulation;
   }
   
   .courseFields {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
   
   .gradeControls {
     width: 100%;
   }
   
-  .gradeSelect {
-    flex: 1;
+  .gradeSelect,
+  .courseInput,
+  .pointsInput {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    touch-action: manipulation;
+  }
+  
+  .systemButton {
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    touch-action: manipulation;
+  }
+  
+  .institutionSelect {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .removeButton {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .courseCard {
+    padding: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .gpaNumber {
+    font-size: var(--text-3xl);
+  }
+  
+  .systemSelector {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .systemButton {
+    width: 100%;
   }
 }
 

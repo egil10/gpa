@@ -3,8 +3,8 @@
   bottom: 1.5rem;
   right: 1rem;
   z-index: 50;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -13,21 +13,42 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: all 0.2s ease;
   pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Better touch target */
+  touch-action: manipulation;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .scrollToTop:hover {
   background: var(--surface-hover);
   border-color: var(--border-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.scrollToTop:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
   .scrollToTop {
-    bottom: 1rem;
-    right: 0.75rem;
-    width: 2.25rem;
-    height: 2.25rem;
+    /* Position above bottom search bar */
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+    right: calc(0.75rem + env(safe-area-inset-right));
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scrollToTop {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    right: calc(0.5rem + env(safe-area-inset-right));
   }
 }
 

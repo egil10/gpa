@@ -480,12 +480,18 @@
 }
 
 @media (max-width: 768px) {
+  .searchPage {
+    min-height: 50vh;
+  }
+  
   .courseHeader {
     padding: var(--space-4xl) 0 var(--space-3xl);
+    padding-top: calc(var(--space-4xl) + env(safe-area-inset-top));
   }
 
   .courseCode {
     font-size: 2rem;
+    line-height: 1.2;
   }
 
   .institutionName {
@@ -494,10 +500,14 @@
 
   .centeredSearchBar {
     padding: 0 var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
   }
 
   .quickActions {
     padding: var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
   }
 
   .quickButtons {
@@ -506,10 +516,49 @@
 
   .quickButton {
     font-size: var(--text-xs);
-    padding: var(--space-xs) var(--space-sm);
+    padding: 0.625rem 0.875rem;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .input,
+  .select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .submitButton {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.875rem 1rem;
   }
   
   .additionalStats {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .statBox {
+    padding: var(--space-md);
+  }
+  
+  .results {
+    padding-top: var(--space-3xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .courseCode {
+    font-size: 1.75rem;
+  }
+  
+  .statBox {
+    padding: var(--space-sm);
   }
 }

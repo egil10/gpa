@@ -487,17 +487,34 @@
 }
 
 @media (max-width: 768px) {
+  .hero {
+    padding: var(--space-4xl) 0 var(--space-3xl);
+    /* Account for safe area and navbar */
+    padding-top: calc(var(--space-4xl) + env(safe-area-inset-top));
+  }
+  
   .heroTitle {
     font-size: 2rem;
+    line-height: 1.2;
   }
   
   .heroSubtitle {
     font-size: var(--text-lg);
   }
   
+  .distributionsSection {
+    padding: var(--space-3xl) 0 var(--space-2xl);
+  }
+  
   .sectionHeader {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-md);
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
   }
   
   .actions {
@@ -508,17 +525,73 @@
     grid-template-columns: 1fr;
     gap: var(--space-lg);
   }
-  
-  .sectionTitle {
-    font-size: 1.5rem;
-  }
 
   .controls {
     flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
   }
 
   .controlGroup {
     min-width: 100%;
+  }
+  
+  .controlLabel {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  
+  .searchInput,
+  .select {
+    padding: 0.75rem 1rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+  
+  .applyButton {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+    justify-content: center;
+  }
+  
+  .searchSubmitButton,
+  .searchClearButton {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .loadMoreButtonInline {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    min-height: 44px;
+  }
+  
+  .resultsInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  
+  .clearSearchButton {
+    padding: 0.5rem 1rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+  
+  .cardsGrid {
+    gap: var(--space-md);
   }
 }
 
