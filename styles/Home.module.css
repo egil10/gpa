@@ -43,24 +43,23 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-xl);
+  padding: 0.75rem 1.5rem; /* px-6 py-3 */
   background-color: var(--grok-blue);
   color: #000000;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: var(--text-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem; /* rounded-lg */
   will-change: transform, background-color;
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 212, 255, 0.2), 0 4px 6px -2px rgba(0, 212, 255, 0.1); /* shadow-lg shadow-grok-blue/20 */
 }
 
 .ctaButton:hover {
   background-color: var(--grok-blue-hover);
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
 }
 
 .ctaButton:active {
@@ -99,7 +98,7 @@
 .dashboardCard {
   background-color: var(--grok-surface);
   border: 1px solid var(--grok-border);
-  border-radius: 1rem;
+  border-radius: 1.5rem; /* rounded-2xl */
   padding: var(--space-xl);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, border-color, box-shadow;
@@ -109,7 +108,7 @@
   text-decoration: none;
   color: inherit;
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .dashboardCard:nth-child(1) { animation-delay: 0.1s; }
@@ -121,7 +120,7 @@
 .dashboardCard:hover {
   border-color: var(--grok-blue);
   transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); /* hover-glow effect */
 }
 
 .dashboardCardHeader {
@@ -231,19 +230,19 @@
   padding: var(--space-xl);
   border: 1px solid var(--grok-border);
   background-color: var(--grok-surface);
-  border-radius: 1rem;
+  border-radius: 1.5rem; /* rounded-2xl */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   color: inherit;
   display: block;
   will-change: transform, border-color, box-shadow;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .exploreCard:hover {
   border-color: var(--grok-blue);
   transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); /* hover-glow effect */
 }
 
 .exploreCard h3 {

@@ -1,7 +1,7 @@
 .card {
   background-color: var(--grok-surface);
   border: 1px solid var(--grok-border);
-  border-radius: 1rem;
+  border-radius: 1.5rem; /* rounded-2xl */
   padding: var(--space-xl);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -9,13 +9,13 @@
   text-decoration: none;
   color: inherit;
   will-change: transform, border-color, box-shadow;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .card:hover {
   border-color: var(--grok-blue);
   transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); /* hover-glow effect */
 }
 
 .header {

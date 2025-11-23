@@ -22,8 +22,8 @@
   padding: var(--space-lg);
   background-color: var(--grok-surface);
   border: 1px solid var(--grok-border);
-  border-radius: 1rem;
-  backdrop-filter: blur(8px);
+  border-radius: 1.5rem; /* rounded-2xl */
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .quickActions h3 {
@@ -82,8 +82,8 @@
   padding: var(--space-xl);
   border: 1px solid var(--grok-border);
   background-color: var(--grok-surface);
-  border-radius: 1rem;
-  backdrop-filter: blur(8px);
+  border-radius: 1.5rem; /* rounded-2xl */
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .formRow {
@@ -120,7 +120,7 @@
 .select {
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--grok-border);
-  border-radius: 0.75rem;
+  border-radius: 0.75rem; /* rounded-xl */
   font-family: 'JetBrains Mono', monospace;
   font-size: var(--text-base);
   background-color: var(--grok-surface-2);
@@ -141,25 +141,24 @@
 }
 
 .submitButton {
-  padding: var(--space-sm) var(--space-xl);
+  padding: 0.75rem 1.5rem; /* px-6 py-3 */
   background-color: var(--grok-blue);
   color: #000000;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: var(--text-sm);
-  border-radius: 0.5rem;
+  border-radius: 0.5rem; /* rounded-lg */
   border: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   will-change: transform, background-color;
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 212, 255, 0.2), 0 4px 6px -2px rgba(0, 212, 255, 0.1); /* shadow-lg shadow-grok-blue/20 */
 }
 
 .submitButton:hover:not(:disabled) {
   background-color: var(--grok-blue-hover);
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
 }
 
 .submitButton:active:not(:disabled) {
@@ -177,7 +176,7 @@
   padding: var(--space-md);
   background-color: rgba(255, 107, 53, 0.1);
   border: 1px solid var(--grok-orange);
-  border-radius: 0.75rem;
+  border-radius: 1.5rem; /* rounded-2xl */
   color: var(--grok-orange);
 }
 
@@ -227,8 +226,8 @@
   padding: var(--space-lg);
   border: 1px solid var(--grok-border);
   background-color: var(--grok-surface);
-  border-radius: 1rem;
-  backdrop-filter: blur(8px);
+  border-radius: 1.5rem; /* rounded-2xl */
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .statBox h4 {

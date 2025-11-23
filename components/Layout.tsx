@@ -19,15 +19,10 @@ const generateStars = () => {
     stars.push(
       <div
         key={i}
+        className="absolute w-1 h-1 bg-white rounded-full opacity-30 pointer-events-none"
         style={{
-          position: 'absolute',
-          width: '4px',
-          height: '4px',
-          background: 'white',
-          borderRadius: '50%',
           top: `${top}%`,
           left: `${left}%`,
-          opacity: 0.3,
           animation: `ping ${2 + Math.random() * 2}s ease-in-out infinite`,
           animationDelay: `${delay}s`,
         }}
@@ -53,38 +48,23 @@ export default function Layout({ children, title, description }: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/gpa/favicon.svg" type="image/svg+xml" />
       </Head>
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'linear-gradient(to bottom, #000000 0%, #050505 50%, #000000 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+      <div className="min-h-screen bg-black bg-gradient-to-b from-[#000000] via-[#050505] to-black relative overflow-hidden flex flex-col">
         {/* Subtle moving stars */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0.3,
-          pointerEvents: 'none'
-        }}>
+        <div className="absolute inset-0 opacity-30 pointer-events-none">
           {generateStars()}
         </div>
         
-        {/* Very faint noise texture */}
+        {/* Very faint noise texture - 1% opacity as per spec */}
         <div
+          className="fixed inset-0 opacity-[0.01] pointer-events-none"
           style={{
-            position: 'fixed',
-            inset: 0,
-            opacity: 0.05,
-            pointerEvents: 'none',
             backgroundImage: `url("${noiseTexture}")`,
             backgroundSize: '256px 256px',
           }}
         />
         
         <Navbar />
-        <main style={{ flex: 1, position: 'relative', zIndex: 10 }}>
+        <main className="flex-1 relative z-10">
           {children}
         </main>
         <Footer />

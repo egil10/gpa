@@ -50,23 +50,19 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Hide scrollbars but keep functionality */
+/* Hide scrollbars completely but keep functionality */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0px;
+  height: 0px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--grok-bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--grok-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--grok-text-muted);
+  background: transparent;
 }
 
 body {
@@ -154,37 +150,37 @@ input, select, textarea {
   padding: 0 var(--space-lg);
 }
 
-/* Grok Card Style */
+/* Grok Card Style - rounded-2xl (1.5rem) and backdrop-blur-sm */
 .grok-card {
   background: var(--grok-surface);
   border: 1px solid var(--grok-border);
-  border-radius: 1rem;
+  border-radius: 1.5rem; /* rounded-2xl */
   padding: var(--space-xl);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .grok-card:hover {
   border-color: var(--grok-blue);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
   transform: translateY(-2px);
 }
 
-/* Grok Button Styles */
+/* Grok Button Styles - exact match to spec */
 .btn-grok-primary {
   background: var(--grok-blue);
   color: #000000;
   font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem; /* px-6 py-3 */
+  border-radius: 0.5rem; /* rounded-lg */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 212, 255, 0.2), 0 4px 6px -2px rgba(0, 212, 255, 0.1); /* shadow-lg shadow-grok-blue/20 */
+  border: none;
 }
 
 .btn-grok-primary:hover {
   background: var(--grok-blue-hover);
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
 }
 
 .btn-grok-primary:active {
@@ -194,14 +190,14 @@ input, select, textarea {
 .btn-grok-secondary {
   border: 1px solid var(--grok-border);
   color: var(--grok-text-primary);
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem; /* px-5 py-2.5 */
+  border-radius: 0.5rem; /* rounded-lg */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
 }
 
 .btn-grok-secondary:hover {
   background: var(--grok-surface-2);
-  border-color: var(--grok-blue);
 }
 
 /* Typography Utilities */
@@ -251,7 +247,7 @@ input, select, textarea {
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Typing dots animation */
+/* Typing dots animation - exact match to spec */
 .typing-dots {
   display: inline-flex;
   gap: 0.25rem;
@@ -259,10 +255,10 @@ input, select, textarea {
 
 .typing-dots span {
   display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--grok-blue);
-  border-radius: 50%;
+  width: 0.5rem; /* w-2 */
+  height: 0.5rem; /* h-2 */
+  background: var(--grok-blue); /* bg-grok-blue */
+  border-radius: 50%; /* rounded-full */
   animation: bounce 1.4s infinite;
 }
 
@@ -274,7 +270,7 @@ input, select, textarea {
   animation-delay: 0.4s;
 }
 
-/* Hover glow effect */
+/* Hover glow effect - exact match to spec */
 .hover-glow {
   transition: box-shadow 0.3s ease;
 }
