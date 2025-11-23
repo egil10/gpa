@@ -14,6 +14,11 @@ import styles from '@/styles/Home.module.css';
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
 
 const COURSES_PER_PAGE = 9;
+
+// BasePath constant - matches next.config.js and _document.tsx
+// In production (GitHub Pages), this is '/gpa'
+const isProduction = process.env.NODE_ENV === 'production';
+const BASEPATH = isProduction ? '/gpa' : '';
 const INITIAL_COURSES_COUNT = 12; // Show 12 popular courses on initial load
 
 export default function Home() {
@@ -822,7 +827,7 @@ export default function Home() {
             <h1 className={styles.heroTitle}>
               <span className={styles.heroLogo}>
                 <Image 
-                  src="/dist.svg" 
+                  src={`${BASEPATH}/dist.svg`}
                   alt="Logo" 
                   width={120} 
                   height={68}
