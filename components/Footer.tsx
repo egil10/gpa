@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Github, Calculator } from 'lucide-react';
+import { Github, Calculator, Home } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -16,9 +16,6 @@ export default function Footer() {
               Karakterstatistikk er en plattform for å utforske karakterfordelinger 
               for emner ved norske universiteter. Plattformen gir deg innsikt i 
               hvordan karakterer er fordelt på tvers av ulike emner og institusjoner.
-            </p>
-            <p className={styles.footerSubtext}>
-              Støtter UiO, NTNU, UiB og NHH. Bygget med Next.js, React og TypeScript.
             </p>
           </div>
           <div className={styles.footerSection}>
@@ -46,6 +43,10 @@ export default function Footer() {
         <div className={styles.footerBottom}>
           <p className="text-light">© {currentYear} Karakterstatistikk</p>
           <div className={styles.footerLinks}>
+            <Link href="/" className={styles.footerLink}>
+              <Home size={18} />
+              <span>Hjem</span>
+            </Link>
             <Link href="/kalkulator" className={styles.footerLink}>
               <Calculator size={18} />
               <span>GPA Kalkulator</span>

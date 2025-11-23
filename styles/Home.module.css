@@ -1,8 +1,30 @@
 .hero {
-  padding: var(--space-3xl) 0;
+  padding: var(--space-6xl) 0 var(--space-5xl);
   border-bottom: 1px solid var(--border);
   background: transparent;
   position: relative;
+}
+
+.hero :global([class*="searchBarContainer"]) {
+  position: relative !important;
+  opacity: 1 !important;
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+.hero :global([class*="inputWrapper"]) {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero :global([class*="backdrop"]) {
+  display: none;
 }
 
 .heroContent {
@@ -10,12 +32,16 @@
   margin: 0 auto;
   text-align: center;
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  align-items: center;
 }
 
 .heroTitle {
   font-size: 3rem;
   font-weight: 600;
-  margin-bottom: var(--space-lg);
+  margin: 0;
   letter-spacing: -0.02em;
   color: var(--text-primary);
   font-family: var(--font-inter);
@@ -77,14 +103,14 @@
 }
 
 .distributionsSection {
-  padding: var(--space-3xl) 0;
+  padding: var(--space-5xl) 0 var(--space-3xl);
   background-color: transparent;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-lg);
   margin-bottom: var(--space-2xl);
   flex-wrap: wrap;
@@ -114,14 +140,14 @@
 .refreshButton {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 0.625rem 1.25rem;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   background-color: var(--surface);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  font-weight: 500;
-  font-size: var(--text-sm);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -208,10 +234,11 @@
 .controlLabel {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
 }
 
 .searchInput,

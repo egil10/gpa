@@ -1,0 +1,33 @@
+.homeButton {
+  position: fixed;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.homeButton:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .homeButton {
+    top: var(--space-md);
+    left: var(--space-md);
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+

@@ -1,8 +1,6 @@
 .chartContainer {
   background-color: var(--surface);
   padding: var(--space-xl);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
 }
 
 .chartHeader {
@@ -56,6 +54,7 @@
   gap: var(--space-md);
   margin-top: var(--space-xl);
   padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
 }
 
 .statItem {
@@ -64,8 +63,6 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-sm);
-  background-color: var(--bg-secondary);
-  border-radius: 0.5rem;
 }
 
 .grade {

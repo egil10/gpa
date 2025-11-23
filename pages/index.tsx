@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RefreshCw, ArrowUpDown, Filter, Search, ArrowUp, X } from 'lucide-react';
 import Layout from '@/components/Layout';
+import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processGradeData } from '@/lib/utils';
@@ -23,8 +24,6 @@ export default function Home() {
   const [loadedCount, setLoadedCount] = useState(0); // Track how many courses we've loaded data for
   const [targetCount, setTargetCount] = useState(15); // Target: load 15 initially
   const [isAutoLoading, setIsAutoLoading] = useState(true); // Auto-load until we reach target
-  const [courseSortMetadata, setCourseSortMetadata] = useState<Map<string, { totalStudents: number; aPercent: number; avgGrade: number }>>(new Map());
-  const [isLoadingSortMetadata, setIsLoadingSortMetadata] = useState(false);
 
   // Load course list metadata (fast - just codes/names)
   useEffect(() => {
@@ -116,64 +115,29 @@ export default function Home() {
     return validResults.length;
   }, [coursesData, loadingCourses]);
 
-  // Auto-load full data for top sorted courses (based on metadata sort)
+  // Auto-load full data for courses (simple sequential loading)
   useEffect(() => {
-    if (allCourses.length === 0 || isLoadingSortMetadata) return;
+    if (allCourses.length === 0) return;
     if (!isAutoLoading) return;
     if (loadingCourses.size > 0) return; // Wait for current batch to finish
+    if (searchQuery.trim()) return; // Don't auto-load when searching
 
-    // Filter courses by institution and search
+    // Filter courses by institution
     let filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.trim().toUpperCase();
-      filtered = filtered.filter(c => 
-        c.code.toUpperCase().includes(query) ||
-        (c.name && c.name.toUpperCase().includes(query))
-      );
-    }
 
-    // Sort by metadata
-    const sorted = [...filtered].sort((a, b) => {
-      const keyA = `${a.institution}-${a.code}`;
-      const keyB = `${b.institution}-${b.code}`;
-      const metaA = courseSortMetadata.get(keyA);
-      const metaB = courseSortMetadata.get(keyB);
-      
-      if (!metaA || !metaB) return 0; // Can't sort without metadata
-      
-      switch (sortBy) {
-        case 'most-a':
-          return metaB.aPercent - metaA.aPercent;
-        case 'least-a':
-          return metaA.aPercent - metaB.aPercent;
-        case 'highest-avg':
-          return metaB.avgGrade - metaA.avgGrade;
-        case 'lowest-avg':
-          return metaA.avgGrade - metaB.avgGrade;
-        case 'most-students':
-          return metaB.totalStudents - metaA.totalStudents;
-        case 'least-students':
-          return metaA.totalStudents - metaB.totalStudents;
-        default:
-          return 0;
-      }
-    });
-
-    // Get top courses that need data loaded
-    const topCoursesNeedingData = sorted
-      .slice(0, targetCount * 2) // Get more than target to ensure we have enough
+    // Find courses that need data loaded (just pick next ones sequentially)
+    const coursesNeedingData = filtered
       .filter(course => {
         const key = `${course.institution}-${course.code}`;
-        return !coursesData.has(key) && !loadingCourses.has(key) && courseSortMetadata.has(key);
+        return !coursesData.has(key) && !loadingCourses.has(key);
       })
-      .slice(0, 10); // Load up to 10 at a time
+      .slice(0, 3); // Load 3 at a time
 
-    if (topCoursesNeedingData.length === 0) {
-      // Check if we have enough courses with data
-      const coursesWithData = sorted.filter(c => {
+    if (coursesNeedingData.length === 0) {
+      // Check if we have enough courses with data for current filter
+      const coursesWithData = filtered.filter(c => {
         const key = `${c.institution}-${c.code}`;
         return coursesData.has(key);
       });
@@ -185,100 +149,33 @@ export default function Home() {
     }
 
     // Load next batch of 3
-    loadCoursesData(topCoursesNeedingData, 3).then(loaded => {
+    loadCoursesData(coursesNeedingData, 3).then(loaded => {
       if (loaded > 0) {
         setLoadedCount(prev => prev + loaded);
       }
-      // Check if we've loaded enough
-      const coursesWithData = sorted.filter(c => {
-        const key = `${c.institution}-${c.code}`;
-        return coursesData.has(key);
-      });
-      
-      if (coursesWithData.length >= targetCount) {
-        setIsAutoLoading(false);
-      }
     });
-  }, [allCourses, selectedInstitution, searchQuery, courseSortMetadata, sortBy, loadCoursesData, loadedCount, targetCount, isAutoLoading, coursesData, loadingCourses, isLoadingSortMetadata]);
-
-  // Fetch sorting metadata for courses (basic stats for sorting)
-  const fetchSortMetadata = useCallback(async (courses: CourseInfo[], batchSize: number = 20) => {
-    setIsLoadingSortMetadata(true);
-    const metadata = new Map<string, { totalStudents: number; aPercent: number; avgGrade: number }>();
-    
-    // Process in batches
-    for (let i = 0; i < courses.length; i += batchSize) {
-      const batch = courses.slice(i, i + batchSize);
-      
-      const batchPromises = batch.map(async (course) => {
-        try {
-          const uniData = UNIVERSITIES[course.institution];
-          if (!uniData) return null;
-          
-          const formattedCode = formatCourseCode(course.code, course.institution);
-          const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-          
-          if (!data || data.length === 0) return null;
-          
-          // Get the most recent year's data
-          const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
-          const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-          
-          const stats = processGradeData(yearData);
-          if (!stats) return null;
-          
-          const aPercent = stats.distributions.find(d => d.grade === 'A')?.percentage || 0;
-          
-          return {
-            key: `${course.institution}-${course.code}`,
-            metadata: {
-              totalStudents: stats.totalStudents,
-              aPercent,
-              avgGrade: stats.averageGrade || 0,
-            }
-          };
-        } catch (error) {
-          return null;
-        }
-      });
-      
-      const results = await Promise.all(batchPromises);
-      results.forEach(result => {
-        if (result) {
-          metadata.set(result.key, result.metadata);
-        }
-      });
-    }
-    
-    setCourseSortMetadata(metadata);
-    setIsLoadingSortMetadata(false);
-  }, []);
-
-  // Load sorting metadata when sort option or filters change
+  }, [allCourses, selectedInstitution, searchQuery, loadCoursesData, targetCount, isAutoLoading, loadingCourses]);
+  
+  // Separate effect to check if we've loaded enough
   useEffect(() => {
-    if (allCourses.length === 0) return;
-    if (isLoadingSortMetadata) return; // Don't start new fetch if already loading
+    if (searchQuery.trim()) return;
+    if (!isAutoLoading) return;
     
-    // Filter courses by institution
-    const filtered = selectedInstitution !== 'all'
+    let filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
     
-    // Only fetch metadata for courses we don't have yet
-    const coursesNeedingMetadata = filtered.filter(c => {
+    const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
-      return !courseSortMetadata.has(key);
+      return coursesData.has(key);
     });
     
-    if (coursesNeedingMetadata.length > 0) {
-      // Fetch metadata in batches (limit to reasonable amount to avoid too many requests)
-      // For performance, only fetch for first 1000 courses
-      const limit = Math.min(1000, coursesNeedingMetadata.length);
-      fetchSortMetadata(coursesNeedingMetadata.slice(0, limit), 20);
+    if (coursesWithData.length >= targetCount) {
+      setIsAutoLoading(false);
     }
-  }, [sortBy, selectedInstitution, allCourses, courseSortMetadata, isLoadingSortMetadata, fetchSortMetadata]);
+  }, [coursesData, allCourses, selectedInstitution, searchQuery, targetCount, isAutoLoading]);
 
-  // Filter and sort courses using metadata
+  // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
     // Filter courses by institution and search query
     let filtered = selectedInstitution !== 'all'
@@ -293,107 +190,44 @@ export default function Home() {
         (c.name && c.name.toUpperCase().includes(query))
       );
     }
-    
-    // Sort courses by metadata (if available) or fall back to loaded data
-    const sorted = [...filtered].sort((a, b) => {
-      const keyA = `${a.institution}-${a.code}`;
-      const keyB = `${b.institution}-${b.code}`;
-      const metaA = courseSortMetadata.get(keyA);
-      const metaB = courseSortMetadata.get(keyB);
-      
-      // If we have metadata, use it for sorting
-      if (metaA && metaB) {
-        switch (sortBy) {
-          case 'most-a':
-            return metaB.aPercent - metaA.aPercent;
-          case 'least-a':
-            return metaA.aPercent - metaB.aPercent;
-          case 'highest-avg':
-            return metaB.avgGrade - metaA.avgGrade;
-          case 'lowest-avg':
-            return metaA.avgGrade - metaB.avgGrade;
-          case 'most-students':
-            return metaB.totalStudents - metaA.totalStudents;
-          case 'least-students':
-            return metaA.totalStudents - metaB.totalStudents;
-          default:
-            return 0;
-        }
-      }
-      
-      // Fall back to loaded data if available
-      const dataA = coursesData.get(keyA);
-      const dataB = coursesData.get(keyB);
-      
-      if (dataA && dataB) {
-        switch (sortBy) {
-          case 'most-a': {
-            const aPercent = dataA.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            const bPercent = dataB.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            return bPercent - aPercent;
-          }
-          case 'least-a': {
-            const aPercent = dataA.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            const bPercent = dataB.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            return aPercent - bPercent;
-          }
-          case 'highest-avg':
-            return (dataB.averageGrade || 0) - (dataA.averageGrade || 0);
-          case 'lowest-avg':
-            return (dataA.averageGrade || 0) - (dataB.averageGrade || 0);
-          case 'most-students':
-            return dataB.totalStudents - dataA.totalStudents;
-          case 'least-students':
-            return dataA.totalStudents - dataB.totalStudents;
-          default:
-            return 0;
-        }
-      }
-      
-      // If no metadata or data, maintain order
-      return 0;
-    });
-    
-    // Get top N courses based on sort
-    const topCourses = sorted.slice(0, Math.max(targetCount * 2, 100)); // Get more than we need to ensure we have enough with data
-    
-    // Return only courses with full data loaded, maintaining sort order
-    const coursesWithFullData = topCourses
+
+    // Get courses with loaded data
+    const coursesWithData = filtered
       .map(course => {
         const key = `${course.institution}-${course.code}`;
         const data = coursesData.get(key);
-        return data ? { course, data, sortKey: key } : null;
+        return data ? data : null;
       })
-      .filter((c): c is { course: CourseInfo; data: CourseStats & { institution: string; courseName: string }; sortKey: string } => c !== null);
-    
-    // Re-sort by full data to ensure correct order (metadata might be slightly different)
-    const finalSorted = coursesWithFullData.sort((a, b) => {
+      .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+
+    // Sort using loaded data only
+    coursesWithData.sort((a, b) => {
       switch (sortBy) {
         case 'most-a': {
-          const aPercent = a.data.distributions.find(d => d.grade === 'A')?.percentage || 0;
-          const bPercent = b.data.distributions.find(d => d.grade === 'A')?.percentage || 0;
+          const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+          const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
           return bPercent - aPercent;
         }
         case 'least-a': {
-          const aPercent = a.data.distributions.find(d => d.grade === 'A')?.percentage || 0;
-          const bPercent = b.data.distributions.find(d => d.grade === 'A')?.percentage || 0;
+          const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+          const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
           return aPercent - bPercent;
         }
         case 'highest-avg':
-          return (b.data.averageGrade || 0) - (a.data.averageGrade || 0);
+          return (b.averageGrade || 0) - (a.averageGrade || 0);
         case 'lowest-avg':
-          return (a.data.averageGrade || 0) - (b.data.averageGrade || 0);
+          return (a.averageGrade || 0) - (b.averageGrade || 0);
         case 'most-students':
-          return b.data.totalStudents - a.data.totalStudents;
+          return b.totalStudents - a.totalStudents;
         case 'least-students':
-          return a.data.totalStudents - b.data.totalStudents;
+          return a.totalStudents - b.totalStudents;
         default:
           return 0;
       }
     });
     
-    return finalSorted.map(({ data }) => data);
-  }, [allCourses, coursesData, courseSortMetadata, sortBy, selectedInstitution, searchQuery, targetCount]);
+    return coursesWithData;
+  }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery]);
 
   // Load data for courses matching search query
   useEffect(() => {
@@ -431,7 +265,6 @@ export default function Home() {
     // Clear cache and reload course list
     setCoursesData(new Map());
     setLoadingCourses(new Set());
-    setCourseSortMetadata(new Map());
     setLoadedCount(0);
     setTargetCount(15);
     setIsAutoLoading(true);
@@ -461,11 +294,9 @@ export default function Home() {
         <div className="container">
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              Karakterstatistikk
+              Karakterfordeling
             </h1>
-            <p className={styles.heroSubtitle}>
-              Utforsk karakterfordelinger for emner ved norske universiteter. Data fra NSD.
-            </p>
+            <BottomSearchBar />
           </div>
         </div>
       </div>
@@ -473,31 +304,23 @@ export default function Home() {
       <section className={styles.distributionsSection}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>Karakterfordelinger</h2>
-              <p className={styles.sectionSubtitle}>
-                Utforsk alle emner med karakterstatistikk. Sorter etter enkle eller vanskelige emner.
-              </p>
-            </div>
-            <div className={styles.actions}>
-              <button
-                onClick={handleRefresh}
-                className={styles.refreshButton}
-                disabled={loading}
-                aria-label="Refresh courses"
-              >
-                <RefreshCw size={18} className={loading ? styles.spinning : ''} />
-                <span>Oppdater</span>
-              </button>
-            </div>
+            <h2 className={styles.sectionTitle}>Karakterfordelinger</h2>
+            <button
+              onClick={handleRefresh}
+              className={styles.refreshButton}
+              disabled={loading}
+              aria-label="Refresh courses"
+              title="Oppdater"
+            >
+              <RefreshCw size={18} className={loading ? styles.spinning : ''} />
+            </button>
           </div>
 
           {/* Sorting and Filtering Controls */}
           <form onSubmit={handleSearchSubmit} className={styles.controls}>
             <div className={styles.controlGroup}>
-              <label htmlFor="search" className={styles.controlLabel}>
+              <label htmlFor="search" className={styles.controlLabel} title="Søk">
                 <Search size={16} />
-                Søk:
               </label>
               <div className={styles.searchInputWrapper}>
                 <input
@@ -529,9 +352,8 @@ export default function Home() {
               </div>
             </div>
             <div className={styles.controlGroup}>
-              <label htmlFor="sortBy" className={styles.controlLabel}>
+              <label htmlFor="sortBy" className={styles.controlLabel} title="Sorter etter">
                 <ArrowUpDown size={16} />
-                Sorter etter:
               </label>
               <select
                 id="sortBy"
@@ -548,9 +370,8 @@ export default function Home() {
               </select>
             </div>
             <div className={styles.controlGroup}>
-              <label htmlFor="institution" className={styles.controlLabel}>
+              <label htmlFor="institution" className={styles.controlLabel} title="Institusjon">
                 <Filter size={16} />
-                Institusjon:
               </label>
               <select
                 id="institution"
@@ -576,21 +397,7 @@ export default function Home() {
             <>
               <div className={styles.resultsInfo}>
                 <p>
-                  {isLoadingSortMetadata ? (
-                    'Laster sorteringsdata...'
-                  ) : searchQuery.trim() ? (
-                    <>
-                      Viser {filteredAndSortedCourses.length} emner som matcher "{searchQuery}"
-                      {selectedInstitution !== 'all' && ` fra ${UNIVERSITIES[selectedInstitution]?.shortName || selectedInstitution}`}
-                    </>
-                  ) : (
-                    <>
-                      Viser {filteredAndSortedCourses.length} emner (sortert fra {selectedInstitution !== 'all' 
-                        ? allCourses.filter(c => c.institution === selectedInstitution).length 
-                        : allCourses.length} totalt)
-                      {selectedInstitution !== 'all' && ` fra ${UNIVERSITIES[selectedInstitution]?.shortName || selectedInstitution}`}
-                    </>
-                  )}
+                  Viser {filteredAndSortedCourses.length} emner
                 </p>
                 {searchQuery.trim() && (
                   <button

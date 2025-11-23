@@ -5,7 +5,6 @@ import CourseNameAutocomplete from './CourseNameAutocomplete';
 import VGSCourseAutocomplete from './VGSCourseAutocomplete';
 import { CourseInfo } from '@/lib/courses';
 import { VGSCourse } from '@/lib/vgs-courses';
-import { UNIVERSITIES } from '@/lib/api';
 import styles from './GPACalculator.module.css';
 
 interface GPACalculatorProps {
@@ -23,7 +22,6 @@ const EXAMPLE_COURSES: Course[] = [
 
 export default function GPACalculator({ initialSystem = 'university' }: GPACalculatorProps) {
   const [system, setSystem] = useState<GradeSystem>(initialSystem);
-  const [institution, setInstitution] = useState<string>('');
   const [bonusPoints, setBonusPoints] = useState({ realfag: 0, other: 0 }); // High school bonus points
   const [courses, setCourses] = useState<Course[]>([]);
   const [hasCalculated, setHasCalculated] = useState(false);
@@ -182,24 +180,6 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               Videregående (1-6)
             </button>
           </div>
-          {system === 'university' && (
-            <div className={styles.institutionSelector}>
-              <label htmlFor="gpa-institution">Institusjon (valgfritt)</label>
-              <select
-                id="gpa-institution"
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
-                className={styles.institutionSelect}
-              >
-                <option value="">Alle institusjoner</option>
-                {Object.entries(UNIVERSITIES).map(([key, uni]) => (
-                  <option key={key} value={key}>
-                    {uni.shortName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
       </div>
 
@@ -444,7 +424,6 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                         value={course.name}
                         onChange={(name) => updateCourse(course.id, 'name', name)}
                         onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
-                        institution={institution || undefined}
                         placeholder="Søk etter emnenavn eller skriv manuelt..."
                         disabled={false}
                       />
