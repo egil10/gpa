@@ -57,7 +57,7 @@ You can also manually trigger deployment:
 - Select **"Deploy to GitHub Pages"** workflow
 - Click **"Run workflow"** button
 
-### ⚠️ Important: Base Path Configuration
+### ⚠️ Importante: Base Path Configuration
 
 Since your repository is `egil10/gpa` (not `egil10.github.io`), you **MUST** add a base path!
 
