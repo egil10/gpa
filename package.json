@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "export": "next build",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "fetch-cache": "tsx scripts/fetch-cache.ts"
   },
   "dependencies": {
     "lucide-react": "^0.300.0",
@@ -21,6 +22,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.0.0"
   }
 }

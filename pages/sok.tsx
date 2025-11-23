@@ -285,7 +285,16 @@ export default function SearchPage() {
 
           {error && (
             <div className={styles.error}>
-              <p>{error}</p>
+              <p><strong>Feil:</strong> {error}</p>
+              {error.includes('CORS') && (
+                <p className={styles.errorHint}>
+                  <small>
+                    💡 Dette er et kjent problem med offentlige CORS-proxyer. 
+                    For å løse dette permanent, deploy <code>api/proxy.js</code> til Vercel (gratis). 
+                    Se <a href="https://github.com/egil10/gpa/blob/main/docs/CORS_SOLUTION.md" target="_blank" rel="noopener noreferrer">dokumentasjonen</a>.
+                  </small>
+                </p>
+              )}
             </div>
           )}
 

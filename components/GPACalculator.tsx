@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { BookOpen, X } from 'lucide-react';
 import { Course, GradeSystem, calculateGPA, UNIVERSITY_GRADES, HIGHSCHOOL_GRADES, GRADE_VALUES } from '@/types/gpa';
 import CourseNameAutocomplete from './CourseNameAutocomplete';
@@ -23,17 +23,18 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   const [system, setSystem] = useState<GradeSystem>(initialSystem);
   const [institution, setInstitution] = useState<string>('');
   const [bonusPoints, setBonusPoints] = useState({ realfag: 0, other: 0 }); // High school bonus points
-  const [courses, setCourses] = useState<Course[]>(() => {
-    // Pre-populate with examples on first load
+  const [courses, setCourses] = useState<Course[]>([]);
+  
+  // Pre-populate with examples on first client-side load
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const hasSeenExamples = localStorage.getItem('gpa-has-seen-examples');
-      if (!hasSeenExamples) {
+      if (!hasSeenExamples && courses.length === 0) {
         localStorage.setItem('gpa-has-seen-examples', 'true');
-        return EXAMPLE_COURSES.map(c => ({ ...c, system: initialSystem }));
+        setCourses(EXAMPLE_COURSES.map(c => ({ ...c, system: initialSystem })));
       }
     }
-    return [];
-  });
+  }, [initialSystem, courses.length]);
 
   const handleSystemChange = useCallback((newSystem: GradeSystem) => {
     setSystem(newSystem);
@@ -432,14 +433,18 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 </div>
               </div>
             ))}
-            <button
-              onClick={addCourse}
-              className={styles.addCourseButton}
-              aria-label="Legg til nytt emne"
-              title="Legg til nytt emne"
-            >
-              +
-            </button>
+            {courses.length > 0 && (
+              <div className={styles.addCourseWrapper}>
+                <button
+                  onClick={addCourse}
+                  className={styles.addCourseButton}
+                  aria-label="Legg til nytt emne"
+                  title="Legg til nytt emne"
+                >
+                  +
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -47,4 +47,8 @@ Thumbs.db
 # Inspiration folder
 inspo/
 
+# Data cache (optional - you can commit this if you want)
+# Uncomment the line below if you don't want to commit cache.json
+# data/cache.json
+
 

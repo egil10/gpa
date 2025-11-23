@@ -1,13 +1,16 @@
 import { GradeData, SearchPayload, University } from '@/types';
+import { getCachedData } from './cache';
 
 // NSD API URL - CORS issues in production require a proxy
 const DIRECT_API = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
 
 // Multiple CORS proxy options as fallback
+// ⚠️ WARNING: Public CORS proxies are unreliable and often fail.
+// For production use, deploy api/proxy.js to Vercel (free) for reliable CORS handling.
+// See docs/CORS_SOLUTION.md for instructions.
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
-  'https://api.codetabs.com/v1/proxy?quest=',
 ];
 
 // Use proxy in production, direct API in development
@@ -74,25 +77,60 @@ export function createSearchPayload(
 }
 
 async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<GradeData[]> {
+  if (isDevelopment) {
+    // Direct API call in development
+    try {
+      const response = await fetch(DIRECT_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 204 || !response.ok) {
+        throw new Error('No data found');
+      }
+
+      const data: GradeData[] = await response.json();
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // In production, try proxies
   const proxy = CORS_PROXIES[proxyIndex];
-  const url = isDevelopment 
-    ? DIRECT_API 
-    : `${proxy}${encodeURIComponent(DIRECT_API)}`;
+  let url: string;
+  let headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (proxy.includes('allorigins.win')) {
+    url = `${proxy}${encodeURIComponent(DIRECT_API)}`;
+  } else {
+    url = `${proxy}${encodeURIComponent(DIRECT_API)}`;
+  }
 
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 
     if (response.status === 204 || !response.ok) {
-      throw new Error('No data found');
+      throw new Error(`Proxy ${proxyIndex} returned ${response.status}`);
     }
 
-    const data: GradeData[] = await response.json();
+    let data: GradeData[];
+    if (proxy.includes('allorigins.win')) {
+      const text = await response.text();
+      data = JSON.parse(text);
+    } else {
+      data = await response.json();
+    }
+    
     return data;
   } catch (error) {
     // Try next proxy if available
@@ -100,7 +138,14 @@ async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<G
       console.warn(`Proxy ${proxyIndex} failed, trying next...`);
       return fetchWithProxy(payload, proxyIndex + 1);
     }
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Kunne ikke hente data fra NSD API. ` +
+      `Dette skyldes CORS-restriksjoner (alle offentlige proxy-tjenester feiler). ` +
+      `For å løse dette, deploy api/proxy.js til Vercel (gratis). ` +
+      `Se docs/CORS_SOLUTION.md for instruksjoner. ` +
+      `Original feil: ${errorMessage}`
+    );
   }
 }
 
@@ -109,6 +154,19 @@ export async function fetchGradeData(
   courseCode: string,
   year?: number
 ): Promise<GradeData[]> {
+  // Try cache first (server-side only)
+  if (typeof window === 'undefined') {
+    const cached = getCachedData(institutionCode, courseCode);
+    if (cached && cached.length > 0) {
+      // Filter by year if specified
+      if (year) {
+        return cached.filter(item => parseInt(item.Årstall, 10) === year);
+      }
+      return cached;
+    }
+  }
+
+  // Fall back to API if cache miss or client-side
   const payload = createSearchPayload(institutionCode, courseCode, year);
   return fetchWithProxy(payload);
 }

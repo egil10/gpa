@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Calculator } from 'lucide-react';
 import Layout from '@/components/Layout';
 import StatCard from '@/components/StatCard';
@@ -56,18 +56,157 @@ const FEATURED_COURSES: Array<CourseStats & { institution: string }> = [
       { grade: 'F', count: 32, percentage: 10 },
     ],
   },
+  {
+    courseCode: 'MAT1110-1',
+    year: 2022,
+    institution: 'UiO',
+    totalStudents: 580,
+    averageGrade: 2.6,
+    distributions: [
+      { grade: 'A', count: 29, percentage: 5 },
+      { grade: 'B', count: 58, percentage: 10 },
+      { grade: 'C', count: 116, percentage: 20 },
+      { grade: 'D', count: 116, percentage: 20 },
+      { grade: 'E', count: 116, percentage: 20 },
+      { grade: 'F', count: 145, percentage: 25 },
+    ],
+  },
+  {
+    courseCode: 'TDT4145-1',
+    year: 2022,
+    institution: 'NTNU',
+    totalStudents: 280,
+    averageGrade: 3.4,
+    distributions: [
+      { grade: 'A', count: 42, percentage: 15 },
+      { grade: 'B', count: 70, percentage: 25 },
+      { grade: 'C', count: 84, percentage: 30 },
+      { grade: 'D', count: 42, percentage: 15 },
+      { grade: 'E', count: 28, percentage: 10 },
+      { grade: 'F', count: 14, percentage: 5 },
+    ],
+  },
+  {
+    courseCode: 'STK1100-1',
+    year: 2022,
+    institution: 'UiO',
+    totalStudents: 420,
+    averageGrade: 2.9,
+    distributions: [
+      { grade: 'A', count: 25, percentage: 6 },
+      { grade: 'B', count: 63, percentage: 15 },
+      { grade: 'C', count: 105, percentage: 25 },
+      { grade: 'D', count: 84, percentage: 20 },
+      { grade: 'E', count: 63, percentage: 15 },
+      { grade: 'F', count: 80, percentage: 19 },
+    ],
+  },
+  {
+    courseCode: 'INF100-1',
+    year: 2022,
+    institution: 'UiB',
+    totalStudents: 350,
+    averageGrade: 3.1,
+    distributions: [
+      { grade: 'A', count: 35, percentage: 10 },
+      { grade: 'B', count: 70, percentage: 20 },
+      { grade: 'C', count: 105, percentage: 30 },
+      { grade: 'D', count: 70, percentage: 20 },
+      { grade: 'E', count: 35, percentage: 10 },
+      { grade: 'F', count: 35, percentage: 10 },
+    ],
+  },
+  {
+    courseCode: 'BØK110-1',
+    year: 2022,
+    institution: 'BI',
+    totalStudents: 520,
+    averageGrade: 3.3,
+    distributions: [
+      { grade: 'A', count: 78, percentage: 15 },
+      { grade: 'B', count: 104, percentage: 20 },
+      { grade: 'C', count: 156, percentage: 30 },
+      { grade: 'D', count: 104, percentage: 20 },
+      { grade: 'E', count: 52, percentage: 10 },
+      { grade: 'F', count: 26, percentage: 5 },
+    ],
+  },
+  {
+    courseCode: 'IN2090-1',
+    year: 2022,
+    institution: 'UiO',
+    totalStudents: 310,
+    averageGrade: 3.0,
+    distributions: [
+      { grade: 'A', count: 31, percentage: 10 },
+      { grade: 'B', count: 62, percentage: 20 },
+      { grade: 'C', count: 93, percentage: 30 },
+      { grade: 'D', count: 62, percentage: 20 },
+      { grade: 'E', count: 31, percentage: 10 },
+      { grade: 'F', count: 31, percentage: 10 },
+    ],
+  },
+  {
+    courseCode: 'TDT4135-1',
+    year: 2022,
+    institution: 'NTNU',
+    totalStudents: 180,
+    averageGrade: 3.5,
+    distributions: [
+      { grade: 'A', count: 36, percentage: 20 },
+      { grade: 'B', count: 54, percentage: 30 },
+      { grade: 'C', count: 45, percentage: 25 },
+      { grade: 'D', count: 27, percentage: 15 },
+      { grade: 'E', count: 9, percentage: 5 },
+      { grade: 'F', count: 9, percentage: 5 },
+    ],
+  },
+  {
+    courseCode: 'DAT1000-1',
+    year: 2022,
+    institution: 'OsloMet',
+    totalStudents: 240,
+    averageGrade: 2.7,
+    distributions: [
+      { grade: 'A', count: 12, percentage: 5 },
+      { grade: 'B', count: 36, percentage: 15 },
+      { grade: 'C', count: 72, percentage: 30 },
+      { grade: 'D', count: 60, percentage: 25 },
+      { grade: 'E', count: 36, percentage: 15 },
+      { grade: 'F', count: 24, percentage: 10 },
+    ],
+  },
+  {
+    courseCode: 'PSYK1001-1',
+    year: 2022,
+    institution: 'UiO',
+    totalStudents: 680,
+    averageGrade: 3.2,
+    distributions: [
+      { grade: 'A', count: 68, percentage: 10 },
+      { grade: 'B', count: 136, percentage: 20 },
+      { grade: 'C', count: 204, percentage: 30 },
+      { grade: 'D', count: 136, percentage: 20 },
+      { grade: 'E', count: 68, percentage: 10 },
+      { grade: 'F', count: 68, percentage: 10 },
+    ],
+  },
 ];
 
 export default function Home() {
-  // Get one random course from each institution
-  const randomCourses = useMemo(() => {
+  // Get one random course from each institution (client-side only to avoid hydration mismatch)
+  const [randomCourses, setRandomCourses] = useState<CourseInfo[]>([]);
+  
+  useEffect(() => {
+    // Only generate random courses on client side
     const institutions = ['UiO', 'NTNU', 'OsloMet', 'UiB', 'BI'];
-    return institutions.map(inst => {
-      const courses = POPULAR_COURSES.filter(c => c.institution === inst);
-      if (courses.length === 0) return null;
-      const randomIndex = Math.floor(Math.random() * courses.length);
-      return courses[randomIndex];
+    const courses = institutions.map(inst => {
+      const instCourses = POPULAR_COURSES.filter(c => c.institution === inst);
+      if (instCourses.length === 0) return null;
+      const randomIndex = Math.floor(Math.random() * instCourses.length);
+      return instCourses[randomIndex];
     }).filter(Boolean) as CourseInfo[];
+    setRandomCourses(courses);
   }, []);
 
   return (
