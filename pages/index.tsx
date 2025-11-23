@@ -825,9 +825,13 @@ export default function Home() {
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
               <span className={styles.heroLogo}>
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M 2 32 C 2 32, 6 26, 10 24 C 14 22, 16 20.5, 20 20 C 24 20.5, 26 22, 30 24 C 34 26, 38 32, 38 32" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                </svg>
+                <Image 
+                  src="/dist.svg" 
+                  alt="Logo" 
+                  width={40} 
+                  height={40}
+                  priority
+                />
               </span>
               Karakterfordeling
             </h1>
