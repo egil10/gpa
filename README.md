@@ -4,7 +4,7 @@ A comprehensive web application for calculating Grade Point Average (GPA) for No
 
 ## Overview
 
-This project enables students to:
+This project enables students to: 
 
 - Calculate GPA for university and high school courses
 - Search grade distribution statistics for courses at major Norwegian institutions
