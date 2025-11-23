@@ -82,6 +82,23 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     );
   }, []);
 
+  const handleCourseNameSelect = useCallback((courseId: string, courseInfo: CourseInfo | null) => {
+    if (courseInfo) {
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.id === courseId
+            ? {
+                ...c,
+                name: courseInfo.name,
+                // Optionally set default credits based on institution
+                credits: c.credits || (system === 'university' ? 7.5 : 1),
+              }
+            : c
+        )
+      );
+    }
+  }, [system]);
+
   const adjustGrade = useCallback((id: string, direction: 'up' | 'down') => {
     setCourses((prev) =>
       prev.map((c) => {

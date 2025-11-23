@@ -7,7 +7,7 @@ import MultiYearChart from '@/components/MultiYearChart';
 import CourseAutocomplete from '@/components/CourseAutocomplete';
 import CourseExplorer from '@/components/CourseExplorer';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
-import { processMultiYearData, combineAllYears, getAvailableYears } from '@/lib/utils';
+import { processMultiYearData, combineAllYears } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { CourseInfo, getInstitutionForCourse } from '@/lib/courses';
 import styles from '@/styles/Search.module.css';
@@ -23,7 +23,6 @@ export default function SearchPage() {
   const [institutionLocked, setInstitutionLocked] = useState(false);
   const [showExplorer, setShowExplorer] = useState(false);
 
-  const availableYears = getAvailableYears();
 
   const handleExplorerCourseSelect = (course: CourseInfo) => {
     setCourseCode(course.code);
@@ -273,21 +272,6 @@ export default function SearchPage() {
                 )}
               </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="year">År</label>
-                <select
-                  id="year"
-                  value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className={styles.select}
-                >
-                  {availableYears.map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               <button
                 type="submit"
