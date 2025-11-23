@@ -69,14 +69,39 @@ export async function loadCourseData(
 ): Promise<CourseData[]> {
   try {
     // Try to load from public folder (works for static export)
+    // Files are in public/data/institutions/ or public/ depending on setup
     const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
     
-    // Try regular JSON first (gzip handled by server)
-    const response = await fetch(`${basePath}/${fileName}`, {
-      headers: {
-        'Accept-Encoding': 'gzip, deflate',
-      },
-    });
+    // Try multiple paths
+    const pathsToTry = [
+      `${basePath}/${fileName}`,  // e.g., /data/institutions/uio-all-courses.json
+      `${basePath}/data/institutions/${fileName.split('/').pop()}`,  // if fileName is just the filename
+      fileName,  // absolute path if already includes basePath
+    ];
+    
+    let response: Response | null = null;
+    let lastError: Error | null = null;
+    
+    for (const filePath of pathsToTry) {
+      const normalizedPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+      try {
+        response = await fetch(normalizedPath, {
+          headers: {
+            'Accept-Encoding': 'gzip, deflate',
+          },
+        });
+        if (response.ok) {
+          break;
+        }
+      } catch (error) {
+        lastError = error as Error;
+        continue;
+      }
+    }
+    
+    if (!response || !response.ok) {
+      throw lastError || new Error(`Failed to fetch ${fileName}: ${response?.status || 'unknown'}`);
+    }
     
     if (!response.ok) {
       throw new Error(`Failed to fetch ${fileName}: ${response.status}`);

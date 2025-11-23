@@ -16,7 +16,7 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     // Mark Node.js modules as external for client-side bundles
     if (!isServer) {
       config.resolve.fallback = {
@@ -25,6 +25,14 @@ const nextConfig = {
         path: false,
         crypto: false,
       };
+      
+      // Ignore the cache module on client-side to prevent fs bundling
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^\.\/cache$/,
+          contextRegExp: /lib$/,
+        })
+      );
     }
     return config;
   },

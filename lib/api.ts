@@ -1,5 +1,26 @@
 import { GradeData, SearchPayload, University, DepartmentFilter, StudyProgramFilter } from '@/types';
-import { getCachedData } from './cache';
+
+// Cache helper - only loads on server-side to avoid bundling fs module
+function getCachedDataSafe(
+  institutionCode: string,
+  courseCode: string
+): GradeData[] | null {
+  // Only try to use cache on server-side
+  if (typeof window !== 'undefined') {
+    return null;
+  }
+
+  try {
+    // Use Function constructor to make require truly dynamic
+    // This prevents webpack from analyzing the require call
+    const requireFunc = new Function('modulePath', 'return require(modulePath)');
+    const cacheModule = requireFunc('./cache');
+    return cacheModule.getCachedData(institutionCode, courseCode);
+  } catch (e) {
+    // Cache not available, return null
+    return null;
+  }
+}
 
 // NSD API URL - CORS issues in production require a proxy
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
@@ -230,15 +251,13 @@ export async function fetchGradeData(
   departmentFilter?: DepartmentFilter
 ): Promise<GradeData[]> {
   // Try cache first (server-side only)
-  if (typeof window === 'undefined') {
-    const cached = getCachedData(institutionCode, courseCode);
-    if (cached && cached.length > 0) {
-      // Filter by year if specified
-      if (year) {
-        return cached.filter(item => parseInt(item.Årstall, 10) === year);
-      }
-      return cached;
+  const cached = getCachedDataSafe(institutionCode, courseCode);
+  if (cached && cached.length > 0) {
+    // Filter by year if specified
+    if (year) {
+      return cached.filter(item => parseInt(item.Årstall, 10) === year);
     }
+    return cached;
   }
 
   // Fall back to API if cache miss or client-side

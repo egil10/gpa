@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CourseInfo, searchCourses, POPULAR_COURSES } from '@/lib/courses';
+import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
-import { searchNHHCourses, nhhCourseToCourseInfo } from '@/lib/nhh-courses';
+import { searchAllCourses, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
 import styles from './CourseNameAutocomplete.module.css';
 
 interface CourseNameAutocompleteProps {
@@ -37,31 +37,23 @@ export default function CourseNameAutocomplete({
     }
   }, [value]);
 
-  // Load NHH courses state
-  const [nhhCourses, setNhhCourses] = useState<CourseInfo[]>([]);
-  const [nhhCoursesLoaded, setNhhCoursesLoaded] = useState(false);
-
-  // Load NHH courses when NHH is selected
+  // Preload institution courses when institution is selected
   useEffect(() => {
-    if (institution === 'NHH' && !nhhCoursesLoaded) {
-      searchNHHCourses('').then(courses => {
-        const courseInfos = courses.map(nhhCourseToCourseInfo);
-        setNhhCourses(courseInfos);
-        setNhhCoursesLoaded(true);
-      }).catch(console.error);
+    if (institution) {
+      preloadInstitutionCourses(institution);
     }
-  }, [institution, nhhCoursesLoaded]);
+  }, [institution]);
 
   // Get popular courses for empty query
-  const getPopularCourses = useCallback(() => {
-    if (institution === 'NHH' && nhhCoursesLoaded && nhhCourses.length > 0) {
-      return nhhCourses.slice(0, 6);
+  const getPopularCoursesList = useCallback(async () => {
+    try {
+      const popular = await getPopularCourses(institution, 6);
+      return popular.length > 0 ? popular : POPULAR_COURSES.filter(c => !institution || c.institution === institution).slice(0, 6);
+    } catch {
+      // Fallback to hardcoded list
+      return POPULAR_COURSES.filter(c => !institution || c.institution === institution).slice(0, 6);
     }
-    if (institution) {
-      return POPULAR_COURSES.filter(c => c.institution === institution).slice(0, 6);
-    }
-    return POPULAR_COURSES.slice(0, 6);
-  }, [institution, nhhCourses, nhhCoursesLoaded]);
+  }, [institution]);
 
   // Search with debouncing
   const performSearch = useCallback((searchQuery: string) => {
@@ -71,33 +63,24 @@ export default function CourseNameAutocomplete({
 
     debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
-        const popular = getPopularCourses();
+        const popular = await getPopularCoursesList();
         setSuggestions(popular);
         setShowSuggestions(popular.length > 0);
       } else {
-        let results: CourseInfo[] = [];
-        
-        // If NHH is selected, search NHH courses first
-        if (institution === 'NHH' && nhhCoursesLoaded) {
-          const nhhResults = await searchNHHCourses(searchQuery);
-          results = nhhResults.map(nhhCourseToCourseInfo);
+        try {
+          // Search by name - searchAllCourses searches both code and name
+          const results = await searchAllCourses(searchQuery, institution, 10);
+          setSuggestions(results);
+          setShowSuggestions(results.length > 0);
+        } catch (error) {
+          console.error('Search error:', error);
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
-        
-        // Also search regular courses
-        const regularResults = searchCourses(searchQuery, institution);
-        
-        // Combine and deduplicate (NHH courses take priority)
-        const regularFiltered = regularResults.filter(r => 
-          !results.some(n => n.code === r.code)
-        );
-        results = [...results, ...regularFiltered].slice(0, 10);
-        
-        setSuggestions(results);
-        setShowSuggestions(results.length > 0);
       }
       setSelectedIndex(-1);
     }, 200);
-  }, [institution, getPopularCourses, nhhCoursesLoaded]);
+  }, [institution, getPopularCoursesList]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -146,9 +129,9 @@ export default function CourseNameAutocomplete({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = async () => {
     if (query.trim().length === 0) {
-      const popular = getPopularCourses();
+      const popular = await getPopularCoursesList();
       setSuggestions(popular);
       setShowSuggestions(popular.length > 0);
     } else if (suggestions.length > 0) {

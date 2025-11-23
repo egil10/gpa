@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CourseInfo, searchCourses, getCourseByCode, POPULAR_COURSES } from '@/lib/courses';
+import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
+import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
 import styles from './CourseAutocomplete.module.css';
 
 interface CourseAutocompleteProps {
@@ -34,20 +35,31 @@ export default function CourseAutocomplete({
   useEffect(() => {
     if (value !== query) {
       setQuery(value);
-      const course = getCourseByCode(value, institution);
-      setSelectedCourse(course);
-      if (course && onCourseSelect) {
-        onCourseSelect(course);
-      }
+      getCourseByCode(value, institution).then(course => {
+        setSelectedCourse(course);
+        if (course && onCourseSelect) {
+          onCourseSelect(course);
+        }
+      });
     }
   }, [value, institution]);
 
-  // Get popular courses for empty query
-  const getPopularCourses = useCallback(() => {
+  // Preload institution courses when institution is selected
+  useEffect(() => {
     if (institution) {
-      return POPULAR_COURSES.filter(c => c.institution === institution).slice(0, 8);
+      preloadInstitutionCourses(institution);
     }
-    return POPULAR_COURSES.slice(0, 8);
+  }, [institution]);
+
+  // Get popular courses for empty query
+  const getPopularCoursesList = useCallback(async () => {
+    try {
+      const popular = await getPopularCourses(institution, 8);
+      return popular.length > 0 ? popular : POPULAR_COURSES.filter(c => !institution || c.institution === institution).slice(0, 8);
+    } catch {
+      // Fallback to hardcoded list
+      return POPULAR_COURSES.filter(c => !institution || c.institution === institution).slice(0, 8);
+    }
   }, [institution]);
 
   // Search with debouncing
@@ -56,35 +68,42 @@ export default function CourseAutocomplete({
       clearTimeout(debounceRef.current);
     }
 
-    debounceRef.current = setTimeout(() => {
+    debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
         // Show popular courses when input is empty
-        const popular = getPopularCourses();
+        const popular = await getPopularCoursesList();
         setSuggestions(popular);
         setShowSuggestions(popular.length > 0);
       } else {
-        const results = searchCourses(searchQuery, institution);
-        setSuggestions(results);
-        setShowSuggestions(results.length > 0);
+        try {
+          const results = await searchAllCourses(searchQuery, institution, 20);
+          setSuggestions(results);
+          setShowSuggestions(results.length > 0);
+        } catch (error) {
+          console.error('Search error:', error);
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
       }
       setSelectedIndex(-1);
     }, 200);
-  }, [institution, getPopularCourses]);
+  }, [institution, getPopularCoursesList]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
     setQuery(newValue);
     onChange(newValue);
     
-    const course = getCourseByCode(newValue, institution);
-    setSelectedCourse(course);
-    
-    // If no course found and value is cleared, notify parent
-    if (!course && newValue.trim() === '' && onCourseSelect) {
-      onCourseSelect(null);
-    } else if (onCourseSelect) {
-      onCourseSelect(course);
-    }
+    getCourseByCode(newValue, institution).then(course => {
+      setSelectedCourse(course);
+      
+      // If no course found and value is cleared, notify parent
+      if (!course && newValue.trim() === '' && onCourseSelect) {
+        onCourseSelect(null);
+      } else if (onCourseSelect) {
+        onCourseSelect(course);
+      }
+    });
 
     // Always perform search (shows popular courses when empty)
     performSearch(newValue);
@@ -131,10 +150,10 @@ export default function CourseAutocomplete({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = async () => {
     if (query.trim().length === 0) {
       // Show popular courses when focusing on empty input
-      const popular = getPopularCourses();
+      const popular = await getPopularCoursesList();
       setSuggestions(popular);
       setShowSuggestions(popular.length > 0);
     } else if (suggestions.length > 0) {

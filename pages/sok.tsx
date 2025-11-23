@@ -63,11 +63,42 @@ export default function SearchPage() {
 
   // Auto-search if query params are present
   useEffect(() => {
-    if (router.isReady && router.query.code && router.query.uni) {
-      handleSearch();
+    if (router.isReady && router.query.code) {
+      // Wait for state to update from URL params, then search
+      const timer = setTimeout(() => {
+        const codeFromUrl = String(router.query.code || '');
+        const uniFromUrl = String(router.query.uni || institution);
+        if (codeFromUrl && uniFromUrl && UNIVERSITIES[uniFromUrl]) {
+          // Use values from URL directly for search
+          const uniData = UNIVERSITIES[uniFromUrl];
+          const formattedCode = formatCourseCode(codeFromUrl, uniFromUrl);
+          
+          setLoading(true);
+          setError(null);
+          setAllYearsStats({});
+          
+          fetchAllYearsData(uniData.code, formattedCode)
+            .then(data => {
+              if (data && data.length > 0) {
+                const multiYearData = processMultiYearData(data);
+                setAllYearsStats(multiYearData);
+                setLoading(false);
+                setError(null);
+              } else {
+                setError('Ingen data funnet for dette emnet');
+                setLoading(false);
+              }
+            })
+            .catch(err => {
+              setError(err.message || 'Kunne ikke hente data');
+              setLoading(false);
+            });
+        }
+      }, 200);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady]);
+  }, [router.isReady, router.query.code, router.query.uni, institution]);
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

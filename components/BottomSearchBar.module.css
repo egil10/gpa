@@ -35,6 +35,7 @@
 
 .inputWrapper {
   width: 100%;
+  position: relative;
 }
 
 .inputContainer {
@@ -47,11 +48,25 @@
   padding: 0.5rem 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.1s ease-in-out;
+  min-height: 3rem;
+}
+
+.inputContainer:hover {
+  border-color: var(--border-hover);
 }
 
 .inputContainer:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-right: 0.5rem;
+  flex-shrink: 0;
 }
 
 .inputContent {
@@ -67,6 +82,7 @@
   font-size: 1rem;
   color: var(--text-primary);
   outline: none;
+  min-height: 2rem;
 }
 
 .input::placeholder {
@@ -108,21 +124,132 @@
   color: var(--text-invert);
   transition: all 0.1s ease;
   flex-shrink: 0;
+  transform: rotate(-90deg);
 }
 
 .submitButton:hover:not(:disabled) {
   background: var(--accent-hover);
-  transform: scale(1.05);
+  transform: rotate(-90deg) scale(1.05);
 }
 
 .submitButton:active:not(:disabled) {
-  transform: scale(1);
+  transform: rotate(-90deg) scale(1);
 }
 
 .submitButton:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   background: var(--text-muted);
+}
+
+/* Suggestions dropdown */
+.suggestions {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 20rem;
+  overflow-y: auto;
+  z-index: 50;
+  margin-bottom: 0.5rem;
+}
+
+.suggestionsHeader {
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  border-bottom: 1px solid var(--border);
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionItem:hover,
+.suggestionItem.selected {
+  background: var(--surface-hover);
+}
+
+.suggestionContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.suggestionCode {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.suggestionName {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestionInstitution {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+/* Scroll to top button */
+.scrollToTop {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1rem;
+  z-index: 50;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: rotate(-90deg);
+}
+
+.scrollToTop:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: rotate(-90deg) translateY(-2px);
 }
 
 @media (max-width: 768px) {
@@ -134,5 +261,16 @@
   .input {
     font-size: 0.9375rem;
   }
-}
 
+  .scrollToTop {
+    bottom: 5rem;
+    right: 0.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .suggestions {
+    max-height: 16rem;
+    bottom: calc(100% + 0.25rem);
+  }
+}
