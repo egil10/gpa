@@ -13,12 +13,14 @@ export interface NHHBachelorCourse {
   lastYearStudents: number;
 }
 
-// This will be populated from the JSON file
+// Import the course data directly (works for static export)
+// This will be populated at build time
 let nhhBachelorCoursesData: NHHBachelorCourse[] | null = null;
 
 /**
  * Load NHH Bachelor courses from the JSON file
  * This is called automatically on first access
+ * For static export, we import the JSON at build time
  */
 async function loadNHHBachelorCourses(): Promise<NHHBachelorCourse[]> {
   if (nhhBachelorCoursesData) {
@@ -26,35 +28,41 @@ async function loadNHHBachelorCourses(): Promise<NHHBachelorCourse[]> {
   }
 
   try {
-    // In browser: fetch from public directory
-    // In Node.js: read from file system
-    if (typeof window === 'undefined') {
-      // Server-side: read from file
-      const fs = await import('fs');
-      const path = await import('path');
+    // Try to load from public folder (works for static export)
+    // The JSON file will be copied to public during build
+    if (typeof window !== 'undefined') {
+      // Client-side: fetch from public folder
+      // Handle basePath (e.g., /gpa) if configured
+      const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
+      const response = await fetch(`${basePath}/nhh-bachelor-courses.json`);
+      if (response.ok) {
+        const data = await response.json();
+        const courses = (data.courses || []) as NHHBachelorCourse[];
+        nhhBachelorCoursesData = courses;
+        return courses;
+      }
+    } else {
+      // Server-side: read from file system
+      const fs = require('fs');
+      const path = require('path');
       const dataPath = path.join(process.cwd(), 'data', 'institutions', 'nhh-bachelor-courses.json');
       
       if (fs.existsSync(dataPath)) {
         const fileContent = fs.readFileSync(dataPath, 'utf-8');
         const data = JSON.parse(fileContent);
-        nhhBachelorCoursesData = data.courses || [];
-        return nhhBachelorCoursesData;
-      }
-    } else {
-      // Client-side: fetch from public API or static file
-      // We'll create an API route for this
-      const response = await fetch('/api/courses/nhh-bachelor');
-      if (response.ok) {
-        const data = await response.json();
-        nhhBachelorCoursesData = data.courses || [];
-        return nhhBachelorCoursesData;
+        const courses = (data.courses || []) as NHHBachelorCourse[];
+        nhhBachelorCoursesData = courses;
+        return courses;
       }
     }
   } catch (error) {
     console.warn('Failed to load NHH Bachelor courses:', error);
   }
 
-  return [];
+  // Return empty array if loading fails
+  const empty: NHHBachelorCourse[] = [];
+  nhhBachelorCoursesData = empty;
+  return empty;
 }
 
 /**

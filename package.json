@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/copy-nhh-data.js",
     "build": "next build",
     "start": "next start",
     "export": "next build",
@@ -11,7 +12,9 @@
     "fetch-cache": "tsx scripts/fetch-cache.ts",
     "test-fetch": "tsx scripts/test-fetch.ts",
     "test-hierarchy": "tsx scripts/test-hierarchy-discovery.ts",
-    "discover-nhh": "tsx scripts/discover-nhh-bachelor.ts"
+    "discover-nhh": "tsx scripts/discover-nhh-bachelor.ts",
+    "discover-uio": "tsx scripts/discover-uio-courses.ts",
+    "discover-uib": "tsx scripts/discover-uib-courses.ts"
   },
   "dependencies": {
     "lucide-react": "^0.300.0",

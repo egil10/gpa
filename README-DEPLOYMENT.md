@@ -1,137 +1,152 @@
 # 🚀 Deploy NHH Bachelor Courses to Website
 
-## ✅ What's Ready
+## ✅ Status: READY TO DEPLOY!
 
-All NHH Bachelor courses have been discovered and are ready to be published! Here's what was created:
+All NHH Bachelor courses have been discovered and are ready to be published!
 
-1. **✅ 44 NHH Bachelor courses discovered** from 5 years of data
-2. **✅ JSON data file** saved to `data/institutions/nhh-bachelor-courses.json`
-3. **✅ API route** created at `/api/courses/nhh-bachelor`
-4. **✅ Integration** with CourseNameAutocomplete component
-5. **✅ All components updated** and ready to use
+## 📊 What Was Discovered
 
-## 📦 Files Created/Updated
+- **✅ 44 NHH Bachelor courses** discovered and saved
+- **✅ 37 courses** with 2024 data
+- **✅ 10,311 students** in 2024
+- **✅ 5 years** of historical data (2020-2024)
+- **✅ JSON file** saved to `data/institutions/nhh-bachelor-courses.json`
+- **✅ Auto-copied** to `public/` folder during build (for static export)
 
-- `scripts/discover-nhh-bachelor.ts` - Discovery script
-- `lib/nhh-bachelor-courses.ts` - Library functions
-- `pages/api/courses/nhh-bachelor.ts` - API endpoint
-- `components/CourseNameAutocomplete.tsx` - Updated to use NHH courses
-- `data/institutions/nhh-bachelor-courses.json` - Course data (44 courses)
+## 🎯 Deploy in 3 Simple Steps
 
-## 🎯 Steps to Deploy
-
-### 1. Verify Data is Ready
+### Step 1: Verify Data Exists
 
 ```bash
-# Check that the JSON file exists and has data
+# Check the JSON file exists
 cat data/institutions/nhh-bachelor-courses.json
 ```
 
-You should see 44 courses with data like:
+You should see 44 courses with codes like:
 - BED1, BED2, BED3, BED4, BED5 (Bedriftsøkonomi)
 - MET1, MET2, MET3, MET4 (Matematikk)
 - SAM1, SAM2, SAM3, SAM4 (Samfunnsøkonomi)
 - SOL1, SOL2, SOL3, SOL4 (Strategi og ledelse)
-- etc.
 
-### 2. Test Locally
-
-```bash
-# Start development server
-npm run dev
-
-# Visit: http://localhost:3000/sok
-# Select "NHH" as institution
-# Try typing course codes like "BED1", "MET1", etc.
-# You should see autocomplete suggestions!
-```
-
-### 3. Build & Test Production Build
+### Step 2: Build (This Will Auto-Copy Data)
 
 ```bash
-# Build for production
 npm run build
-
-# Test the production build
-npm start
-
-# Visit: http://localhost:3000/sok
-# Verify everything works
 ```
 
-### 4. Deploy to Vercel (or your hosting)
+This will:
+- ✅ Automatically copy JSON to `public/` folder (via `prebuild` script)
+- ✅ Build the entire application
+- ✅ Create static files ready for deployment
 
-If using Vercel:
+**Note:** The build might take 1-2 minutes. You'll see:
+```
+> prebuild
+> node scripts/copy-nhh-data.js
+✅ Copied NHH Bachelor courses data to public folder
+```
 
+### Step 3: Deploy
+
+**For GitHub Pages:**
 ```bash
-# Make sure you're logged in
-vercel login
+# The build output is in the 'out' folder
+# Just commit and push - GitHub Actions should deploy automatically
+git add .
+git commit -m "Add NHH Bachelor courses discovery"
+git push
+```
 
-# Deploy
+**For Vercel/Netlify:**
+```bash
+# Just push to your repo - auto-deploy should handle it
+git add .
+git commit -m "Add NHH Bachelor courses discovery"
+git push
+```
+
+Or manually:
+```bash
 vercel --prod
 ```
 
-**Important:** Make sure the `data/` folder is included in your deployment!
-- Vercel: It should be included automatically
-- Other platforms: Make sure `data/` is in your repo and not in `.gitignore`
+## ✅ Verification
 
-### 5. Verify Deployment
+After deployment, test:
 
-After deployment:
-1. Go to your website
-2. Navigate to the search page (`/sok`)
-3. Select "NHH" as institution
-4. Start typing a course code (e.g., "BED1")
-5. You should see autocomplete suggestions with NHH Bachelor courses!
+1. **Go to your website** → Search page (`/sok` or `/gpa/sok`)
+2. **Select "NHH"** as institution
+3. **Type "BED1"** → Should show autocomplete suggestions
+4. **Type "MET1"** → Should show autocomplete suggestions
+5. **Select a course** → Should load grade statistics
 
 ## 🔄 Updating Course Data
 
-If you want to refresh the course data (e.g., after a new year):
+To refresh course data (e.g., after new year):
 
 ```bash
-# Run the discovery script again
+# 1. Re-discover courses
 npm run discover-nhh
 
-# This will update data/institutions/nhh-bachelor-courses.json
-# Then rebuild and redeploy
+# 2. Rebuild (auto-copies to public)
 npm run build
-vercel --prod
+
+# 3. Redeploy
+git add .
+git commit -m "Update NHH Bachelor courses"
+git push
 ```
 
-## 📊 What Was Discovered
+## 📁 Files Structure
 
-- **44 Bachelor courses** from NHH
-- **37 courses** with 2024 data
-- **10,311 total students** in 2024
-- **5 years** of historical data (2020-2024)
+```
+data/
+  institutions/
+    nhh-bachelor-courses.json  ← Source data (44 courses)
 
-## 🎉 Success Indicators
+public/
+  nhh-bachelor-courses.json    ← Auto-copied during build
 
-You'll know it's working when:
-- ✅ Autocomplete shows NHH courses when NHH is selected
-- ✅ Typing "BED" shows BED1, BED2, BED3, BED4, BED5
-- ✅ Typing "MET" shows MET1, MET2, MET3, MET4
-- ✅ Selecting a course and searching shows grade statistics
-- ✅ API endpoint `/api/courses/nhh-bachelor` returns JSON data
+lib/
+  nhh-bachelor-courses.ts      ← Library functions
+
+components/
+  CourseNameAutocomplete.tsx   ← Updated to use NHH courses
+```
 
 ## 🐛 Troubleshooting
 
 **No courses showing in autocomplete?**
-- Check browser console for errors
-- Verify API route is accessible: `/api/courses/nhh-bachelor`
-- Check that JSON file exists in `data/institutions/`
-
-**API returns 404?**
-- Make sure `data/institutions/nhh-bachelor-courses.json` exists
-- Check file permissions
-- Run `npm run discover-nhh` again
+- ✅ Check browser console for errors
+- ✅ Verify `public/nhh-bachelor-courses.json` exists after build
+- ✅ Check network tab - should fetch `/nhh-bachelor-courses.json` (or `/gpa/nhh-bachelor-courses.json`)
 
 **Build fails?**
-- Check TypeScript errors: `npm run type-check`
-- Verify all imports are correct
-- Make sure `data/` folder is not in `.gitignore`
+- ✅ Run `npm run discover-nhh` first to create the data file
+- ✅ Check TypeScript errors: `npm run type-check`
+- ✅ Verify `data/institutions/nhh-bachelor-courses.json` exists
+
+**JSON file not found?**
+- ✅ Run `npm run discover-nhh` to generate it
+- ✅ Check that `data/institutions/` directory exists
+
+## 📝 What Happens Automatically
+
+When you run `npm run build`:
+
+1. **Prebuild script runs** → Copies JSON to `public/` folder
+2. **Next.js builds** → Creates static HTML/JS files
+3. **JSON is included** → Available at `/nhh-bachelor-courses.json`
+4. **Autocomplete loads** → Fetches JSON on first NHH selection
+
+## 🎉 Success!
+
+When everything works:
+- ✅ Autocomplete shows 44 NHH courses
+- ✅ Typing course codes shows suggestions
+- ✅ Selecting a course shows grade statistics
+- ✅ Everything works in static export mode
 
 ---
 
-**Ready to deploy?** Run `npm run build` and then `vercel --prod` (or your deployment command)! 🚀
-
+**Ready?** Just run `npm run build` and deploy! 🚀
