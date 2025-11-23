@@ -25,7 +25,7 @@ export default function Layout({ children, title, description }: LayoutProps) {
       </Head>
       <div className="min-h-screen bg-white flex flex-col">
         <Navbar />
-        <main className="flex-1 relative z-10 pb-24">
+        <main className="flex-1 relative z-10 pb-32">
           {children}
         </main>
         <Footer />

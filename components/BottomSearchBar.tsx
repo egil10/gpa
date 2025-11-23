@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'reac
 import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
-import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
 import { UNIVERSITIES } from '@/lib/api';
 import { formatCourseCode } from '@/lib/api';
 import styles from './BottomSearchBar.module.css';
@@ -14,6 +14,7 @@ export default function BottomSearchBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [searchBarOpacity, setSearchBarOpacity] = useState(1);
   const router = useRouter();
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,12 +29,30 @@ export default function BottomSearchBar() {
     preloadInstitutionCourses('NHH');
   }, []);
 
-  // Show/hide scroll to top button
+  // Show/hide scroll to top button and fade search bar near footer
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollBottom = documentHeight - (scrollY + windowHeight);
+      
+      // Show scroll to top after 300px
+      setShowScrollTop(scrollY > 300);
+      
+      // Fade out search bar when within 200px of footer
+      const footerFadeDistance = 200;
+      if (scrollBottom < footerFadeDistance) {
+        // Fade out as we approach footer
+        const opacity = Math.max(0, scrollBottom / footerFadeDistance);
+        setSearchBarOpacity(opacity);
+      } else {
+        setSearchBarOpacity(1);
+      }
     };
+    
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -45,15 +64,9 @@ export default function BottomSearchBar() {
 
     debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
-        // Show popular courses when input is empty
-        try {
-          const popular = await getPopularCourses(undefined, 8);
-          setSuggestions(popular);
-          setShowSuggestions(popular.length > 0);
-        } catch {
-          setSuggestions([]);
-          setShowSuggestions(false);
-        }
+        // Don't show suggestions when input is empty
+        setSuggestions([]);
+        setShowSuggestions(false);
       } else {
         try {
           const results = await searchAllCourses(searchQuery, undefined, 10);
@@ -75,10 +88,14 @@ export default function BottomSearchBar() {
       getCourseByCode(query.trim(), undefined).then(course => {
         setSelectedCourse(course);
       });
+      // Only perform search when there's a query
+      performSearch(query);
     } else {
       setSelectedCourse(null);
+      // Hide suggestions when query is empty
+      setShowSuggestions(false);
+      setSuggestions([]);
     }
-    performSearch(query);
   }, [query, performSearch]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,9 +104,8 @@ export default function BottomSearchBar() {
   };
 
   const handleSelectCourse = (course: CourseInfo) => {
-    // Navigate directly to course charts
-    const formattedCode = formatCourseCode(course.code, course.institution);
-    router.push(`/sok?code=${encodeURIComponent(formattedCode)}&uni=${course.institution}`);
+    // Navigate directly to course charts (use code without suffix in URL)
+    router.push(`/sok?code=${encodeURIComponent(course.code)}&uni=${course.institution}`);
     setQuery('');
     setShowSuggestions(false);
     setSuggestions([]);
@@ -102,13 +118,14 @@ export default function BottomSearchBar() {
       // If we have a selected course, navigate to it
       handleSelectCourse(selectedCourse);
     } else if (query.trim()) {
-      // Otherwise, try to find the course or navigate with the query
-      getCourseByCode(query.trim(), undefined).then(course => {
+      // Strip suffix from query before searching/navigating
+      const cleanQuery = stripCourseCodeSuffix(query.trim());
+      getCourseByCode(cleanQuery, undefined).then(course => {
         if (course) {
           handleSelectCourse(course);
         } else {
-          // Navigate to search page with query
-          router.push(`/sok?code=${encodeURIComponent(query.trim())}`);
+          // Navigate to search page with query (without suffix)
+          router.push(`/sok?code=${encodeURIComponent(cleanQuery)}`);
           setQuery('');
           setShowSuggestions(false);
         }
@@ -152,16 +169,9 @@ export default function BottomSearchBar() {
     }
   };
 
-  const handleFocus = async () => {
-    if (query.trim().length === 0) {
-      try {
-        const popular = await getPopularCourses(undefined, 8);
-        setSuggestions(popular);
-        setShowSuggestions(popular.length > 0);
-      } catch {
-        setShowSuggestions(false);
-      }
-    } else if (suggestions.length > 0) {
+  const handleFocus = () => {
+    // Only show suggestions if there's a query
+    if (query.trim().length > 0 && suggestions.length > 0) {
       setShowSuggestions(true);
     }
   };
@@ -191,7 +201,10 @@ export default function BottomSearchBar() {
 
   return (
     <>
-      <div className={styles.searchBarContainer}>
+      <div 
+        className={styles.searchBarContainer}
+        style={{ opacity: searchBarOpacity, pointerEvents: searchBarOpacity > 0.3 ? 'auto' : 'none' }}
+      >
         <div className={styles.backdrop}></div>
         <div className={styles.searchBar}>
           <form onSubmit={handleSubmit} className={styles.form}>
@@ -236,7 +249,7 @@ export default function BottomSearchBar() {
                 </div>
               </div>
               
-              {showSuggestions && suggestions.length > 0 && (
+              {showSuggestions && suggestions.length > 0 && searchBarOpacity > 0.3 && (
                 <div ref={suggestionsRef} className={styles.suggestions}>
                   {query.trim().length === 0 && (
                     <div className={styles.suggestionsHeader}>
@@ -274,6 +287,7 @@ export default function BottomSearchBar() {
         <button
           onClick={scrollToTop}
           className={styles.scrollToTop}
+          style={{ opacity: searchBarOpacity }}
           aria-label="Scroll to top"
           title="Scroll to top"
         >

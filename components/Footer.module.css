@@ -2,7 +2,7 @@
   border-top: 1px solid var(--border);
   background-color: var(--bg-secondary);
   margin-top: var(--space-3xl);
-  padding: var(--space-2xl) 0 var(--space-lg);
+  padding: var(--space-2xl) 0 calc(var(--space-lg) + 5rem);
 }
 
 .footerContent {
@@ -50,6 +50,31 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-md);
+}
+
+.footerLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, color;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.footerLink:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
 }
 
 .footerBottom p {

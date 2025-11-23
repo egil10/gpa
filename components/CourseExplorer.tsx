@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { POPULAR_COURSES, CourseInfo, getCoursesForInstitution } from '@/lib/courses';
+import React, { useState, useMemo, useEffect } from 'react';
+import { CourseInfo, getCoursesForInstitution } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
+import { getAvailableInstitutions, loadAllCourses } from '@/lib/all-courses';
 import styles from './CourseExplorer.module.css';
 
 interface CourseExplorerProps {
@@ -11,18 +12,31 @@ interface CourseExplorerProps {
 export default function CourseExplorer({ onCourseSelect, selectedInstitution }: CourseExplorerProps) {
   const [selectedInst, setSelectedInst] = useState<string>(selectedInstitution || '');
   const [searchQuery, setSearchQuery] = useState('');
+  const [availableCourses, setAvailableCourses] = useState<CourseInfo[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Get all unique institutions
+  // Load available courses from data files
+  useEffect(() => {
+    loadAllCourses().then(courses => {
+      setAvailableCourses(courses);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  // Get available institutions (only those with data)
   const institutions = useMemo(() => {
-    const instSet = new Set(POPULAR_COURSES.map(c => c.institution));
-    return Array.from(instSet).sort();
+    return getAvailableInstitutions().sort();
   }, []);
 
   // Filter courses based on institution and search query
   const filteredCourses = useMemo(() => {
+    if (loading) return [];
+
     let courses = selectedInst 
-      ? getCoursesForInstitution(selectedInst)
-      : POPULAR_COURSES;
+      ? availableCourses.filter(c => c.institution === selectedInst)
+      : availableCourses;
 
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
@@ -33,7 +47,7 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
     }
 
     return courses.sort((a, b) => a.code.localeCompare(b.code));
-  }, [selectedInst, searchQuery]);
+  }, [selectedInst, searchQuery, availableCourses, loading]);
 
   const handleCourseClick = (course: CourseInfo) => {
     onCourseSelect(course);

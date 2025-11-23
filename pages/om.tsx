@@ -48,9 +48,8 @@ export default function AboutPage() {
               <ul className={styles.list}>
                 <li>Universitetet i Oslo (UiO)</li>
                 <li>Norges teknisk-naturvitenskapelige universitet (NTNU)</li>
-                <li>OsloMet – storbyuniversitetet</li>
                 <li>Universitetet i Bergen (UiB)</li>
-                <li>Handelshøyskolen BI</li>
+                <li>Norges handelshøyskole (NHH)</li>
               </ul>
             </section>
 

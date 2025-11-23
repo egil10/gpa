@@ -7,27 +7,57 @@ import { CourseInfo } from './courses';
 import { UNIVERSITIES } from './api';
 import { loadCourseData, CourseData, searchCourseData } from './course-loader';
 
-// Institution data file mappings
+// Institution data file mappings - only institutions with actual data files
 const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
   UiO: { file: 'uio-all-courses.json', code: '1110' },
   NTNU: { file: 'ntnu-all-courses.json', code: '1150' },
   UiB: { file: 'uib-all-courses.json', code: '1120' },
   NHH: { file: 'nhh-all-courses.json', code: '1240' },
-  OsloMet: { file: 'oslomet-all-courses.json', code: '1175' },
-  BI: { file: 'bi-all-courses.json', code: '8241' },
+  // OsloMet and BI removed - no data files available
 };
+
+/**
+ * Get list of available institutions (those with data files)
+ */
+export function getAvailableInstitutions(): string[] {
+  return Object.keys(INSTITUTION_DATA_FILES);
+}
 
 // Cache for loaded course data
 const courseDataCache: Map<string, CourseInfo[]> = new Map();
 const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
+ * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010", "BØK1101" -> "BØK110")
+ */
+export function stripCourseCodeSuffix(code: string): string {
+  // Remove -1 or 1 suffix (handles both BI format and standard format)
+  return code.replace(/[-]?1$/, '').trim();
+}
+
+/**
+ * Check if a course has data available (has years with students)
+ */
+function courseHasData(courseData: CourseData): boolean {
+  // Course has data if:
+  // 1. It has years array with at least one year
+  // 2. It has lastYearStudents count (indicates data exists)
+  // 3. Years array is not empty
+  return (
+    (courseData.years && courseData.years.length > 0) ||
+    (courseData.lastYearStudents !== undefined && courseData.lastYearStudents > 0)
+  );
+}
+
+/**
  * Convert CourseData to CourseInfo
  */
 function courseDataToCourseInfo(courseData: CourseData, institution: string, institutionCode: string): CourseInfo {
+  // Strip suffix for display
+  const displayCode = stripCourseCodeSuffix(courseData.courseCode);
   return {
-    code: courseData.courseCode,
-    name: courseData.courseName || courseData.courseCode,
+    code: displayCode,
+    name: courseData.courseName || displayCode,
     institution,
     institutionCode,
   };
@@ -73,10 +103,12 @@ export async function loadInstitutionCourses(institution: string): Promise<Cours
         courseData = await loadCourseData(fileName, institutionData.code);
       }
       
-      // Convert to CourseInfo format
-      const courses = courseData.map(cd => 
-        courseDataToCourseInfo(cd, institution, institutionData.code)
-      );
+      // Convert to CourseInfo format and filter out courses without data
+      const courses = courseData
+        .filter(cd => courseHasData(cd)) // Only include courses with data
+        .map(cd => 
+          courseDataToCourseInfo(cd, institution, institutionData.code)
+        );
 
       // Cache the results
       courseDataCache.set(institution, courses);
@@ -130,7 +162,8 @@ function searchCoursesFromList(
   query: string,
   limit: number
 ): CourseInfo[] {
-  const normalizedQuery = query.trim().toUpperCase();
+  // Strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
+  const normalizedQuery = stripCourseCodeSuffix(query.trim().toUpperCase());
   
   if (!normalizedQuery) {
     // Return popular courses (by code length - shorter codes are usually more popular)
@@ -180,7 +213,8 @@ export async function getCourseByCode(
   code: string,
   institution?: string
 ): Promise<CourseInfo | null> {
-  const normalizedCode = code.trim().toUpperCase();
+  // Strip suffix from code for matching (user might type "IN2010-1" but we store "IN2010")
+  const normalizedCode = stripCourseCodeSuffix(code.trim().toUpperCase());
   
   if (institution) {
     const courses = await loadInstitutionCourses(institution);

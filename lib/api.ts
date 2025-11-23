@@ -46,10 +46,9 @@ const getVercelProxyUrl = () => {
 export const UNIVERSITIES: Record<string, University> = {
   UiO: { code: '1110', name: 'Universitetet i Oslo', shortName: 'UiO' },
   NTNU: { code: '1150', name: 'Norges teknisk-naturvitenskapelige universitet', shortName: 'NTNU' },
-  OsloMet: { code: '1175', name: 'OsloMet – storbyuniversitetet', shortName: 'OsloMet' },
   UiB: { code: '1120', name: 'Universitetet i Bergen', shortName: 'UiB' },
-  BI: { code: '8241', name: 'Handelshøyskolen BI', shortName: 'BI' },
   NHH: { code: '1240', name: 'Norges handelshøyskole', shortName: 'NHH' },
+  // OsloMet and BI removed - no data files available
 };
 
 export function createSearchPayload(
@@ -248,9 +247,29 @@ export async function fetchGradeData(
   institutionCode: string,
   courseCode: string,
   year?: number,
-  departmentFilter?: DepartmentFilter
+  departmentFilter?: DepartmentFilter,
+  institution?: string
 ): Promise<GradeData[]> {
-  // Try cache first (server-side only)
+  // Try to get institution name from code if not provided
+  if (!institution) {
+    const uniEntry = Object.entries(UNIVERSITIES).find(([_, uni]) => uni.code === institutionCode);
+    institution = uniEntry ? uniEntry[0] : '';
+  }
+  
+  // Try cache first (works on both client and server)
+  if (institution) {
+    const { getGradeDataFromCache } = await import('./grade-data-cache');
+    const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
+    if (cached && cached.length > 0) {
+      // Filter by year if specified
+      if (year) {
+        return cached.filter(item => parseInt(item.Årstall, 10) === year);
+      }
+      return cached;
+    }
+  }
+  
+  // Fall back to server-side cache
   const cached = getCachedDataSafe(institutionCode, courseCode);
   if (cached && cached.length > 0) {
     // Filter by year if specified
@@ -260,20 +279,58 @@ export async function fetchGradeData(
     return cached;
   }
 
-  // Fall back to API if cache miss or client-side
+  // Fall back to API if cache miss
   const payload = createSearchPayload(institutionCode, courseCode, year, departmentFilter);
-  return fetchWithProxy(payload);
+  const data = await fetchWithProxy(payload);
+  
+  // Cache the fetched data
+  if (institution && data.length > 0) {
+    const { storeGradeDataInCache } = await import('./grade-data-cache');
+    storeGradeDataInCache(institutionCode, courseCode, institution, data);
+  }
+  
+  return data;
 }
 
 // Fetch data for all available years
 export async function fetchAllYearsData(
   institutionCode: string,
   courseCode: string,
-  departmentFilter?: DepartmentFilter
+  departmentFilter?: DepartmentFilter,
+  institution?: string
 ): Promise<GradeData[]> {
+  // Try to get institution name from code if not provided
+  if (!institution) {
+    const uniEntry = Object.entries(UNIVERSITIES).find(([_, uni]) => uni.code === institutionCode);
+    institution = uniEntry ? uniEntry[0] : '';
+  }
+  
+  // Try cache first (works on both client and server)
+  if (institution) {
+    const { getGradeDataFromCache } = await import('./grade-data-cache');
+    const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
+    if (cached && cached.length > 0) {
+      return cached;
+    }
+  }
+  
+  // Fall back to server-side cache
+  const cached = getCachedDataSafe(institutionCode, courseCode);
+  if (cached && cached.length > 0) {
+    return cached;
+  }
+  
   // Fetch without year filter to get all years
   const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
-  return fetchWithProxy(payload);
+  const data = await fetchWithProxy(payload);
+  
+  // Cache the fetched data
+  if (institution && data.length > 0) {
+    const { storeGradeDataInCache } = await import('./grade-data-cache');
+    storeGradeDataInCache(institutionCode, courseCode, institution, data);
+  }
+  
+  return data;
 }
 
 // Fetch all courses from a department (for browsing)

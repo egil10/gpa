@@ -11,6 +11,7 @@ import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processMultiYearData, combineAllYears } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { CourseInfo, getInstitutionForCourse } from '@/lib/courses';
+import { stripCourseCodeSuffix } from '@/lib/all-courses';
 import styles from '@/styles/Search.module.css';
 
 export default function SearchPage() {
@@ -43,7 +44,8 @@ export default function SearchPage() {
     if (router.isReady) {
       const { code, uni } = router.query;
       if (code) {
-        const codeStr = String(code);
+        // Strip suffix from URL code for display (e.g., "IN2010-1" -> "IN2010")
+        const codeStr = stripCourseCodeSuffix(String(code));
         setCourseCode(codeStr);
         const courseInstitution = getInstitutionForCourse(codeStr);
         if (courseInstitution) {
@@ -66,7 +68,8 @@ export default function SearchPage() {
     if (router.isReady && router.query.code) {
       // Wait for state to update from URL params, then search
       const timer = setTimeout(() => {
-        const codeFromUrl = String(router.query.code || '');
+        // Strip suffix from URL code before formatting (formatCourseCode will add it back)
+        const codeFromUrl = stripCourseCodeSuffix(String(router.query.code || ''));
         const uniFromUrl = String(router.query.uni || institution);
         if (codeFromUrl && uniFromUrl && UNIVERSITIES[uniFromUrl]) {
           // Use values from URL directly for search
@@ -77,7 +80,7 @@ export default function SearchPage() {
           setError(null);
           setAllYearsStats({});
           
-          fetchAllYearsData(uniData.code, formattedCode)
+          fetchAllYearsData(uniData.code, formattedCode, undefined, uniFromUrl)
             .then(data => {
               if (data && data.length > 0) {
                 const multiYearData = processMultiYearData(data);
@@ -119,8 +122,8 @@ export default function SearchPage() {
       }
 
       const formattedCode = formatCourseCode(courseCode, institution);
-      // Fetch all years at once
-      const data = await fetchAllYearsData(uniData.code, formattedCode);
+      // Fetch all years at once (pass institution for caching)
+      const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, institution);
 
       if (!data || data.length === 0) {
         setError('Ingen data funnet for dette emnet');

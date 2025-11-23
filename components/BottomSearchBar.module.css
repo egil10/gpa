@@ -8,19 +8,22 @@
   margin: 0 auto;
   padding: 0 var(--space-md);
   padding-bottom: var(--space-md);
+  transition: opacity 0.3s ease;
 }
 
 .backdrop {
   position: absolute;
   bottom: 0;
-  height: 3.5rem;
+  height: 4rem;
   width: 100%;
   background: linear-gradient(
     to top,
-    var(--bg-primary) 0%,
-    var(--bg-primary) 94%,
-    rgba(255, 255, 255, 0.8) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 60%,
+    rgba(255, 255, 255, 0.5) 85%,
+    transparent 100%
   );
+  backdrop-filter: blur(8px);
   pointer-events: none;
 }
 
@@ -124,16 +127,16 @@
   color: var(--text-invert);
   transition: all 0.1s ease;
   flex-shrink: 0;
-  transform: rotate(-90deg);
+  transform: rotate(90deg);
 }
 
 .submitButton:hover:not(:disabled) {
   background: var(--accent-hover);
-  transform: rotate(-90deg) scale(1.05);
+  transform: rotate(90deg) scale(1.05);
 }
 
 .submitButton:active:not(:disabled) {
-  transform: rotate(-90deg) scale(1);
+  transform: rotate(90deg) scale(1);
 }
 
 .submitButton:disabled {
@@ -240,9 +243,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: rotate(-90deg);
+  pointer-events: auto;
 }
 
 .scrollToTop:hover {

@@ -1,4 +1,5 @@
 import { UNIVERSITIES } from './api';
+import { getAvailableInstitutions } from './all-courses';
 
 export interface CourseInfo {
   code: string;
@@ -6,6 +7,9 @@ export interface CourseInfo {
   institution: string;
   institutionCode: string;
 }
+
+// Get available institutions (those with data files)
+const AVAILABLE_INSTITUTIONS = new Set(getAvailableInstitutions());
 
 // Popular courses database - can be expanded
 export const POPULAR_COURSES: CourseInfo[] = [
@@ -40,16 +44,6 @@ export const POPULAR_COURSES: CourseInfo[] = [
   { code: 'INF101', name: 'Objektorientert programmering', institution: 'UiB', institutionCode: '1120' },
   { code: 'INF102', name: 'Algoritmer, datastrukturer og programmering', institution: 'UiB', institutionCode: '1120' },
   { code: 'MAT111', name: 'Kalkulus', institution: 'UiB', institutionCode: '1120' },
-  
-  // OsloMet courses
-  { code: 'DAT1000', name: 'Grunnleggende programmering', institution: 'OsloMet', institutionCode: '1175' },
-  { code: 'DAT1100', name: 'Objektorientert programmering', institution: 'OsloMet', institutionCode: '1175' },
-  
-  // BI courses
-  { code: 'BØK110', name: 'Grunnleggende bedriftsøkonomi', institution: 'BI', institutionCode: '8241' },
-  { code: 'BØK120', name: 'Finansregnskap', institution: 'BI', institutionCode: '8241' },
-  { code: 'BØK130', name: 'Bedriftsøkonomi', institution: 'BI', institutionCode: '8241' },
-  { code: 'BØK140', name: 'Markedsføring', institution: 'BI', institutionCode: '8241' },
   
   // NHH courses - Obligatoriske emner (Required courses)
   { code: 'BED1', name: 'Grunnleggende bedriftsøkonomi', institution: 'NHH', institutionCode: '1240' },

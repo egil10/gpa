@@ -1,5 +1,6 @@
 import React from 'react';
-import { Github } from 'lucide-react';
+import Link from 'next/link';
+import { Github, Calculator } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -37,16 +38,22 @@ export default function Footer() {
         </div>
         <div className={styles.footerBottom}>
           <p className="text-light">© {currentYear} Karakterstatistikk</p>
-          <a 
-            href="https://github.com/egil10/gpa" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.githubLink}
-            aria-label="GitHub repository"
-          >
-            <Github size={18} />
-            <span>GitHub</span>
-          </a>
+          <div className={styles.footerLinks}>
+            <Link href="/kalkulator" className={styles.footerLink}>
+              <Calculator size={18} />
+              <span>GPA Kalkulator</span>
+            </Link>
+            <a 
+              href="https://github.com/egil10/gpa" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.githubLink}
+              aria-label="GitHub repository"
+            >
+              <Github size={18} />
+              <span>GitHub</span>
+            </a>
+          </div>
         </div>
       </div>
     </footer>
