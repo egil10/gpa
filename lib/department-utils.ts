@@ -48,10 +48,11 @@ export function extractCoursesFromDepartmentData(data: GradeData[]): DepartmentC
 
 /**
  * Get course code without suffix (e.g., "IN2010-1" -> "IN2010")
+ * Only removes "-1" suffix, preserving dashes and numbers that are part of the actual course code
  */
 export function normalizeCourseCode(code: string): string {
-  // Remove -1 or 1 suffix
-  return code.replace(/[-]?1$/, '').trim();
+  // Only remove "-1" suffix (dash followed by 1 at the end)
+  return code.replace(/-1$/, '').trim();
 }
 
 /**

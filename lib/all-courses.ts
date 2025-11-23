@@ -28,11 +28,18 @@ const courseDataCache: Map<string, CourseInfo[]> = new Map();
 const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
- * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010", "BØK1101" -> "BØK110")
+ * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010")
+ * Only removes "-1" suffix, preserving dashes and numbers that are part of the actual course code
+ * Examples:
+ *   "IN2010-1" -> "IN2010" (removes API suffix)
+ *   "STK-MAT2011" -> "STK-MAT2011" (preserves - dash and trailing 1)
+ *   "FYS-STK3155" -> "FYS-STK3155" (preserves - dash)
  */
 export function stripCourseCodeSuffix(code: string): string {
-  // Remove -1 or 1 suffix (handles both BI format and standard format)
-  return code.replace(/[-]?1$/, '').trim();
+  // Only remove "-1" suffix (dash followed by 1 at the end)
+  // This is the API format suffix, not part of the actual course code
+  // Don't remove standalone "1" as it might be part of the course code (e.g., "STK-MAT2011")
+  return code.replace(/-1$/, '').trim();
 }
 
 /**
@@ -163,6 +170,7 @@ function searchCoursesFromList(
   limit: number
 ): CourseInfo[] {
   // Strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
+  // Only strip -1 suffix, don't strip standalone 1 as it might be part of the code (e.g., STK-MAT2011)
   const normalizedQuery = stripCourseCodeSuffix(query.trim().toUpperCase());
   
   if (!normalizedQuery) {
@@ -246,6 +254,93 @@ export async function getPopularCourses(
       .sort((a, b) => a.code.length - b.code.length)
       .slice(0, limit);
   }
+}
+
+/**
+ * Get most popular courses across all institutions in round-robin fashion
+ * Picks courses with highest student counts, distributing evenly across institutions
+ */
+export async function getMostPopularCoursesRoundRobin(limit: number = 12): Promise<CourseInfo[]> {
+  const institutions = Object.keys(INSTITUTION_DATA_FILES);
+  const coursesByInstitution: Map<string, Array<CourseInfo & { studentCount: number }>> = new Map();
+  
+  // Load course data for each institution (with student counts)
+  await Promise.all(institutions.map(async (institution) => {
+    try {
+      const institutionData = INSTITUTION_DATA_FILES[institution];
+      if (!institutionData) return;
+      
+      // Load course data (which has student counts)
+      let fileName = `data/institutions/${institutionData.file}`;
+      let courseData = await loadCourseData(fileName, institutionData.code);
+      
+      if (courseData.length === 0) {
+        fileName = institutionData.file;
+        courseData = await loadCourseData(fileName, institutionData.code);
+      }
+      
+      if (courseData.length === 0 && typeof window !== 'undefined') {
+        fileName = `/gpa/data/institutions/${institutionData.file}`;
+        courseData = await loadCourseData(fileName, institutionData.code);
+      }
+      
+      // Convert to CourseInfo with student counts, sort by student count
+      const coursesWithCounts = courseData
+        .filter(cd => courseHasData(cd) && cd.lastYearStudents && cd.lastYearStudents > 0)
+        .map(cd => ({
+          ...courseDataToCourseInfo(cd, institution, institutionData.code),
+          studentCount: cd.lastYearStudents || 0,
+        }))
+        .sort((a, b) => b.studentCount - a.studentCount); // Highest first
+      
+      coursesByInstitution.set(institution, coursesWithCounts);
+    } catch (error) {
+      console.warn(`Failed to load popular courses for ${institution}:`, error);
+    }
+  }));
+  
+  // Round-robin selection: pick 1 from each institution, then loop
+  const selected: CourseInfo[] = [];
+  const institutionIndices = new Map<string, number>(); // Track current index per institution
+  
+  // Initialize indices
+  institutions.forEach(inst => institutionIndices.set(inst, 0));
+  
+  // Keep selecting until we have enough or run out of courses
+  while (selected.length < limit) {
+    let foundAny = false;
+    
+    // One round: pick one from each institution
+    for (const institution of institutions) {
+      if (selected.length >= limit) break;
+      
+      const courses = coursesByInstitution.get(institution) || [];
+      const currentIndex = institutionIndices.get(institution) || 0;
+      
+      if (currentIndex < courses.length) {
+        const course = courses[currentIndex];
+        // Avoid duplicates
+        if (!selected.find(c => c.code === course.code && c.institution === course.institution)) {
+          selected.push({
+            code: course.code,
+            name: course.name,
+            institution: course.institution,
+            institutionCode: course.institutionCode,
+          });
+          institutionIndices.set(institution, currentIndex + 1);
+          foundAny = true;
+        } else {
+          // Skip this one, move to next
+          institutionIndices.set(institution, currentIndex + 1);
+        }
+      }
+    }
+    
+    // If we didn't find any new courses, we're done
+    if (!foundAny) break;
+  }
+  
+  return selected.slice(0, limit);
 }
 
 /**

@@ -250,6 +250,66 @@
   color: var(--text-primary);
 }
 
+.gradeDistribution {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gradeDistributionHeader {
+  margin-bottom: var(--space-sm);
+}
+
+.gradeDistributionLabel {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-family: var(--font-inter);
+}
+
+.gradeDistributionTable {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-xs);
+  max-width: 100%;
+}
+
+.gradeDistributionCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: var(--space-xs);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  transition: all 0.15s ease;
+}
+
+.gradeDistributionCell:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.gradeDistributionGrade {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
+}
+
+.gradeDistributionCount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--font-inter);
+  letter-spacing: -0.01em;
+}
+
 .bonusPointsSection {
   margin-top: var(--space-2xl);
   padding: var(--space-xl) 0;
@@ -466,7 +526,7 @@
 .coursesList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-sm);
   position: relative;
 }
 
@@ -505,7 +565,7 @@
 }
 
 .courseCard {
-  padding: var(--space-lg) 0;
+  padding: var(--space-xs) 0;
   border-top: 1px solid var(--border);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
@@ -531,13 +591,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-xs);
 }
 
 .courseNumber {
   font-family: var(--font-inter);
   letter-spacing: -0.01em;
-  font-size: var(--text-sm);
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -568,32 +628,33 @@
 
 .courseFields {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  grid-template-columns: 2fr 1.2fr 1fr 0.8fr;
+  gap: var(--space-sm);
+  align-items: end;
+  margin-bottom: var(--space-xs);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 0.25rem;
 }
 
 .field label {
-  font-size: var(--text-xs);
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-secondary);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.125rem;
   font-family: var(--font-inter);
 }
 
 .input {
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   font-family: var(--font-inter);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   background-color: var(--surface);
   transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: border-color;
@@ -612,10 +673,10 @@
 }
 
 .gradeButton {
-  width: 40px;
+  width: 32px;
   border: 1px solid var(--border);
   background-color: var(--surface);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, background-color;
@@ -624,6 +685,7 @@
   justify-content: center;
   border-radius: 0.375rem;
   font-family: var(--font-inter);
+  padding: 0;
 }
 
 .gradeButton:hover:not(:disabled) {
@@ -643,11 +705,11 @@
 
 .gradeSelect {
   flex: 1;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   font-family: var(--font-inter);
   letter-spacing: -0.01em;
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: 600;
   background-color: var(--surface);
   cursor: pointer;
@@ -661,8 +723,8 @@
 }
 
 .courseStats {
-  padding-top: var(--space-md);
-  margin-top: var(--space-md);
+  padding-top: var(--space-xs);
+  margin-top: var(--space-xs);
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
@@ -672,9 +734,13 @@
 .coursePoints {
   font-family: var(--font-inter);
   letter-spacing: -0.01em;
-  font-size: var(--text-sm);
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 600;
+  padding: 0.375rem 0.5rem;
+  background-color: var(--surface);
+  border-radius: 0.25rem;
+  display: inline-block;
 }
 
 @media (max-width: 768px) {
@@ -707,7 +773,7 @@
   
   .courseFields {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: var(--space-sm);
   }
   
   .gradeControls {
@@ -743,6 +809,23 @@
   
   .courseCard {
     padding: var(--space-md);
+  }
+
+  .gradeDistributionTable {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xs);
+  }
+
+  .gradeDistributionCell {
+    padding: 0.5rem 0.375rem;
+  }
+
+  .gradeDistributionGrade {
+    font-size: 0.875rem;
+  }
+
+  .gradeDistributionCount {
+    font-size: 1rem;
   }
 }
 

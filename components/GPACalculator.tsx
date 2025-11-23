@@ -161,6 +161,20 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
   const availableGrades = system === 'university' ? UNIVERSITY_GRADES : HIGHSCHOOL_GRADES;
 
+  // Calculate grade distribution
+  const gradeDistribution = useMemo(() => {
+    const distribution: Record<string, number> = {};
+    availableGrades.forEach(grade => {
+      distribution[grade] = 0;
+    });
+    courses.forEach(course => {
+      if (distribution.hasOwnProperty(course.grade)) {
+        distribution[course.grade]++;
+      }
+    });
+    return distribution;
+  }, [courses, availableGrades]);
+
   return (
     <div className={styles.calculator}>
       <div className={styles.header}>
@@ -231,6 +245,21 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                   <span className={styles.detailValue}>{calculation.gpa.toFixed(2)}</span>
                 </div>
               )}
+            </div>
+            <div className={styles.gradeDistribution}>
+              <div className={styles.gradeDistributionHeader}>
+                <span className={styles.gradeDistributionLabel}>Karakterfordeling</span>
+              </div>
+              <div className={styles.gradeDistributionTable}>
+                {availableGrades.map(grade => (
+                  <div key={grade} className={styles.gradeDistributionCell}>
+                    <span className={styles.gradeDistributionGrade}>{grade}</span>
+                    <span className={styles.gradeDistributionCount}>
+                      {gradeDistribution[grade] || 0}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className={styles.calculateActions}>
               <button
@@ -424,7 +453,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                         value={course.name}
                         onChange={(name) => updateCourse(course.id, 'name', name)}
                         onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
-                        placeholder="Søk etter emnenavn eller skriv manuelt..."
+                        placeholder="Søk eller skriv..."
                         disabled={false}
                       />
                     ) : (
@@ -432,7 +461,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                         value={course.name}
                         onChange={(name) => updateCourse(course.id, 'name', name)}
                         onCourseSelect={(vgsCourse) => handleVGSCourseSelect(course.id, vgsCourse)}
-                        placeholder="Søk etter fag eller skriv manuelt..."
+                        placeholder="Søk eller skriv..."
                         disabled={false}
                       />
                     )}
@@ -492,12 +521,13 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                       className={styles.input}
                     />
                   </div>
-                </div>
 
-                <div className={styles.courseStats}>
-                  <span className={styles.coursePoints}>
-                    {GRADE_VALUES[course.grade] * course.credits} poeng
-                  </span>
+                  <div className={styles.field}>
+                    <label style={{ visibility: 'hidden' }}>Poeng</label>
+                    <span className={styles.coursePoints}>
+                      {GRADE_VALUES[course.grade] * course.credits} poeng
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}

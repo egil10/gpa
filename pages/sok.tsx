@@ -6,7 +6,7 @@ import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processMultiYearData } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { getInstitutionForCourse } from '@/lib/courses';
-import { stripCourseCodeSuffix } from '@/lib/all-courses';
+import { stripCourseCodeSuffix, getCourseByCode } from '@/lib/all-courses';
 import styles from '@/styles/Search.module.css';
 
 export default function SearchPage() {
@@ -41,36 +41,59 @@ export default function SearchPage() {
   // Auto-load data if query params are present
   useEffect(() => {
     if (router.isReady && router.query.code && courseCode && institution) {
-      // Wait for state to update from URL params, then load
-      const timer = setTimeout(() => {
+      // Wait for state to update from URL params, then validate and load
+      const timer = setTimeout(async () => {
         const uniData = UNIVERSITIES[institution];
         if (!uniData) {
           setError('Ugyldig institusjon');
           return;
         }
 
-        const formattedCode = formatCourseCode(courseCode, institution);
-        
-        setLoading(true);
-        setError(null);
-        setAllYearsStats({});
-        
-        fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
-          .then(data => {
-            if (data && data.length > 0) {
-              const multiYearData = processMultiYearData(data);
-              setAllYearsStats(multiYearData);
-              setLoading(false);
-              setError(null);
-            } else {
-              setError('Ingen data funnet for dette emnet');
-              setLoading(false);
-            }
-          })
-          .catch(err => {
-            setError(err.message || 'Kunne ikke hente data');
+        // First, validate that the course code exists in our course list
+        try {
+          const course = await getCourseByCode(courseCode, institution);
+          if (!course) {
+            // Course code doesn't exist - show not found message
+            setError(`Emnekode "${courseCode}" ikke funnet`);
             setLoading(false);
-          });
+            setAllYearsStats({});
+            return;
+          }
+
+          // Course exists, proceed to fetch data
+          const formattedCode = formatCourseCode(courseCode, institution);
+          
+          setLoading(true);
+          setError(null);
+          setAllYearsStats({});
+          
+          fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
+            .then(data => {
+              if (data && data.length > 0) {
+                const multiYearData = processMultiYearData(data);
+                setAllYearsStats(multiYearData);
+                setLoading(false);
+                setError(null);
+              } else {
+                setError('Ingen data funnet for dette emnet');
+                setLoading(false);
+              }
+            })
+            .catch(err => {
+              // Check if error is CORS-related or actual "no data"
+              if (err.message && err.message.includes('CORS')) {
+                setError(err.message);
+              } else {
+                setError('Ingen data funnet for dette emnet');
+              }
+              setLoading(false);
+            });
+        } catch (err) {
+          // Error validating course - show error
+          setError(`Emnekode "${courseCode}" ikke funnet`);
+          setLoading(false);
+          setAllYearsStats({});
+        }
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -106,7 +129,7 @@ export default function SearchPage() {
           {error && (
             <div className={styles.error}>
               <p><strong>Feil:</strong> {error}</p>
-              {error.includes('CORS') && (
+              {error.includes('CORS') && !error.includes('ikke funnet') && (
                 <p className={styles.errorHint}>
                   <small>
                     💡 Dette er et kjent problem med offentlige CORS-proxyer. 

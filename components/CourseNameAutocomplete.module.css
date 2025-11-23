@@ -13,7 +13,7 @@
 .icon {
   position: absolute;
   left: var(--space-md);
-  color: var(--color-text-light);
+  color: var(--text-secondary);
   pointer-events: none;
   z-index: 1;
 }
@@ -21,12 +21,13 @@
 .input {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border);
-  font-family: var(--font-sans);
+  border: 1px solid var(--border);
+  font-family: var(--font-inter);
   font-size: var(--text-base);
-  background-color: var(--color-background);
+  background-color: var(--surface);
   transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: border-color;
+  border-radius: 0.375rem;
 }
 
 .inputWrapper .input {
@@ -35,7 +36,7 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--accent);
 }
 
 .input:disabled {
@@ -50,7 +51,7 @@
   border: none;
   padding: var(--space-xs);
   cursor: pointer;
-  color: var(--color-text-light);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +60,7 @@
 }
 
 .clearButton:hover {
-  color: var(--color-text);
+  color: var(--text-primary);
 }
 
 .suggestions {
@@ -67,25 +68,26 @@
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  z-index: 9999;
+  background-color: #ffffff !important;
+  border: 1px solid var(--border);
   border-top: none;
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.15s ease-out;
   margin-top: 2px;
   border-radius: 0 0 0.375rem 0.375rem;
+  isolation: isolate;
 }
 
 .suggestionsHeader {
   padding: var(--space-xs) var(--space-sm);
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border);
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--color-text-light);
+  color: var(--text-secondary);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -95,9 +97,9 @@
   width: 100%;
   padding: var(--space-sm) var(--space-md);
   text-align: left;
-  background-color: var(--color-background);
+  background-color: #ffffff !important;
   border: none;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background-color 0.1s ease;
   display: flex;
@@ -112,7 +114,7 @@
 
 .suggestionItem:hover,
 .suggestionItem.selected {
-  background-color: var(--color-surface);
+  background-color: var(--surface-hover) !important;
 }
 
 .suggestionContent {
@@ -124,31 +126,31 @@
 
 .suggestionName {
   font-size: var(--text-xs);
-  color: var(--color-text);
+  color: var(--text-primary);
   font-weight: 400;
 }
 
 .courseName {
   font-size: var(--text-sm);
-  color: var(--color-text);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .courseCategory {
   font-size: var(--text-xs);
-  color: var(--color-text-light);
+  color: var(--text-secondary);
 }
 
 .suggestionCode {
   font-family: var(--font-inter);
   letter-spacing: -0.01em;
   font-size: var(--text-xs);
-  color: var(--color-text-light);
+  color: var(--text-secondary);
 }
 
 /* Highlight duplicate names by making codes more prominent */
 .suggestionItem.duplicate .suggestionCode {
-  color: var(--color-accent);
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -156,14 +158,14 @@
   font-family: var(--font-inter);
   letter-spacing: -0.01em;
   font-size: var(--text-xs);
-  color: var(--color-accent);
+  color: var(--accent);
   font-weight: 600;
   margin-left: var(--space-xs);
 }
 
 .suggestionInstitution {
   font-size: var(--text-xs);
-  color: var(--color-text-light);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -177,15 +179,26 @@
 }
 
 .suggestions::-webkit-scrollbar-track {
-  background: var(--color-surface);
+  background: var(--bg-secondary);
 }
 
 .suggestions::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--border);
   border-radius: 4px;
 }
 
 .suggestions::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-light);
+  background: var(--text-secondary);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 

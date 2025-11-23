@@ -6,13 +6,14 @@ import CourseDistributionCard from '@/components/CourseDistributionCard';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processGradeData } from '@/lib/utils';
 import { CourseStats } from '@/types';
-import { loadAllCourses } from '@/lib/all-courses';
+import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
 import styles from '@/styles/Home.module.css';
 
-type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students';
+type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
 
 const COURSES_PER_PAGE = 9;
+const INITIAL_COURSES_COUNT = 12; // Show 12 popular courses on initial load
 
 export default function Home() {
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
@@ -25,12 +26,21 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [pendingSortBy, setPendingSortBy] = useState<SortOption>('most-a');
   const [pendingInstitution, setPendingInstitution] = useState<string>('all');
-  const [displayCount, setDisplayCount] = useState(COURSES_PER_PAGE); // How many courses to show
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 9 courses are loaded
+  const [displayCount, setDisplayCount] = useState(INITIAL_COURSES_COUNT); // How many courses to show
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 12 courses are loaded
   const [lastSortBy, setLastSortBy] = useState<SortOption | null>(null); // Track last sort option to detect changes
   const [courseOrder, setCourseOrder] = useState<string[]>([]); // Maintain stable order of courses
   const coursesDataRef = useRef<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const loadingCoursesRef = useRef<Set<string>>(new Set());
+
+  // Sync refs with state - do this early so refs are always up to date
+  useEffect(() => {
+    coursesDataRef.current = coursesData;
+  }, [coursesData]);
+
+  useEffect(() => {
+    loadingCoursesRef.current = loadingCourses;
+  }, [loadingCourses]);
 
   // Load course list metadata
   useEffect(() => {
@@ -52,10 +62,21 @@ export default function Home() {
   useEffect(() => {
     if (allCourses.length > 0) {
       setInitialLoadComplete(false);
+      // Reset display count when institution changes
+      setDisplayCount(COURSES_PER_PAGE);
     }
   }, [selectedInstitution]);
 
-  // Check if initial load is complete (we have at least 9 courses loaded)
+  // Sync refs with state
+  useEffect(() => {
+    coursesDataRef.current = coursesData;
+  }, [coursesData]);
+
+  useEffect(() => {
+    loadingCoursesRef.current = loadingCourses;
+  }, [loadingCourses]);
+
+  // Check if initial load is complete (we have at least 9 courses loaded OR no more courses to load)
   useEffect(() => {
     if (searchQuery.trim() || initialLoadComplete) return;
     
@@ -68,37 +89,28 @@ export default function Home() {
       return coursesDataRef.current.has(key);
     });
     
-    if (coursesWithData.length >= COURSES_PER_PAGE && loadingCoursesRef.current.size === 0) {
+    const loadingCount = loadingCoursesRef.current.size;
+    
+    // Mark as complete if we have enough courses AND nothing is currently loading
+    if (coursesWithData.length >= INITIAL_COURSES_COUNT && loadingCount === 0) {
       setInitialLoadComplete(true);
     }
-  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete]);
-
-  // Load initial 9 courses
-  useEffect(() => {
-    if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
-    
-    const filtered = selectedInstitution !== 'all'
-      ? allCourses.filter(c => c.institution === selectedInstitution)
-      : allCourses;
-
-    const coursesToLoad = filtered
-      .filter(course => {
-        const key = `${course.institution}-${course.code}`;
-        return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-      })
-      .slice(0, COURSES_PER_PAGE);
-
-    if (coursesToLoad.length === 0) {
-      // If no courses to load, check if we have enough loaded
-      const filteredWithData = filtered.filter(c => {
-        const key = `${c.institution}-${c.code}`;
-        return coursesDataRef.current.has(key);
-      });
-      if (filteredWithData.length >= COURSES_PER_PAGE) {
-        setInitialLoadComplete(true);
-      }
-      return;
+    // Also mark as complete if we've tried loading but got fewer than 9 (some may have failed)
+    // This prevents infinite waiting if some courses fail to load
+    else if (loadingCount === 0 && coursesWithData.length > 0) {
+      // Give it a bit more time before marking complete with fewer courses
+      const timer = setTimeout(() => {
+        if (coursesWithData.length > 0 && loadingCoursesRef.current.size === 0) {
+          setInitialLoadComplete(true);
+        }
+      }, 2000); // Wait 2 seconds after loading stops
+      return () => clearTimeout(timer);
     }
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, coursesData, loadingCourses]);
+
+  // Helper function to load course data
+  const loadCoursesData = useCallback((coursesToLoad: CourseInfo[]) => {
+    if (coursesToLoad.length === 0) return;
 
     // Mark as loading
     setLoadingCourses(prev => {
@@ -108,6 +120,8 @@ export default function Home() {
     });
 
     // Fetch the courses
+    let cancelled = false;
+    
     Promise.all(
       coursesToLoad.map(async (course) => {
         try {
@@ -117,7 +131,7 @@ export default function Home() {
           const formattedCode = formatCourseCode(course.code, course.institution);
           const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
           
-          if (!data || data.length === 0) return null;
+          if (cancelled || !data || data.length === 0) return null;
           
           const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
           const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
@@ -134,10 +148,14 @@ export default function Home() {
             },
           };
         } catch (error) {
+          // Silently skip failed courses - they'll be retried if needed
+          console.debug(`Failed to load course ${course.code}:`, error);
           return null;
         }
       })
     ).then(results => {
+      if (cancelled) return;
+      
       const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
       
       setCoursesData(prev => {
@@ -151,8 +169,80 @@ export default function Home() {
         coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
         return next;
       });
+
+      // If we got at least some results, update course order and mark progress
+      if (validResults.length > 0) {
+        setCourseOrder(prev => {
+          const newKeys = validResults.map(r => r.key);
+          return [...prev, ...newKeys.filter(k => !prev.includes(k))];
+        });
+      }
     });
-  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load initial popular courses (12 courses with most candidates, distributed across institutions)
+  useEffect(() => {
+    if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
+    
+    // If institution filter is 'all', use popular courses in round-robin fashion
+    if (selectedInstitution === 'all') {
+      // Load most popular courses across all institutions (round-robin)
+      getMostPopularCoursesRoundRobin(INITIAL_COURSES_COUNT).then(popularCourses => {
+        // Filter out courses that are already loaded or loading
+        const toLoad = popularCourses.filter(course => {
+          const key = `${course.institution}-${course.code}`;
+          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+        });
+        
+        if (toLoad.length > 0) {
+          loadCoursesData(toLoad);
+        } else if (popularCourses.length > 0) {
+          // All popular courses are already loaded or loading
+          setInitialLoadComplete(true);
+        }
+      }).catch(error => {
+        console.warn('Failed to load popular courses, falling back to regular selection:', error);
+        // Fall back to regular selection
+        const fallbackCourses = allCourses
+          .filter(course => {
+            const key = `${course.institution}-${course.code}`;
+            return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+          })
+          .slice(0, INITIAL_COURSES_COUNT);
+        if (fallbackCourses.length > 0) {
+          loadCoursesData(fallbackCourses);
+        }
+      });
+      return; // Exit early - loading popular courses asynchronously
+    }
+    
+    // Institution filter is active - use filtered courses
+    const filtered = allCourses.filter(c => c.institution === selectedInstitution);
+    const coursesToLoad = filtered
+      .filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+      })
+      .slice(0, INITIAL_COURSES_COUNT);
+
+    if (coursesToLoad.length === 0) {
+      // If no courses to load, check if we have enough loaded
+      const filteredWithData = filtered.filter(c => {
+        const key = `${c.institution}-${c.code}`;
+        return coursesDataRef.current.has(key);
+      });
+      if (filteredWithData.length >= INITIAL_COURSES_COUNT) {
+        setInitialLoadComplete(true);
+      }
+      return;
+    }
+
+    loadCoursesData(coursesToLoad);
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadCoursesData]);
 
   // Reset course order when sort option, institution, or search changes
   useEffect(() => {
@@ -161,6 +251,11 @@ export default function Home() {
       setLastSortBy(sortBy);
     }
   }, [sortBy, selectedInstitution, searchQuery, lastSortBy]);
+  
+  // Note: We don't clear coursesData when institution filter changes because:
+  // 1. The filtering logic already ensures only courses from selected institution are shown
+  // 2. Clearing would lose data if user switches back to "all"
+  // 3. The safety check in filteredAndSortedCourses ensures institution matches
 
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
@@ -196,12 +291,16 @@ export default function Home() {
       filtered = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
     }
 
-    // Get courses with loaded data
+    // Get courses with loaded data, ensuring institution matches filter
     const coursesWithData = filtered
       .map(course => {
         const key = `${course.institution}-${course.code}`;
         const data = coursesData.get(key);
-        return data ? data : null;
+        // Double-check that the data's institution matches the selected institution filter
+        if (data && (selectedInstitution === 'all' || data.institution === selectedInstitution)) {
+          return data;
+        }
+        return null;
       })
       .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
 
@@ -248,6 +347,10 @@ export default function Home() {
             return b.totalStudents - a.totalStudents;
           case 'least-students':
             return a.totalStudents - b.totalStudents;
+          case 'alphabetical-az':
+            return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
+          case 'alphabetical-za':
+            return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
           default:
             return 0;
         }
@@ -256,8 +359,15 @@ export default function Home() {
       return [...orderedCourses, ...unorderedCourses];
     }
 
+    // Final safety check: filter out any courses that don't match the institution filter
+    // This ensures we never show courses from the wrong institution, even if data was loaded incorrectly
+    const finalCourses = coursesWithData.filter(course => {
+      if (selectedInstitution === 'all') return true;
+      return course.institution === selectedInstitution;
+    });
+    
     // Sort using loaded data only (when order should be reset)
-    coursesWithData.sort((a, b) => {
+    finalCourses.sort((a, b) => {
       switch (sortBy) {
         case 'most-a': {
           const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
@@ -277,12 +387,16 @@ export default function Home() {
           return b.totalStudents - a.totalStudents;
         case 'least-students':
           return a.totalStudents - b.totalStudents;
+        case 'alphabetical-az':
+          return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
+        case 'alphabetical-za':
+          return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
         default:
           return 0;
       }
     });
     
-    return coursesWithData;
+    return finalCourses;
   }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy]);
 
   // Update course order when sorting (separate effect to avoid infinite loop)
@@ -574,17 +688,31 @@ export default function Home() {
 
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
+    // Apply pending filters and sort
     setSortBy(pendingSortBy);
     setSelectedInstitution(pendingInstitution);
-    setSearchQuery(searchInput.trim());
-    setDisplayCount(COURSES_PER_PAGE); // Reset to 9 when applying
+    
+    // Apply search query from input
+    const newSearchQuery = searchInput.trim();
+    setSearchQuery(newSearchQuery);
+    
+    // Reset display to initial state - start fresh
+    setDisplayCount(newSearchQuery ? COURSES_PER_PAGE : INITIAL_COURSES_COUNT);
+    
+    // Reset course order and initial load state to force reload
+    setCourseOrder([]);
+    
+    // If there's a search query, courses will reload via the search effect
+    // If no search query and filters changed, reset initial load to reload popular courses
+    if (!newSearchQuery) {
+      setInitialLoadComplete(false);
+    }
+    
+    // Force re-render by clearing any cached course data that might not match new filters
+    // The effects will reload the appropriate courses based on new filters/search
   };
-
-  const handleSearchSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setSearchQuery(searchInput.trim());
-    setDisplayCount(COURSES_PER_PAGE); // Reset to 9 when searching
-  };
+  
+  
 
   const handleSearchClear = () => {
     setSearchInput('');
@@ -687,7 +815,7 @@ export default function Home() {
           </div>
 
           {/* Sorting and Filtering Controls */}
-          <form onSubmit={handleSearchSubmit} className={styles.controls}>
+          <form onSubmit={handleApply} className={styles.controls}>
             <div className={styles.controlGroup}>
               <label htmlFor="search" className={styles.controlLabel} title="Søk">
                 <Search size={16} />
@@ -698,6 +826,12 @@ export default function Home() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApply(e as any);
+                    }
+                  }}
                   placeholder="Søk etter emnekode eller navn..."
                   className={styles.searchInput}
                 />
@@ -711,14 +845,6 @@ export default function Home() {
                     <X size={16} />
                   </button>
                 )}
-                <button
-                  type="submit"
-                  className={styles.searchSubmitButton}
-                  aria-label="Search"
-                  disabled={!searchInput.trim()}
-                >
-                  <ArrowUp size={16} />
-                </button>
               </div>
             </div>
             <div className={styles.controlGroup}>
@@ -737,6 +863,8 @@ export default function Home() {
                 <option value="lowest-avg">Lavest snitt</option>
                 <option value="most-students">Flest kandidater</option>
                 <option value="least-students">Færrest kandidater</option>
+                <option value="alphabetical-az">A-Z (emnekode)</option>
+                <option value="alphabetical-za">Z-A (emnekode)</option>
               </select>
             </div>
             <div className={styles.controlGroup}>
@@ -776,17 +904,31 @@ export default function Home() {
           ) : (
             <>
               <div className={styles.resultsInfo}>
-                <p>
-                  Viser {displayedCourses.length} emner
-                </p>
-                {searchQuery.trim() && (
-                  <button
-                    onClick={handleSearchClear}
-                    className={styles.clearSearchButton}
-                    aria-label="Clear search"
-                  >
-                    Tøm søk
-                  </button>
+                {loadingCourses.size > 0 && displayedCourses.length === 0 ? (
+                  <div className={styles.fetchingIndicator}>
+                    <span className={styles.fetchingText}>Henter</span>
+                    <span className={styles.fetchingDots}>
+                      <span className={styles.dot}>.</span>
+                      <span className={styles.dot}>.</span>
+                      <span className={styles.dot}>.</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className={styles.resultsInfoContent}>
+                    <p className={styles.resultsCount}>
+                      Viser {displayedCourses.length} emner
+                    </p>
+                    {searchQuery.trim() && (
+                      <button
+                        onClick={handleSearchClear}
+                        className={styles.clearSearchButton}
+                        aria-label="Clear search"
+                        type="button"
+                      >
+                        Tøm søk
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               <div className={styles.cardsGrid}>
@@ -798,18 +940,16 @@ export default function Home() {
                   />
                 ))}
               </div>
-              {hasMoreCourses && (
-                <div className={styles.loadMoreContainer}>
-                  <button 
-                    onClick={handleLoadMore} 
-                    className={styles.loadMoreButtonInline} 
-                    disabled={loadingCourses.size > 0}
-                    aria-label="Last flere emner"
-                  >
-                    {loadingCourses.size > 0 ? 'Laster...' : 'Last inn flere'}
-                  </button>
-                </div>
-              )}
+              <div className={styles.loadMoreContainer}>
+                <button 
+                  onClick={handleLoadMore} 
+                  className={`${styles.loadMoreButtonInline} ${!hasMoreCourses ? styles.loadMoreButtonDimmed : ''}`}
+                  disabled={loadingCourses.size > 0 || !hasMoreCourses}
+                  aria-label="Last flere emner"
+                >
+                  {loadingCourses.size > 0 ? 'Laster...' : !hasMoreCourses ? 'Alle emner lastet' : 'Last inn flere'}
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -817,3 +957,4 @@ export default function Home() {
     </Layout>
   );
 }
+

@@ -36,7 +36,15 @@ export default function Footer() {
               .
             </p>
             <p className={styles.footerSubtext}>
-              Dataen er offentlig tilgjengelig og oppdateres regelmessig.
+              Dataen er offentlig tilgjengelig og oppdateres regelmessig.{' '}
+              <a 
+                href="https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Se dataene direkte hos NSD
+              </a>
+              .
             </p>
           </div>
         </div>

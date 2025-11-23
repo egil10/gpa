@@ -21,7 +21,7 @@ export default function CourseNameAutocomplete({
   placeholder = 'Søk etter emnenavn...',
   disabled = false,
 }: CourseNameAutocompleteProps) {
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState(value || '');
   const [suggestions, setSuggestions] = useState<CourseInfo[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -30,12 +30,12 @@ export default function CourseNameAutocomplete({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
 
-  // Update query when value prop changes
+  // Update query when value prop changes from parent
   useEffect(() => {
     if (value !== query) {
-      setQuery(value);
+      setQuery(value || '');
     }
-  }, [value]);
+  }, [value]); // Only depend on value, not query to avoid loops
 
   // Preload institution courses when institution is selected
   useEffect(() => {
@@ -136,12 +136,14 @@ export default function CourseNameAutocomplete({
   };
 
   const handleFocus = async () => {
+    // Always perform search on focus to show suggestions
     if (query.trim().length === 0) {
       const popular = await getPopularCoursesList();
       setSuggestions(popular);
       setShowSuggestions(popular.length > 0);
-    } else if (suggestions.length > 0) {
-      setShowSuggestions(true);
+    } else {
+      // Re-run search for existing query to refresh suggestions
+      await performSearch(query);
     }
   };
 
