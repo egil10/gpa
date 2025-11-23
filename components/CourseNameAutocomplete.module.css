@@ -147,6 +147,20 @@
   color: var(--color-text-light);
 }
 
+/* Highlight duplicate names by making codes more prominent */
+.suggestionItem.duplicate .suggestionCode {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.duplicateBadge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-left: var(--space-xs);
+}
+
 .suggestionInstitution {
   font-size: var(--text-xs);
   color: var(--color-text-light);

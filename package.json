@@ -13,8 +13,11 @@
     "test-fetch": "tsx scripts/test-fetch.ts",
     "test-hierarchy": "tsx scripts/test-hierarchy-discovery.ts",
     "discover-nhh": "tsx scripts/discover-nhh-bachelor.ts",
+    "discover-nhh-all": "tsx scripts/discover-nhh-all-courses.ts",
     "discover-uio": "tsx scripts/discover-uio-courses.ts",
-    "discover-uib": "tsx scripts/discover-uib-courses.ts"
+    "discover-uib": "tsx scripts/discover-uib-courses.ts",
+    "discover-ntnu": "tsx scripts/discover-ntnu-courses.ts",
+    "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {
     "lucide-react": "^0.300.0",

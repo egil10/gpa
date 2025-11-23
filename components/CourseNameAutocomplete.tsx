@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CourseInfo, searchCourses, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
-import { searchNHHBachelorCourses, nhhCourseToCourseInfo } from '@/lib/nhh-bachelor-courses';
+import { searchNHHCourses, nhhCourseToCourseInfo } from '@/lib/nhh-courses';
 import styles from './CourseNameAutocomplete.module.css';
 
 interface CourseNameAutocompleteProps {
@@ -37,14 +37,14 @@ export default function CourseNameAutocomplete({
     }
   }, [value]);
 
-  // Load NHH Bachelor courses state
+  // Load NHH courses state
   const [nhhCourses, setNhhCourses] = useState<CourseInfo[]>([]);
   const [nhhCoursesLoaded, setNhhCoursesLoaded] = useState(false);
 
-  // Load NHH Bachelor courses when NHH is selected
+  // Load NHH courses when NHH is selected
   useEffect(() => {
     if (institution === 'NHH' && !nhhCoursesLoaded) {
-      searchNHHBachelorCourses('').then(courses => {
+      searchNHHCourses('').then(courses => {
         const courseInfos = courses.map(nhhCourseToCourseInfo);
         setNhhCourses(courseInfos);
         setNhhCoursesLoaded(true);
@@ -77,9 +77,9 @@ export default function CourseNameAutocomplete({
       } else {
         let results: CourseInfo[] = [];
         
-        // If NHH is selected, search NHH Bachelor courses first
+        // If NHH is selected, search NHH courses first
         if (institution === 'NHH' && nhhCoursesLoaded) {
-          const nhhResults = await searchNHHBachelorCourses(searchQuery);
+          const nhhResults = await searchNHHCourses(searchQuery);
           results = nhhResults.map(nhhCourseToCourseInfo);
         }
         
@@ -197,25 +197,37 @@ export default function CourseNameAutocomplete({
               <span>Populære emner{institution ? ` (${UNIVERSITIES[institution]?.shortName})` : ''}</span>
             </div>
           )}
-          {suggestions.map((course, index) => (
-            <button
-              key={`${course.code}-${course.institution}`}
-              type="button"
-              className={`${styles.suggestionItem} ${
-                index === selectedIndex ? styles.selected : ''
-              }`}
-              onClick={() => handleSelectCourse(course)}
-              onMouseEnter={() => setSelectedIndex(index)}
-            >
-              <div className={styles.suggestionContent}>
-                <div className={styles.suggestionName}>{course.name}</div>
-                <div className={styles.suggestionCode}>{course.code}</div>
-              </div>
-              <div className={styles.suggestionInstitution}>
-                {UNIVERSITIES[course.institution]?.shortName || course.institution}
-              </div>
-            </button>
-          ))}
+          {suggestions.map((course, index) => {
+            // Check if this course name appears multiple times (duplicate)
+            const isDuplicate = suggestions.filter(c => 
+              c.name.toLowerCase() === course.name.toLowerCase()
+            ).length > 1;
+            
+            return (
+              <button
+                key={`${course.code}-${course.institution}`}
+                type="button"
+                className={`${styles.suggestionItem} ${
+                  index === selectedIndex ? styles.selected : ''
+                } ${isDuplicate ? styles.duplicate : ''}`}
+                onClick={() => handleSelectCourse(course)}
+                onMouseEnter={() => setSelectedIndex(index)}
+              >
+                <div className={styles.suggestionContent}>
+                  <div className={styles.suggestionName}>
+                    {course.name}
+                    {isDuplicate && (
+                      <span className={styles.duplicateBadge}> {course.code}</span>
+                    )}
+                  </div>
+                  <div className={styles.suggestionCode}>{course.code}</div>
+                </div>
+                <div className={styles.suggestionInstitution}>
+                  {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

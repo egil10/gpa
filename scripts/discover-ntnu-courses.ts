@@ -1,10 +1,6 @@
 /**
- * Discover and fetch all UiO courses in batches
- * This script will:
- * 1. Fetch courses year by year (2020-2024)
- * 2. Process in batches to avoid overwhelming the API
- * 3. Save progress incrementally
- * 4. Generate a JSON file with all courses
+ * Discover and fetch all NTNU courses in batches
+ * Uses the same structure as UiO/UiB discovery script
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
@@ -22,18 +18,19 @@ interface CourseExport {
   studentCountByYear: Record<number, number>; // Year -> student count
 }
 
-async function discoverUiOCourses() {
+async function discoverNTNUCourses() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║     UiO Courses Discovery & Export (Batched)               ║
+║     NTNU Courses Discovery & Export (Batched)               ║
 ╚════════════════════════════════════════════════════════════╝
   `);
 
-  const institutionCode = '1110';
-  const institutionName = 'UiO';
+  const institutionCode = '1150';
+  const institutionName = 'NTNU';
   
   // Fetch years from most recent to oldest
-  const years = [2024, 2023, 2022, 2021, 2020];
+  // Note: 2025 might not have much data yet, but we'll try
+  const years = [2025, 2024, 2023, 2022, 2021, 2020];
   const allCoursesMap = new Map<string, CourseExport>();
   
   console.log(`📡 Fetching all courses from ${institutionName}...`);
@@ -106,14 +103,40 @@ async function discoverUiOCourses() {
   console.log(`\n✅ Discovery complete!`);
   console.log(`   Total unique courses: ${allCourses.length}\n`);
   
+  // Analyze duplicate names issue
+  console.log(`🔍 Analyzing course name duplicates...\n`);
+  const nameMap = new Map<string, string[]>();
+  allCourses.forEach(course => {
+    if (course.courseName) {
+      if (!nameMap.has(course.courseName)) {
+        nameMap.set(course.courseName, []);
+      }
+      nameMap.get(course.courseName)!.push(course.courseCode);
+    }
+  });
+  
+  const duplicates = Array.from(nameMap.entries()).filter(([_, codes]) => codes.length > 1);
+  if (duplicates.length > 0) {
+    console.log(`   ⚠️  Found ${duplicates.length} course names with multiple codes:`);
+    duplicates.slice(0, 10).forEach(([name, codes]) => {
+      console.log(`      "${name}": ${codes.join(', ')} (${codes.length} variants)`);
+    });
+    if (duplicates.length > 10) {
+      console.log(`      ... and ${duplicates.length - 10} more duplicates`);
+    }
+    console.log(`\n   💡 Recommendation: Show course codes in autocomplete to distinguish\n`);
+  } else {
+    console.log(`   ✅ No duplicate names found!\n`);
+  }
+  
   // Create data directory if it doesn't exist
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   
-  // Save to JSON file
-  const outputFile = path.join(dataDir, 'uio-all-courses.json');
+  // Save to JSON file (optimized format)
+  const outputFile = path.join(dataDir, 'ntnu-all-courses.json');
   const exportData = createOptimizedExport(institutionCode, allCourses);
   
   // Write compact JSON (no whitespace for smaller size)
@@ -126,14 +149,18 @@ async function discoverUiOCourses() {
   console.log(`📊 Summary:`);
   console.log(`   Total courses: ${allCourses.length}`);
   console.log(`   Courses with 2024 data: ${allCourses.filter(c => c.years.includes(2024)).length}`);
+  if (allCourses.some(c => c.years.includes(2025))) {
+    console.log(`   Courses with 2025 data: ${allCourses.filter(c => c.years.includes(2025)).length}`);
+  }
   console.log(`   Total students (2024): ${allCourses
     .filter(c => c.years.includes(2024))
     .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
     .toLocaleString()}`);
   
   // Show courses by year coverage
-  const coursesWithAllYears = allCourses.filter(c => c.years.length === years.length).length;
-  console.log(`   Courses with all ${years.length} years: ${coursesWithAllYears}`);
+  const maxYears = Math.max(...allCourses.map(c => c.years.length));
+  const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
+  console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
   
   // Show sample courses
   console.log(`\n📚 Sample courses:`);
@@ -167,5 +194,5 @@ async function discoverUiOCourses() {
 }
 
 // Run discovery
-discoverUiOCourses().catch(console.error);
+discoverNTNUCourses().catch(console.error);
 

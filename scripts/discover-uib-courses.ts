@@ -4,6 +4,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
+import { createOptimizedExport } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -108,18 +109,12 @@ async function discoverUiBCourses() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   
-  // Save to JSON file
+  // Save to JSON file (optimized format)
   const outputFile = path.join(dataDir, 'uib-all-courses.json');
-  const exportData = {
-    institution: institutionName,
-    institutionCode,
-    lastUpdated: new Date().toISOString(),
-    totalCourses: allCourses.length,
-    yearsCovered: years,
-    courses: allCourses,
-  };
+  const exportData = createOptimizedExport(institutionCode, allCourses);
   
-  fs.writeFileSync(outputFile, JSON.stringify(exportData, null, 2));
+  // Write compact JSON (no whitespace for smaller size)
+  fs.writeFileSync(outputFile, JSON.stringify(exportData));
   
   console.log(`✅ Exported ${allCourses.length} courses to:`);
   console.log(`   ${outputFile}\n`);

@@ -7,6 +7,7 @@
  */
 
 import { getAllCoursesForInstitution, discoverCoursesAtPath, DiscoveredCourse } from '../lib/hierarchy-discovery';
+import { createOptimizedExport } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -109,19 +110,12 @@ async function discoverNHHBachelorCourses() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   
-  // Save to JSON file
+  // Save to JSON file (optimized format)
   const outputFile = path.join(dataDir, 'nhh-bachelor-courses.json');
-  fs.writeFileSync(
-    outputFile,
-    JSON.stringify({
-      institution: institutionName,
-      institutionCode,
-      program: 'Bachelor',
-      lastUpdated: new Date().toISOString(),
-      totalCourses: exportData.length,
-      courses: exportData,
-    }, null, 2)
-  );
+  const optimizedExport = createOptimizedExport(institutionCode, exportData);
+  
+  // Write compact JSON (no whitespace for smaller size)
+  fs.writeFileSync(outputFile, JSON.stringify(optimizedExport));
   
   console.log(`\n✅ Exported ${exportData.length} Bachelor courses to:`);
   console.log(`   ${outputFile}`);
