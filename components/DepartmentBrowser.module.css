@@ -1,0 +1,229 @@
+.container {
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.header h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+}
+
+.selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.selectGroup {
+  flex: 1;
+  min-width: 200px;
+}
+
+.selectGroup label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+  font-size: 0.9rem;
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  color: var(--text-primary, #1a1a1a);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:hover {
+  border-color: var(--primary-color, #0066cc);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color, #0066cc);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.fetchAllButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  color: var(--text-primary, #1a1a1a);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.fetchAllButton:hover {
+  border-color: var(--primary-color, #0066cc);
+  background: var(--bg-secondary, #f8f9fa);
+}
+
+.fetchAllButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fetchAllButton.active {
+  background: var(--primary-color, #0066cc);
+  color: white;
+  border-color: var(--primary-color, #0066cc);
+}
+
+.fetchAllButton.fullWidth {
+  width: 100%;
+}
+
+.fetchAllButton.fullWidth + .info {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+  color: var(--text-secondary, #666);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorBox {
+  padding: 1rem;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+}
+
+.error {
+  color: #c33;
+  margin: 0;
+}
+
+.info {
+  color: var(--text-secondary, #666);
+  margin: 0;
+}
+
+.coursesList {
+  margin-top: 2rem;
+}
+
+.coursesList h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: var(--text-secondary, #666);
+  font-weight: 500;
+}
+
+.coursesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.courseCard {
+  background: white;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.courseCard:hover {
+  border-color: var(--primary-color, #0066cc);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+  transform: translateY(-2px);
+}
+
+.courseCode {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary, #1a1a1a);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.courseMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .selector {
+    flex-direction: column;
+  }
+
+  .selectGroup {
+    min-width: 100%;
+  }
+
+  .coursesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .courseCard {
+    padding: 0.75rem;
+  }
+}
+

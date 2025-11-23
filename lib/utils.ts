@@ -1,5 +1,44 @@
 import { GradeData, GradeDistribution, CourseStats } from '@/types';
 
+// Standard grade order: A-F always, then Bestått/Ikke bestått if present
+export const STANDARD_GRADE_ORDER = ['A', 'B', 'C', 'D', 'E', 'F'];
+export const PASS_FAIL_GRADES = ['Bestått', 'Ikke bestått'];
+
+/**
+ * Ensures A-F grades are always present (with 0 values if missing)
+ * Pass/Fail grades are only included if they exist in the data
+ */
+export function normalizeGradeDistribution(
+  gradeMap: Record<string, { count: number; percentage: number }>,
+  totalStudents: number
+): GradeDistribution[] {
+  const distributions: GradeDistribution[] = [];
+  
+  // Always include A-F in order, with 0 if missing
+  for (const grade of STANDARD_GRADE_ORDER) {
+    const data = gradeMap[grade];
+    distributions.push({
+      grade,
+      count: data?.count || 0,
+      percentage: data?.percentage || 0,
+    });
+  }
+  
+  // Conditionally include Pass/Fail grades if they exist
+  for (const grade of PASS_FAIL_GRADES) {
+    const data = gradeMap[grade];
+    if (data && data.count > 0) {
+      distributions.push({
+        grade,
+        count: data.count,
+        percentage: data.percentage,
+      });
+    }
+  }
+  
+  return distributions;
+}
+
 export function processGradeData(data: GradeData[]): CourseStats | null {
   if (!data || data.length === 0) {
     return null;
@@ -13,20 +52,28 @@ export function processGradeData(data: GradeData[]): CourseStats | null {
     return null;
   }
 
-  const distributions: GradeDistribution[] = data.map((item) => {
+  // Build grade map
+  const gradeMap: Record<string, { count: number; percentage: number }> = {};
+  
+  data.forEach((item) => {
     const count = parseInt(item['Antall kandidater totalt'] || '0', 10);
-    const percentage = Math.round((count / totalStudents) * 100);
-    
     let grade = item.Karakter;
     if (grade === 'G') grade = 'Bestått';
     if (grade === 'H') grade = 'Ikke bestått';
     
-    return {
-      grade,
-      count,
-      percentage,
-    };
+    if (!gradeMap[grade]) {
+      gradeMap[grade] = { count: 0, percentage: 0 };
+    }
+    gradeMap[grade].count += count;
   });
+
+  // Calculate percentages
+  Object.keys(gradeMap).forEach((grade) => {
+    gradeMap[grade].percentage = Math.round((gradeMap[grade].count / totalStudents) * 100);
+  });
+
+  // Normalize to always include A-F
+  const distributions = normalizeGradeDistribution(gradeMap, totalStudents);
 
   // Calculate average grade (A=5, B=4, C=3, D=2, E=1, F=0)
   const gradeValues: Record<string, number> = {
@@ -94,7 +141,7 @@ export function combineAllYears(data: GradeData[]): CourseStats | null {
   }
 
   // Group by grade across all years
-  const gradeMap: Record<string, number> = {};
+  const gradeMap: Record<string, { count: number; percentage: number }> = {};
   let totalStudents = 0;
 
   data.forEach((item) => {
@@ -103,7 +150,10 @@ export function combineAllYears(data: GradeData[]): CourseStats | null {
     if (grade === 'H') grade = 'Ikke bestått';
     
     const count = parseInt(item['Antall kandidater totalt'] || '0', 10);
-    gradeMap[grade] = (gradeMap[grade] || 0) + count;
+    if (!gradeMap[grade]) {
+      gradeMap[grade] = { count: 0, percentage: 0 };
+    }
+    gradeMap[grade].count += count;
     totalStudents += count;
   });
 
@@ -111,11 +161,13 @@ export function combineAllYears(data: GradeData[]): CourseStats | null {
     return null;
   }
 
-  const distributions: GradeDistribution[] = Object.entries(gradeMap).map(([grade, count]) => ({
-    grade,
-    count,
-    percentage: Math.round((count / totalStudents) * 100),
-  }));
+  // Calculate percentages
+  Object.keys(gradeMap).forEach((grade) => {
+    gradeMap[grade].percentage = Math.round((gradeMap[grade].count / totalStudents) * 100);
+  });
+
+  // Normalize to always include A-F
+  const distributions = normalizeGradeDistribution(gradeMap, totalStudents);
 
   // Calculate average grade
   const gradeValues: Record<string, number> = {

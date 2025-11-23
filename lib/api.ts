@@ -1,13 +1,10 @@
-import { GradeData, SearchPayload, University } from '@/types';
+import { GradeData, SearchPayload, University, DepartmentFilter, StudyProgramFilter } from '@/types';
 import { getCachedData } from './cache';
 
 // NSD API URL - CORS issues in production require a proxy
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 
-// Multiple CORS proxy options as fallback
-// ⚠️ WARNING: Public CORS proxies are unreliable and often fail.
-// For production use, deploy api/proxy.js to Vercel (free) for reliable CORS handling.
-// See docs/CORS_SOLUTION.md for instructions.
+// Multiple CORS proxy options as fallback (only used if Vercel proxy unavailable)
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -17,19 +14,13 @@ const CORS_PROXIES = [
 const isDevelopment = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-// Try direct API first, then fallback to proxies
-const getAPIUrl = () => {
-  if (isDevelopment) {
-    return DIRECT_API;
-  }
-  // Use first proxy (allorigins.win is most reliable)
-  return `${CORS_PROXIES[0]}${encodeURIComponent(DIRECT_API)}`;
+// Get the Vercel proxy URL (relative path - works when deployed on Vercel)
+const getVercelProxyUrl = () => {
+  if (typeof window === 'undefined') return null;
+  // Use relative path - Vercel will route /api/proxy to the serverless function
+  // Works with basePath in next.config.js (e.g., /gpa/api/proxy)
+  return '/api/proxy';
 };
-
-const API_URL = getAPIUrl();
-
-// TODO: Replace with your own proxy server (see docs/CORS_FIX.md)
-// Recommended: Deploy api/proxy.js to Vercel
 
 export const UNIVERSITIES: Record<string, University> = {
   UiO: { code: '1110', name: 'Universitetet i Oslo', shortName: 'UiO' },
@@ -37,14 +28,84 @@ export const UNIVERSITIES: Record<string, University> = {
   OsloMet: { code: '1175', name: 'OsloMet – storbyuniversitetet', shortName: 'OsloMet' },
   UiB: { code: '1120', name: 'Universitetet i Bergen', shortName: 'UiB' },
   BI: { code: '8241', name: 'Handelshøyskolen BI', shortName: 'BI' },
+  NHH: { code: '1240', name: 'Norges handelshøyskole', shortName: 'NHH' },
 };
 
 export function createSearchPayload(
   institutionCode: string,
-  courseCode: string,
-  year?: number
+  courseCode?: string,
+  year?: number,
+  departmentFilter?: DepartmentFilter,
+  studyProgramFilter?: StudyProgramFilter
 ): SearchPayload {
-  // Match exact structure from inspiration folder
+  const filters: SearchPayload['filter'] = [
+    {
+      variabel: 'Institusjonskode',
+      selection: { filter: 'item', values: [institutionCode] },
+    },
+  ];
+
+  // Add course code filter if provided
+  if (courseCode) {
+    filters.push({
+      variabel: 'Emnekode',
+      selection: {
+        filter: 'item',
+        values: [courseCode], // Course code (formatted with -1 suffix)
+      },
+    });
+  }
+
+  // Add study program filters (for NHH-style hierarchy: Studium → Studieprogram)
+  if (studyProgramFilter?.programCode) {
+    filters.push({
+      variabel: 'Progkode', // Studieprogram code (e.g., "BACHELOR15")
+      selection: {
+        filter: 'item',
+        values: [studyProgramFilter.programCode],
+      },
+    });
+  }
+  if (studyProgramFilter?.studiumCode) {
+    filters.push({
+      variabel: 'Studkode', // Studium code (e.g., "ØA" for "Økonomisk-administrativ utdanning")
+      selection: {
+        filter: 'item',
+        values: [studyProgramFilter.studiumCode],
+      },
+    });
+  }
+
+  // Add department/faculty filters (for UiO/NTNU-style hierarchy: Fakultet → Institutt)
+  if (departmentFilter?.departmentCode) {
+    filters.push({
+      variabel: 'Ufakkode', // Department code (underfakultet/institutt)
+      selection: {
+        filter: 'item',
+        values: [departmentFilter.departmentCode],
+      },
+    });
+  } else if (departmentFilter?.facultyCode) {
+    filters.push({
+      variabel: 'Fakkode', // Faculty code
+      selection: {
+        filter: 'item',
+        values: [departmentFilter.facultyCode],
+      },
+    });
+  }
+
+  // Add year filter if provided
+  if (year) {
+    filters.push({
+      variabel: 'Årstall',
+      selection: {
+        filter: 'item',
+        values: [String(year)], // Year as string
+      },
+    });
+  }
+
   return {
     tabell_id: 308,
     api_versjon: 1,
@@ -52,32 +113,15 @@ export function createSearchPayload(
     begrensning: '1000',
     kodetekst: 'N',
     desimal_separator: '.',
-    groupBy: ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall'],
-    sortBy: ['Karakter'],
-    filter: [
-      {
-        variabel: 'Institusjonskode',
-        selection: { filter: 'item', values: [institutionCode] },
-      },
-      {
-        variabel: 'Emnekode',
-        selection: {
-          filter: 'item',
-          values: [courseCode], // Course code (formatted with -1 suffix)
-        },
-      },
-      ...(year ? [{
-        variabel: 'Årstall',
-        selection: {
-          filter: 'item',
-          values: [String(year)], // Year as string
-        },
-      }] : []),
-    ],
+    groupBy: courseCode 
+      ? ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall']
+      : ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall'],
+    sortBy: ['Emnekode', 'Karakter'],
+    filter: filters,
   };
 }
 
-async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<GradeData[]> {
+export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, useVercelProxy = true): Promise<GradeData[]> {
   if (isDevelopment) {
     // Direct API call in development
     try {
@@ -100,7 +144,38 @@ async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<G
     }
   }
 
-  // In production, try proxies
+  // In production, try Vercel proxy first (if available)
+  if (useVercelProxy) {
+    const vercelProxyUrl = getVercelProxyUrl();
+    if (vercelProxyUrl) {
+      try {
+        const response = await fetch(vercelProxyUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 204) {
+          throw new Error('No data found');
+        }
+
+        if (!response.ok) {
+          throw new Error(`Vercel proxy returned ${response.status}`);
+        }
+
+        const data: GradeData[] = await response.json();
+        return data;
+      } catch (error) {
+        // If Vercel proxy fails, fall back to public proxies
+        console.warn('Vercel proxy failed, falling back to public proxies:', error);
+        return fetchWithProxy(payload, 0, false);
+      }
+    }
+  }
+
+  // Fall back to public CORS proxies
   const proxy = CORS_PROXIES[proxyIndex];
   let url: string;
   let headers: HeadersInit = {
@@ -137,14 +212,12 @@ async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<G
     // Try next proxy if available
     if (proxyIndex < CORS_PROXIES.length - 1) {
       console.warn(`Proxy ${proxyIndex} failed, trying next...`);
-      return fetchWithProxy(payload, proxyIndex + 1);
+      return fetchWithProxy(payload, proxyIndex + 1, false);
     }
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Kunne ikke hente data fra NSD API. ` +
-      `Dette skyldes CORS-restriksjoner (alle offentlige proxy-tjenester feiler). ` +
-      `For å løse dette, deploy api/proxy.js til Vercel (gratis). ` +
-      `Se docs/CORS_SOLUTION.md for instruksjoner. ` +
+      `Dette skyldes CORS-restriksjoner. ` +
       `Original feil: ${errorMessage}`
     );
   }
@@ -153,7 +226,8 @@ async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<G
 export async function fetchGradeData(
   institutionCode: string,
   courseCode: string,
-  year?: number
+  year?: number,
+  departmentFilter?: DepartmentFilter
 ): Promise<GradeData[]> {
   // Try cache first (server-side only)
   if (typeof window === 'undefined') {
@@ -168,17 +242,103 @@ export async function fetchGradeData(
   }
 
   // Fall back to API if cache miss or client-side
-  const payload = createSearchPayload(institutionCode, courseCode, year);
+  const payload = createSearchPayload(institutionCode, courseCode, year, departmentFilter);
   return fetchWithProxy(payload);
 }
 
 // Fetch data for all available years
 export async function fetchAllYearsData(
   institutionCode: string,
-  courseCode: string
+  courseCode: string,
+  departmentFilter?: DepartmentFilter
 ): Promise<GradeData[]> {
   // Fetch without year filter to get all years
-  const payload = createSearchPayload(institutionCode, courseCode);
+  const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
+  return fetchWithProxy(payload);
+}
+
+// Fetch all courses from a department (for browsing)
+export async function fetchDepartmentCourses(
+  institutionCode: string,
+  departmentCode: string,
+  year?: number
+): Promise<GradeData[]> {
+  const payload = createSearchPayload(
+    institutionCode,
+    undefined, // No specific course
+    year,
+    { departmentCode }
+  );
+  return fetchWithProxy(payload);
+}
+
+// Fetch all courses from a faculty (for browsing)
+export async function fetchFacultyCourses(
+  institutionCode: string,
+  facultyCode: string,
+  year?: number
+): Promise<GradeData[]> {
+  const payload = createSearchPayload(
+    institutionCode,
+    undefined, // No specific course
+    year,
+    { facultyCode }
+  );
+  return fetchWithProxy(payload);
+}
+
+// Fetch ALL courses from an entire institution (no department/faculty filter)
+export async function fetchAllInstitutionCourses(
+  institutionCode: string,
+  year?: number
+): Promise<GradeData[]> {
+  // Create payload with higher limit for institution-wide queries
+  const filters: SearchPayload['filter'] = [
+    {
+      variabel: 'Institusjonskode',
+      selection: { filter: 'item', values: [institutionCode] },
+    },
+  ];
+
+  if (year) {
+    filters.push({
+      variabel: 'Årstall',
+      selection: {
+        filter: 'item',
+        values: [String(year)],
+      },
+    });
+  }
+
+  const payload: SearchPayload = {
+    tabell_id: 308,
+    api_versjon: 1,
+    statuslinje: 'N',
+    begrensning: '5000', // Higher limit for institution-wide queries
+    kodetekst: 'N',
+    desimal_separator: '.',
+    groupBy: ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall'],
+    sortBy: ['Emnekode', 'Karakter'],
+    filter: filters,
+  };
+
+  return fetchWithProxy(payload);
+}
+
+// Fetch courses by study program (for NHH-style hierarchy)
+export async function fetchStudyProgramCourses(
+  institutionCode: string,
+  programCode: string,
+  studiumCode?: string,
+  year?: number
+): Promise<GradeData[]> {
+  const payload = createSearchPayload(
+    institutionCode,
+    undefined, // No specific course
+    year,
+    undefined, // No department filter
+    { programCode, studiumCode }
+  );
   return fetchWithProxy(payload);
 }
 

@@ -47,4 +47,14 @@ export interface SearchPayload {
   }>;
 }
 
+export interface DepartmentFilter {
+  facultyCode?: string;
+  departmentCode?: string;
+}
+
+export interface StudyProgramFilter {
+  studiumCode?: string; // Studium code (e.g., "ØA" for NHH)
+  programCode?: string; // Studieprogram code (e.g., "BACHELOR15")
+}
+
 

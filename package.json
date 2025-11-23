@@ -9,7 +9,8 @@
     "export": "next build",
     "type-check": "tsc --noEmit",
     "fetch-cache": "tsx scripts/fetch-cache.ts",
-    "test-fetch": "tsx scripts/test-fetch.ts"
+    "test-fetch": "tsx scripts/test-fetch.ts",
+    "test-hierarchy": "tsx scripts/test-hierarchy-discovery.ts"
   },
   "dependencies": {
     "lucide-react": "^0.300.0",

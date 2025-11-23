@@ -2,7 +2,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { BookOpen, X } from 'lucide-react';
 import { Course, GradeSystem, calculateGPA, UNIVERSITY_GRADES, HIGHSCHOOL_GRADES, GRADE_VALUES } from '@/types/gpa';
 import CourseNameAutocomplete from './CourseNameAutocomplete';
+import VGSCourseAutocomplete from './VGSCourseAutocomplete';
 import { CourseInfo } from '@/lib/courses';
+import { VGSCourse } from '@/lib/vgs-courses';
 import { UNIVERSITIES } from '@/lib/api';
 import styles from './GPACalculator.module.css';
 
@@ -99,6 +101,22 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
       );
     }
   }, [system]);
+
+  const handleVGSCourseSelect = useCallback((courseId: string, vgsCourse: VGSCourse | null) => {
+    if (vgsCourse) {
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.id === courseId
+            ? {
+                ...c,
+                name: vgsCourse.name,
+                credits: c.credits || 1, // Default 1 credit for VGS courses
+              }
+            : c
+        )
+      );
+    }
+  }, []);
 
   const adjustGrade = useCallback((id: string, direction: 'up' | 'down') => {
     setCourses((prev) =>
@@ -360,14 +378,24 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 <div className={styles.courseFields}>
                   <div className={styles.field}>
                     <label>Emnenavn</label>
-                    <CourseNameAutocomplete
-                      value={course.name}
-                      onChange={(name) => updateCourse(course.id, 'name', name)}
-                      onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
-                      institution={institution || undefined}
-                      placeholder="Søk etter emnenavn eller skriv manuelt..."
-                      disabled={false}
-                    />
+                    {system === 'university' ? (
+                      <CourseNameAutocomplete
+                        value={course.name}
+                        onChange={(name) => updateCourse(course.id, 'name', name)}
+                        onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
+                        institution={institution || undefined}
+                        placeholder="Søk etter emnenavn eller skriv manuelt..."
+                        disabled={false}
+                      />
+                    ) : (
+                      <VGSCourseAutocomplete
+                        value={course.name}
+                        onChange={(name) => updateCourse(course.id, 'name', name)}
+                        onCourseSelect={(vgsCourse) => handleVGSCourseSelect(course.id, vgsCourse)}
+                        placeholder="Søk etter fag eller skriv manuelt..."
+                        disabled={false}
+                      />
+                    )}
                   </div>
 
                   <div className={styles.field}>

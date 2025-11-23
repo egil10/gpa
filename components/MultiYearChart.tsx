@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CourseStats } from '@/types';
 import GradeChart from './GradeChart';
+import { normalizeGradeDistribution } from '@/lib/utils';
 import styles from './MultiYearChart.module.css';
 
 interface MultiYearChartProps {
@@ -32,11 +33,13 @@ export default function MultiYearChart({ allYearsData, courseCode, institution }
 
     if (totalStudents === 0) return null;
 
-    const distributions = Object.entries(allDistributions).map(([grade, data]) => ({
-      grade,
-      count: data.count,
-      percentage: Math.round((data.count / totalStudents) * 100),
-    }));
+    // Recalculate percentages
+    Object.keys(allDistributions).forEach((grade) => {
+      allDistributions[grade].percentage = Math.round((allDistributions[grade].count / totalStudents) * 100);
+    });
+
+    // Normalize to always include A-F
+    const distributions = normalizeGradeDistribution(allDistributions, totalStudents);
 
     return {
       courseCode,

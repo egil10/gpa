@@ -6,6 +6,7 @@ import GradeChart from '@/components/GradeChart';
 import MultiYearChart from '@/components/MultiYearChart';
 import CourseAutocomplete from '@/components/CourseAutocomplete';
 import CourseExplorer from '@/components/CourseExplorer';
+import DepartmentBrowser from '@/components/DepartmentBrowser';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processMultiYearData, combineAllYears } from '@/lib/utils';
 import { CourseStats } from '@/types';
@@ -22,6 +23,7 @@ export default function SearchPage() {
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [institutionLocked, setInstitutionLocked] = useState(false);
   const [showExplorer, setShowExplorer] = useState(false);
+  const [showDepartmentBrowser, setShowDepartmentBrowser] = useState(false);
 
 
   const handleExplorerCourseSelect = (course: CourseInfo) => {
@@ -166,7 +168,10 @@ export default function SearchPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowExplorer(!showExplorer)}
+                onClick={() => {
+                  setShowExplorer(!showExplorer);
+                  setShowDepartmentBrowser(false);
+                }}
                 className={`${styles.quickButton} ${styles.explorerToggle} ${showExplorer ? styles.active : ''}`}
               >
                 {showExplorer ? (
@@ -181,6 +186,26 @@ export default function SearchPage() {
                   </>
                 )}
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDepartmentBrowser(!showDepartmentBrowser);
+                  setShowExplorer(false);
+                }}
+                className={`${styles.quickButton} ${styles.explorerToggle} ${showDepartmentBrowser ? styles.active : ''}`}
+              >
+                {showDepartmentBrowser ? (
+                  <>
+                    <X size={16} />
+                    <span>Lukk</span>
+                  </>
+                ) : (
+                  <>
+                    <Search size={16} />
+                    <span>Utforsk etter fakultet/institutt</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -188,6 +213,21 @@ export default function SearchPage() {
             <CourseExplorer
               onCourseSelect={handleExplorerCourseSelect}
               selectedInstitution={institutionLocked ? institution : undefined}
+            />
+          )}
+
+          {showDepartmentBrowser && (
+            <DepartmentBrowser
+              institutionCode={UNIVERSITIES[institution]?.code || '1110'}
+              onCourseSelect={(courseCode) => {
+                setCourseCode(courseCode);
+                setSelectedCourse(null);
+                setInstitutionLocked(false);
+                // Auto-trigger search after a brief delay
+                setTimeout(() => {
+                  handleSearch();
+                }, 100);
+              }}
             />
           )}
 
