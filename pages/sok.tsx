@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Search, X } from 'lucide-react';
+import { Search, X, ArrowUp, RefreshCw } from 'lucide-react';
 import Layout from '@/components/Layout';
 import GradeChart from '@/components/GradeChart';
 import MultiYearChart from '@/components/MultiYearChart';
@@ -29,14 +29,19 @@ export default function SearchPage() {
 
 
   // Load all courses and generate random courses on mount
-  useEffect(() => {
-    loadAllCourses().then(courses => {
-      // Generate 9 random courses
+  const loadRandomCourses = async () => {
+    try {
+      const courses = await loadAllCourses();
+      // Generate 9 random courses (all courses from loadAllCourses already have data)
       const shuffled = [...courses].sort(() => Math.random() - 0.5);
       setRandomCourses(shuffled.slice(0, 9));
-    }).catch(err => {
+    } catch (err) {
       console.error('Failed to load courses:', err);
-    });
+    }
+  };
+
+  useEffect(() => {
+    loadRandomCourses();
   }, []);
 
   const handleExplorerCourseSelect = (course: CourseInfo) => {
@@ -172,15 +177,95 @@ export default function SearchPage() {
     <Layout title="Søk" description="Søk etter karakterstatistikk for et emne">
       <div className={styles.searchPage}>
         <div className="container">
-          <div className={styles.header}>
-            <h1>Søk etter emne</h1>
-            <p className="text-light">
-              Finn karakterfordelinger for et spesifikt emne ved et universitet
-            </p>
+          {/* Main Search Bar - Centered and Prominent */}
+          <div className={styles.centeredSearchBar}>
+            <form onSubmit={handleSearch} className={styles.searchForm}>
+              <div className={styles.inputWrapper}>
+                <div className={styles.inputContainer}>
+                  <div className={styles.searchIcon}>
+                    <Search size={18} />
+                  </div>
+                  <div className={styles.inputContent}>
+                    <div className={styles.autocompleteWrapper}>
+                      <CourseAutocomplete
+                        value={courseCode}
+                        onChange={(code) => {
+                          setCourseCode(code);
+                          setError(null);
+                          
+                          // Check if code has known institution
+                          if (code.trim()) {
+                            const courseInstitution = getInstitutionForCourse(code);
+                            if (courseInstitution) {
+                              setInstitution(courseInstitution);
+                              setInstitutionLocked(true);
+                            } else if (!selectedCourse) {
+                              setInstitutionLocked(false);
+                            }
+                          } else {
+                            setInstitutionLocked(false);
+                            setSelectedCourse(null);
+                          }
+                        }}
+                        onCourseSelect={(course) => {
+                          setSelectedCourse(course);
+                          if (course) {
+                            setInstitution(course.institution);
+                            setInstitutionLocked(true);
+                          } else if (!courseCode.trim()) {
+                            setInstitutionLocked(false);
+                          }
+                        }}
+                        institution={institutionLocked ? institution : undefined}
+                        placeholder="Søk etter emnekode eller navn..."
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.actions}>
+                    {courseCode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCourseCode('');
+                          setSelectedCourse(null);
+                          setInstitutionLocked(false);
+                          setError(null);
+                        }}
+                        className={styles.clearButton}
+                        aria-label="Clear"
+                      >
+                        <X size={18} />
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className={styles.submitButton}
+                      aria-label="Search"
+                      disabled={!courseCode.trim() || loading}
+                    >
+                      <ArrowUp size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
 
-          <div className={styles.quickActions}>
-            <h3>Rask søk</h3>
+          {/* Show Quick Search when no results */}
+          {Object.keys(allYearsStats).length === 0 && !loading && !error && (
+            <div className={styles.quickActions}>
+            <div className={styles.quickActionsHeader}>
+              <h3>Rask søk</h3>
+              <button
+                type="button"
+                onClick={loadRandomCourses}
+                className={styles.refreshButton}
+                title="Last inn nye tilfeldige emner"
+              >
+                <RefreshCw size={16} />
+              </button>
+            </div>
             <div className={styles.quickButtons}>
               {randomCourses.map((course) => (
                 <button
@@ -244,6 +329,14 @@ export default function SearchPage() {
               </button>
             </div>
           </div>
+          )}
+
+          {showExplorer && (
+            <CourseExplorer
+              onCourseSelect={handleExplorerCourseSelect}
+              selectedInstitution={institutionLocked ? institution : undefined}
+            />
+          )}
 
           {showExplorer && (
             <CourseExplorer
@@ -266,97 +359,6 @@ export default function SearchPage() {
               }}
             />
           )}
-
-          <div className={styles.centeredSearch}>
-            <div className={styles.searchCard}>
-              <CourseAutocomplete
-                value={courseCode}
-                onChange={(code) => {
-                  setCourseCode(code);
-                  setError(null);
-                  
-                  // Check if code has known institution
-                  if (code.trim()) {
-                    const courseInstitution = getInstitutionForCourse(code);
-                    if (courseInstitution) {
-                      setInstitution(courseInstitution);
-                      setInstitutionLocked(true);
-                    } else if (!selectedCourse) {
-                      // Only unlock if no course is selected
-                      setInstitutionLocked(false);
-                    }
-                  } else {
-                    setInstitutionLocked(false);
-                    setSelectedCourse(null);
-                  }
-                }}
-                onCourseSelect={(course) => {
-                  setSelectedCourse(course);
-                  if (course) {
-                    setInstitution(course.institution);
-                    setInstitutionLocked(true);
-                    // Auto-trigger search when course is selected
-                    setTimeout(() => {
-                      handleSearch();
-                    }, 100);
-                  } else if (!courseCode.trim()) {
-                    // Only unlock if course code is cleared
-                    setInstitutionLocked(false);
-                  }
-                }}
-                institution={institutionLocked ? institution : undefined}
-                placeholder="Søk etter emnekode eller navn..."
-                disabled={loading}
-              />
-              
-              {selectedCourse && (
-                <div className={styles.selectedCourseInfo}>
-                  <span className={styles.courseName}>{selectedCourse.name}</span>
-                  <span className={styles.courseInstitution}>
-                    {UNIVERSITIES[selectedCourse.institution]?.name}
-                  </span>
-                </div>
-              )}
-
-              <div className={styles.searchActions}>
-                <div className={styles.institutionSelector}>
-                  <label htmlFor="institution">
-                    {institutionLocked && (
-                      <span className={styles.lockedIcon} title="Låst basert på valgt emne">
-                        🔒
-                      </span>
-                    )}
-                    Institusjon
-                  </label>
-                  <select
-                    id="institution"
-                    value={institution}
-                    onChange={(e) => {
-                      if (!institutionLocked) {
-                        setInstitution(e.target.value);
-                      }
-                    }}
-                    className={styles.institutionSelect}
-                    disabled={institutionLocked || loading}
-                  >
-                    {Object.entries(UNIVERSITIES).map(([key, uni]) => (
-                      <option key={key} value={key}>
-                        {uni.shortName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  disabled={loading || !courseCode.trim()}
-                  className={styles.searchButton}
-                >
-                  {loading ? 'Laster...' : 'Søk'}
-                </button>
-              </div>
-            </div>
-          </div>
 
           {error && (
             <div className={styles.error}>

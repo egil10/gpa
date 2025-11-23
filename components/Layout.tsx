@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import BottomSearchBar from './BottomSearchBar';
+import ScrollToTop from './ScrollToTop';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ export default function Layout({ children, title, description }: LayoutProps) {
         </main>
         <Footer />
         {!isSearchPage && <BottomSearchBar />}
+        <ScrollToTop />
       </div>
     </>
   );

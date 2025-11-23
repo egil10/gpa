@@ -26,6 +26,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   const [institution, setInstitution] = useState<string>('');
   const [bonusPoints, setBonusPoints] = useState({ realfag: 0, other: 0 }); // High school bonus points
   const [courses, setCourses] = useState<Course[]>([]);
+  const [hasCalculated, setHasCalculated] = useState(false);
   
   // Pre-populate with examples on first client-side load
   useEffect(() => {
@@ -62,9 +63,29 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     return 0;
   }, [system, bonusPoints]);
 
-  const calculation = useMemo(() => calculateGPA(courses, totalBonusPoints), [courses, totalBonusPoints]);
+  const calculation = useMemo(() => {
+    if (!hasCalculated) {
+      return {
+        gpa: 0,
+        gpaWithBonus: undefined,
+        totalCredits: 0,
+        weightedSum: 0,
+      };
+    }
+    return calculateGPA(courses, totalBonusPoints);
+  }, [courses, totalBonusPoints, hasCalculated]);
+
+  const handleCalculate = () => {
+    if (courses.length === 0) return;
+    setHasCalculated(true);
+  };
+
+  const handleReset = () => {
+    setHasCalculated(false);
+  };
 
   const addCourse = useCallback(() => {
+    setHasCalculated(false); // Reset calculation when adding course
     const newCourse: Course = {
       id: Date.now().toString(),
       name: '',
@@ -76,10 +97,12 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   }, [system]);
 
   const removeCourse = useCallback((id: string) => {
+    setHasCalculated(false); // Reset calculation when removing course
     setCourses((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
   const updateCourse = useCallback((id: string, field: keyof Course, value: string | number) => {
+    setHasCalculated(false); // Reset calculation when updating course
     setCourses((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
     );
@@ -143,7 +166,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   return (
     <div className={styles.calculator}>
       <div className={styles.header}>
-        <h2>GPA Kalkulator</h2>
+        <h2 className={styles.title}>GPA Kalkulator</h2>
         <div className={styles.controls}>
           <div className={styles.systemSelector}>
             <button
@@ -181,40 +204,69 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
       </div>
 
       <div className={styles.gpaDisplay}>
-        <div className={styles.gpaValue}>
-          <span className={styles.gpaLabel}>GPA</span>
-          <div className={styles.gpaNumber}>
-            {calculation.gpaWithBonus !== undefined 
-              ? calculation.gpaWithBonus.toFixed(2) 
-              : calculation.gpa.toFixed(2)}
-            {calculation.gpaWithBonus !== undefined && calculation.gpaWithBonus !== calculation.gpa && (
-              <span className={styles.gpaBonus}>
-                (inkl. {totalBonusPoints} tilleggspoeng)
-              </span>
-            )}
+        {!hasCalculated ? (
+          <div className={styles.calculatePrompt}>
+            <p>Legg til emner og klikk "Beregn GPA" for å se resultatet.</p>
+            <button
+              onClick={handleCalculate}
+              disabled={courses.length === 0}
+              className={styles.calculateButton}
+            >
+              Beregn GPA
+            </button>
           </div>
-        </div>
-        <div className={styles.gpaDetails}>
-          <div className={styles.detailItem}>
-            <span className={styles.detailLabel}>Totale poeng</span>
-            <span className={styles.detailValue}>{calculation.totalCredits}</span>
-          </div>
-          <div className={styles.detailItem}>
-            <span className={styles.detailLabel}>Vektet sum</span>
-            <span className={styles.detailValue}>{calculation.weightedSum.toFixed(1)}</span>
-          </div>
-          {calculation.gpaWithBonus !== undefined && (
-            <div className={styles.detailItem}>
-              <span className={styles.detailLabel}>GPA uten tilleggspoeng</span>
-              <span className={styles.detailValue}>{calculation.gpa.toFixed(2)}</span>
+        ) : (
+          <>
+            <div className={styles.gpaValue}>
+              <span className={styles.gpaLabel}>GPA</span>
+              <div className={styles.gpaNumber}>
+                {calculation.gpaWithBonus !== undefined 
+                  ? calculation.gpaWithBonus.toFixed(2) 
+                  : calculation.gpa.toFixed(2)}
+                {calculation.gpaWithBonus !== undefined && calculation.gpaWithBonus !== calculation.gpa && (
+                  <span className={styles.gpaBonus}>
+                    (inkl. {totalBonusPoints} tilleggspoeng)
+                  </span>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+            <div className={styles.gpaDetails}>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Antall emner</span>
+                <span className={styles.detailValue}>{courses.length}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>
+                  {system === 'university' ? 'Totale ECTS' : 'Totale poeng'}
+                </span>
+                <span className={styles.detailValue}>{calculation.totalCredits}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Vektet sum</span>
+                <span className={styles.detailValue}>{calculation.weightedSum.toFixed(1)}</span>
+              </div>
+              {calculation.gpaWithBonus !== undefined && (
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>GPA uten tilleggspoeng</span>
+                  <span className={styles.detailValue}>{calculation.gpa.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+            <div className={styles.calculateActions}>
+              <button
+                onClick={handleReset}
+                className={styles.resetButton}
+              >
+                Tilbakestill
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {system === 'highschool' && (
         <div className={styles.bonusPointsSection}>
-          <h3>Tilleggspoeng</h3>
+          <h3 className={styles.sectionTitle}>Tilleggspoeng</h3>
           <p className={styles.bonusPointsInfo}>
             Du kan få maksimalt 4 tilleggspoeng totalt (2 for realfag + 2 for andre fag).
             Hvert poeng gir +0.1 til GPA.
@@ -225,10 +277,13 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               <div className={styles.bonusPointsControls}>
                 <button
                   type="button"
-                  onClick={() => setBonusPoints(prev => ({
-                    ...prev,
-                    realfag: Math.max(0, prev.realfag - 0.5)
-                  }))}
+                  onClick={() => {
+                    setHasCalculated(false);
+                    setBonusPoints(prev => ({
+                      ...prev,
+                      realfag: Math.max(0, prev.realfag - 0.5)
+                    }));
+                  }}
                   className={styles.bonusButton}
                   disabled={bonusPoints.realfag === 0}
                 >
@@ -242,6 +297,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                   step="0.5"
                   value={bonusPoints.realfag}
                   onChange={(e) => {
+                    setHasCalculated(false);
                     const value = Math.min(2, Math.max(0, parseFloat(e.target.value) || 0));
                     const maxOther = 4 - value;
                     setBonusPoints(prev => ({
@@ -254,6 +310,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 <button
                   type="button"
                   onClick={() => {
+                    setHasCalculated(false);
                     const maxRealfag = Math.min(2, 4 - bonusPoints.other);
                     setBonusPoints(prev => ({
                       ...prev,
@@ -272,10 +329,13 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               <div className={styles.bonusPointsControls}>
                 <button
                   type="button"
-                  onClick={() => setBonusPoints(prev => ({
-                    ...prev,
-                    other: Math.max(0, prev.other - 0.5)
-                  }))}
+                  onClick={() => {
+                    setHasCalculated(false);
+                    setBonusPoints(prev => ({
+                      ...prev,
+                      other: Math.max(0, prev.other - 0.5)
+                    }));
+                  }}
                   className={styles.bonusButton}
                   disabled={bonusPoints.other === 0}
                 >
@@ -289,6 +349,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                   step="0.5"
                   value={bonusPoints.other}
                   onChange={(e) => {
+                    setHasCalculated(false);
                     const value = Math.min(2, Math.max(0, parseFloat(e.target.value) || 0));
                     const maxRealfag = 4 - value;
                     setBonusPoints(prev => ({
@@ -301,6 +362,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 <button
                   type="button"
                   onClick={() => {
+                    setHasCalculated(false);
                     const maxOther = Math.min(2, 4 - bonusPoints.realfag);
                     setBonusPoints(prev => ({
                       ...prev,
@@ -328,8 +390,8 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
       <div className={styles.coursesSection}>
         <div className={styles.coursesHeader}>
-          <div>
-            <h3>Emner</h3>
+          <div className={styles.coursesHeaderContent}>
+            <h3 className={styles.sectionTitle}>Emner</h3>
             <p className={styles.coursesSubtitle}>
               {courses.length} {courses.length === 1 ? 'emne' : 'emner'} lagt til
             </p>
@@ -341,9 +403,9 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
         {courses.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>Ingen emner lagt til.</p>
             <button 
               onClick={() => {
+                setHasCalculated(false);
                 const examples = EXAMPLE_COURSES.map((c, i) => ({
                   ...c,
                   id: Date.now().toString() + i,
@@ -356,9 +418,8 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               className={styles.loadExamplesButton}
             >
               <BookOpen size={18} />
-              <span>Last inn eksempel-emner (5 stk)</span>
+              <span>Last inn eksempel-emner</span>
             </button>
-            <p className={styles.emptyHint}>eller klikk "Legg til emne" for å legge til manuelt</p>
           </div>
         ) : (
           <div className={styles.coursesList}>

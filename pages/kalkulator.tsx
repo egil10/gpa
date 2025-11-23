@@ -11,13 +11,6 @@ export default function CalculatorPage() {
     >
       <div className={styles.calculatorPage}>
         <div className="container">
-          <div className={styles.intro}>
-            <h1>GPA Kalkulator</h1>
-            <p className={styles.subtitle}>
-              Beregn din gjennomsnittlige karakter (GPA) med støtte for ECTS-poeng.
-              Støtter både universitetskarakterer (A-F) og videregående karakterer (1-6).
-            </p>
-          </div>
           <GPACalculator />
         </div>
       </div>

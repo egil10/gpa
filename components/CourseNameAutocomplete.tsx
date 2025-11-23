@@ -71,7 +71,13 @@ export default function CourseNameAutocomplete({
           // Search by name - searchAllCourses searches both code and name
           const results = await searchAllCourses(searchQuery, institution, 10);
           setSuggestions(results);
-          setShowSuggestions(results.length > 0);
+          
+          // Hide suggestions if query exactly matches a suggestion name
+          const exactMatch = results.find(
+            course => course.name.toLowerCase() === searchQuery.toLowerCase().trim()
+          );
+          
+          setShowSuggestions(results.length > 0 && !exactMatch);
         } catch (error) {
           console.error('Search error:', error);
           setSuggestions([]);
@@ -203,7 +209,9 @@ export default function CourseNameAutocomplete({
                       <span className={styles.duplicateBadge}> {course.code}</span>
                     )}
                   </div>
-                  <div className={styles.suggestionCode}>{course.code}</div>
+                  {course.code !== course.name && (
+                    <div className={styles.suggestionCode}>{course.code}</div>
+                  )}
                 </div>
                 <div className={styles.suggestionInstitution}>
                   {UNIVERSITIES[course.institution]?.shortName || course.institution}

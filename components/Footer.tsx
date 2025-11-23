@@ -11,6 +11,17 @@ export default function Footer() {
       <div className="container">
         <div className={styles.footerContent}>
           <div className={styles.footerSection}>
+            <h4>Om</h4>
+            <p>
+              Karakterstatistikk er en plattform for å utforske karakterfordelinger 
+              for emner ved norske universiteter. Plattformen gir deg innsikt i 
+              hvordan karakterer er fordelt på tvers av ulike emner og institusjoner.
+            </p>
+            <p className={styles.footerSubtext}>
+              Støtter UiO, NTNU, UiB og NHH. Bygget med Next.js, React og TypeScript.
+            </p>
+          </div>
+          <div className={styles.footerSection}>
             <h4>Data</h4>
             <p>
               Inneholder data under{' '}
@@ -27,12 +38,8 @@ export default function Footer() {
               </a>
               .
             </p>
-          </div>
-          <div className={styles.footerSection}>
-            <h4>Om</h4>
-            <p>
-              Karakterstatistikk er en uavhengig plattform for å utforske 
-              karakterfordelinger ved norske universiteter.
+            <p className={styles.footerSubtext}>
+              Dataen er offentlig tilgjengelig og oppdateres regelmessig.
             </p>
           </div>
         </div>

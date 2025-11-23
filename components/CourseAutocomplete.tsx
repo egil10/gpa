@@ -78,7 +78,13 @@ export default function CourseAutocomplete({
         try {
           const results = await searchAllCourses(searchQuery, institution, 20);
           setSuggestions(results);
-          setShowSuggestions(results.length > 0);
+          
+          // Hide suggestions if query exactly matches a suggestion
+          const exactMatch = results.find(
+            course => course.code.toUpperCase() === searchQuery.toUpperCase().trim()
+          );
+          
+          setShowSuggestions(results.length > 0 && !exactMatch);
         } catch (error) {
           console.error('Search error:', error);
           setSuggestions([]);
@@ -221,7 +227,9 @@ export default function CourseAutocomplete({
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <div className={styles.suggestionCode}>{course.code}</div>
-              <div className={styles.suggestionName}>{course.name}</div>
+              {course.name && course.name !== course.code && (
+                <div className={styles.suggestionName}>{course.name}</div>
+              )}
               <div className={styles.suggestionInstitution}>
                 {UNIVERSITIES[course.institution]?.shortName || course.institution}
               </div>

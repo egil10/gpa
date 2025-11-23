@@ -14,7 +14,6 @@ export default function Navbar() {
             <Link href="/">Hjem</Link>
             <Link href="/sok">Søk</Link>
             <Link href="/kalkulator">Kalkulator</Link>
-            <Link href="/om">Om</Link>
           </div>
         </div>
       </div>

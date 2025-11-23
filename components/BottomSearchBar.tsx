@@ -13,7 +13,6 @@ export default function BottomSearchBar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [searchBarOpacity, setSearchBarOpacity] = useState(1);
   const router = useRouter();
   
@@ -29,16 +28,13 @@ export default function BottomSearchBar() {
     preloadInstitutionCourses('NHH');
   }, []);
 
-  // Show/hide scroll to top button and fade search bar near footer
+  // Fade search bar near footer
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       const scrollBottom = documentHeight - (scrollY + windowHeight);
-      
-      // Show scroll to top after 300px
-      setShowScrollTop(scrollY > 300);
       
       // Fade out search bar when within 200px of footer
       const footerFadeDistance = 200;
@@ -112,6 +108,14 @@ export default function BottomSearchBar() {
     inputRef.current?.blur();
   };
 
+  const handleSuggestionClick = (course: CourseInfo) => {
+    // Just fill in the input, don't navigate yet
+    setQuery(course.code);
+    setSelectedCourse(course);
+    setShowSuggestions(false);
+    inputRef.current?.focus();
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (selectedCourse) {
@@ -156,10 +160,22 @@ export default function BottomSearchBar() {
         break;
       case 'Enter':
         e.preventDefault();
+        // On Enter, actually submit/navigate
         if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
-          handleSelectCourse(suggestions[selectedIndex]);
+          const course = suggestions[selectedIndex];
+          setQuery(course.code);
+          setSelectedCourse(course);
+          setShowSuggestions(false);
+          // Navigate to the selected course
+          handleSelectCourse(course);
         } else if (selectedCourse) {
           handleSelectCourse(selectedCourse);
+        } else if (query.trim()) {
+          // Submit the form with current query
+          const form = inputRef.current?.closest('form');
+          if (form) {
+            form.requestSubmit();
+          }
         }
         break;
       case 'Escape':
@@ -185,9 +201,6 @@ export default function BottomSearchBar() {
     }, 200);
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   // Scroll selected item into view
   useEffect(() => {
@@ -263,7 +276,7 @@ export default function BottomSearchBar() {
                       className={`${styles.suggestionItem} ${
                         index === selectedIndex ? styles.selected : ''
                       }`}
-                      onClick={() => handleSelectCourse(course)}
+                      onClick={() => handleSuggestionClick(course)}
                       onMouseEnter={() => setSelectedIndex(index)}
                     >
                       <div className={styles.suggestionContent}>
@@ -281,19 +294,6 @@ export default function BottomSearchBar() {
           </form>
         </div>
       </div>
-
-      {/* Scroll to top button */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className={styles.scrollToTop}
-          style={{ opacity: searchBarOpacity }}
-          aria-label="Scroll to top"
-          title="Scroll to top"
-        >
-          <ArrowUp size={20} />
-        </button>
-      )}
     </>
   );
 }

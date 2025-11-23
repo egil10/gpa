@@ -43,8 +43,12 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
     <div className={styles.chartContainer}>
       {courseCode && year && (
         <div className={styles.chartHeader}>
-          <h3 className="text-mono">{courseCode}</h3>
-          <p className="text-light">{year} • {totalStudents} kandidater</p>
+          <h3>{courseCode}</h3>
+          <p>
+            <span className={styles.yearBadge}>{year}</span>
+            <span>•</span>
+            <span className={styles.studentsBadge}>{totalStudents} kandidater</span>
+          </p>
         </div>
       )}
       <ResponsiveContainer width="100%" height={400}>

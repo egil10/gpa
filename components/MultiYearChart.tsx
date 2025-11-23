@@ -104,10 +104,15 @@ export default function MultiYearChart({ allYearsData, courseCode, institution }
               <div key={year} className={styles.yearChart}>
                 <div className={styles.yearHeader}>
                   <h3>{year}</h3>
-                  <span className={styles.yearStats}>
-                    {stats.totalStudents} kandidater
-                    {stats.averageGrade && ` • Snitt: ${stats.averageGrade.toFixed(2)}`}
-                  </span>
+                  <div className={styles.yearStats}>
+                    <span className={styles.statBadge}>{stats.totalStudents} kandidater</span>
+                    {stats.averageGrade && (
+                      <>
+                        <span>•</span>
+                        <span className={styles.statBadge}>Snitt: {stats.averageGrade.toFixed(2)}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <GradeChart
                   data={stats.distributions}
