@@ -4,14 +4,25 @@ Welcome to the comprehensive documentation for the Norwegian GPA Calculator proj
 
 ## 📚 Documentation Index
 
+### Getting Started
 1. **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Initial setup and installation
-2. **[DATA_SOURCES.md](./DATA_SOURCES.md)** - ⭐ **Specific NSD website links used to discover data**
-3. **[DATA_MANAGEMENT.md](./DATA_MANAGEMENT.md)** - How to fetch and manage course data
-4. **[DATA_STORAGE_STRATEGY.md](./DATA_STORAGE_STRATEGY.md)** - Data storage architecture and optimization
-5. **[BUILD_AND_DEPLOYMENT.md](./BUILD_AND_DEPLOYMENT.md)** - Building and deploying the website
-6. **[API_REFERENCE.md](./API_REFERENCE.md)** - API details and integration
-7. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
-8. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+2. **[QUICK_START.md](./QUICK_START.md)** - Quick start guide
+
+### Recent Improvements
+3. **[RECENT_IMPROVEMENTS.md](./RECENT_IMPROVEMENTS.md)** - ⭐ **Latest improvements (2025)** - Mobile optimization, logo, UI enhancements
+4. **[MOBILE_OPTIMIZATION.md](./MOBILE_OPTIMIZATION.md)** - Comprehensive mobile optimization guide
+5. **[LOGO_AND_BRANDING.md](./LOGO_AND_BRANDING.md)** - Logo implementation and branding guidelines
+
+### Data Management
+6. **[DATA_SOURCES.md](./DATA_SOURCES.md)** - ⭐ **Specific NSD website links used to discover data**
+7. **[DATA_MANAGEMENT.md](./DATA_MANAGEMENT.md)** - How to fetch and manage course data
+8. **[DATA_STORAGE_STRATEGY.md](./DATA_STORAGE_STRATEGY.md)** - Data storage architecture and optimization
+
+### Development & Deployment
+9. **[BUILD_AND_DEPLOYMENT.md](./BUILD_AND_DEPLOYMENT.md)** - Building and deploying the website
+10. **[API_REFERENCE.md](./API_REFERENCE.md)** - API details and integration
+11. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
+12. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
 ## 🎯 Quick Start
 

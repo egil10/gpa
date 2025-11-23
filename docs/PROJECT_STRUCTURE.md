@@ -20,7 +20,13 @@ gpa/
 │   ├── index.tsx                # Home page
 │   ├── om.tsx                   # About page
 │   └── sok.tsx                  # Search page
+├── assets/                      # Design assets (logos, images)
+│   ├── dist.svg                # Logo source files
+│   └── dist.png
 ├── public/                      # Static assets
+│   ├── dist.svg                # Logo file
+│   ├── favicon.svg             # Favicon
+│   └── data/                   # Course data files
 ├── styles/                      # CSS styles
 │   ├── globals.css              # Global styles (Swiss academic design)
 │   ├── Home.module.css          # Home page styles
@@ -45,6 +51,8 @@ gpa/
 - **Color Palette**: Black, white, grays with blue accent
 - **Typography**: Inter (sans-serif) and JetBrains Mono (monospace)
 - **Spacing**: 8px base grid system
+- **Logo**: Bell curve distribution logo (SVG format)
+- **Responsive**: Fully mobile-optimized with safe area support
 
 ### Pages
 1. **Home (`/`)**: 
