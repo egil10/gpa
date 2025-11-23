@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CourseInfo, searchCourses, getCourseByCode } from '@/lib/courses';
+import { CourseInfo, searchCourses, getCourseByCode, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
 import styles from './CourseAutocomplete.module.css';
 
@@ -42,6 +42,14 @@ export default function CourseAutocomplete({
     }
   }, [value, institution]);
 
+  // Get popular courses for empty query
+  const getPopularCourses = useCallback(() => {
+    if (institution) {
+      return POPULAR_COURSES.filter(c => c.institution === institution).slice(0, 8);
+    }
+    return POPULAR_COURSES.slice(0, 8);
+  }, [institution]);
+
   // Search with debouncing
   const performSearch = useCallback((searchQuery: string) => {
     if (debounceRef.current) {
@@ -49,17 +57,19 @@ export default function CourseAutocomplete({
     }
 
     debounceRef.current = setTimeout(() => {
-      if (searchQuery.trim().length >= 2) {
+      if (searchQuery.trim().length === 0) {
+        // Show popular courses when input is empty
+        const popular = getPopularCourses();
+        setSuggestions(popular);
+        setShowSuggestions(popular.length > 0);
+      } else {
         const results = searchCourses(searchQuery, institution);
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
-        setSelectedIndex(-1);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
       }
+      setSelectedIndex(-1);
     }, 200);
-  }, [institution]);
+  }, [institution, getPopularCourses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
@@ -76,12 +86,8 @@ export default function CourseAutocomplete({
       onCourseSelect(course);
     }
 
-    if (newValue.trim().length >= 2) {
-      performSearch(newValue);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
+    // Always perform search (shows popular courses when empty)
+    performSearch(newValue);
   };
 
   const handleSelectCourse = (course: CourseInfo) => {
@@ -126,7 +132,12 @@ export default function CourseAutocomplete({
   };
 
   const handleFocus = () => {
-    if (query.trim().length >= 2 && suggestions.length > 0) {
+    if (query.trim().length === 0) {
+      // Show popular courses when focusing on empty input
+      const popular = getPopularCourses();
+      setSuggestions(popular);
+      setShowSuggestions(popular.length > 0);
+    } else if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   };
@@ -175,6 +186,11 @@ export default function CourseAutocomplete({
       
       {showSuggestions && suggestions.length > 0 && (
         <div ref={suggestionsRef} className={styles.suggestions}>
+          {query.trim().length === 0 && (
+            <div className={styles.suggestionsHeader}>
+              <span>Populære emner</span>
+            </div>
+          )}
           {suggestions.map((course, index) => (
             <button
               key={`${course.code}-${course.institution}`}

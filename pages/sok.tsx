@@ -110,6 +110,45 @@ export default function SearchPage() {
             </p>
           </div>
 
+          <div className={styles.quickActions}>
+            <h3>Rask søk</h3>
+            <div className={styles.quickButtons}>
+              <button
+                type="button"
+                onClick={() => {
+                  setCourseCode('IN2010');
+                  setInstitution('UiO');
+                  setYear(2022);
+                }}
+                className={styles.quickButton}
+              >
+                IN2010 (UiO)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCourseCode('TDT4100');
+                  setInstitution('NTNU');
+                  setYear(2022);
+                }}
+                className={styles.quickButton}
+              >
+                TDT4100 (NTNU)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCourseCode('ECON1100');
+                  setInstitution('UiO');
+                  setYear(2022);
+                }}
+                className={styles.quickButton}
+              >
+                ECON1100 (UiO)
+              </button>
+            </div>
+          </div>
+
           <form onSubmit={handleSearch} className={styles.searchForm}>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>

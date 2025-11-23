@@ -49,6 +49,19 @@ export const POPULAR_COURSES: CourseInfo[] = [
   { code: 'BØK110', name: 'Grunnleggende bedriftsøkonomi', institution: 'BI', institutionCode: '8241' },
   { code: 'BØK120', name: 'Finansregnskap', institution: 'BI', institutionCode: '8241' },
   { code: 'BØK130', name: 'Bedriftsøkonomi', institution: 'BI', institutionCode: '8241' },
+  { code: 'BØK140', name: 'Markedsføring', institution: 'BI', institutionCode: '8241' },
+  
+  // More UiO courses
+  { code: 'IN1000', name: 'Introduksjon til datamaskiner og datamaskinarkitektur', institution: 'UiO', institutionCode: '1110' },
+  { code: 'IN1050', name: 'Brukerorientert design', institution: 'UiO', institutionCode: '1110' },
+  { code: 'IN1150', name: 'Webteknologi', institution: 'UiO', institutionCode: '1110' },
+  { code: 'STK2100', name: 'Modellering og simulering', institution: 'UiO', institutionCode: '1110' },
+  { code: 'MAT2400', name: 'Lineær algebra', institution: 'UiO', institutionCode: '1110' },
+  
+  // More NTNU courses
+  { code: 'TDT4180', name: 'Menneske-maskin interaksjon', institution: 'NTNU', institutionCode: '1150' },
+  { code: 'TDT4186', name: 'Operativsystemer', institution: 'NTNU', institutionCode: '1150' },
+  { code: 'TDT4200', name: 'Algoritmer og datastrukturer', institution: 'NTNU', institutionCode: '1150' },
 ];
 
 export function searchCourses(query: string, institutionFilter?: string): CourseInfo[] {

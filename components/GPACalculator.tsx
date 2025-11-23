@@ -6,9 +6,28 @@ interface GPACalculatorProps {
   initialSystem?: GradeSystem;
 }
 
+// Example courses to pre-populate
+const EXAMPLE_COURSES: Course[] = [
+  { id: '1', name: 'Algoritmer og datastrukturer', grade: 'B', credits: 7.5, system: 'university' },
+  { id: '2', name: 'Objektorientert programmering', grade: 'A', credits: 7.5, system: 'university' },
+  { id: '3', name: 'Databaser', grade: 'C', credits: 7.5, system: 'university' },
+  { id: '4', name: 'Kalkulus', grade: 'B', credits: 7.5, system: 'university' },
+  { id: '5', name: 'Sannsynlighetsregning', grade: 'C', credits: 7.5, system: 'university' },
+];
+
 export default function GPACalculator({ initialSystem = 'university' }: GPACalculatorProps) {
   const [system, setSystem] = useState<GradeSystem>(initialSystem);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>(() => {
+    // Pre-populate with examples on first load
+    if (typeof window !== 'undefined') {
+      const hasSeenExamples = localStorage.getItem('gpa-has-seen-examples');
+      if (!hasSeenExamples) {
+        localStorage.setItem('gpa-has-seen-examples', 'true');
+        return EXAMPLE_COURSES.map(c => ({ ...c, system: initialSystem }));
+      }
+    }
+    return [];
+  });
 
   const handleSystemChange = useCallback((newSystem: GradeSystem) => {
     setSystem(newSystem);
@@ -107,15 +126,36 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
       <div className={styles.coursesSection}>
         <div className={styles.coursesHeader}>
-          <h3>Emner</h3>
+          <div>
+            <h3>Emner</h3>
+            <p className={styles.coursesSubtitle}>
+              {courses.length} {courses.length === 1 ? 'emne' : 'emner'} lagt til
+            </p>
+          </div>
           <button onClick={addCourse} className={styles.addButton}>
-            + Legg til emne
+            Legg til emne
           </button>
         </div>
 
         {courses.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>Ingen emner lagt til. Klikk "Legg til emne" for å starte.</p>
+            <p>Ingen emner lagt til.</p>
+            <button 
+              onClick={() => {
+                const examples = EXAMPLE_COURSES.map((c, i) => ({
+                  ...c,
+                  id: Date.now().toString() + i,
+                  system,
+                  grade: system === 'university' ? c.grade : '4',
+                  credits: system === 'university' ? 7.5 : 1,
+                }));
+                setCourses(examples);
+              }}
+              className={styles.loadExamplesButton}
+            >
+              📚 Last inn eksempel-emner (5 stk)
+            </button>
+            <p className={styles.emptyHint}>eller klikk "Legg til emne" for å legge til manuelt</p>
           </div>
         ) : (
           <div className={styles.coursesList}>

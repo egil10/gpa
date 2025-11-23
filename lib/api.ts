@@ -1,6 +1,18 @@
 import { GradeData, SearchPayload, University } from '@/types';
 
-const API_URL = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+// NSD API URL - CORS issues in production require a proxy
+// Temporary fix: Using CORS proxy (replace with your own proxy later)
+const CORS_PROXY = 'https://corsproxy.io/?';
+const DIRECT_API = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+
+// Use proxy in production, direct API in development
+const isDevelopment = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const API_URL = isDevelopment ? DIRECT_API : `${CORS_PROXY}${encodeURIComponent(DIRECT_API)}`;
+
+// TODO: Replace with your own proxy server (see docs/CORS_FIX.md)
+// Recommended: Deploy api/proxy.js to Vercel
 
 export const UNIVERSITIES: Record<string, University> = {
   UiO: { code: '1110', name: 'Universitetet i Oslo', shortName: 'UiO' },

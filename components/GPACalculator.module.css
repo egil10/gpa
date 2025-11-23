@@ -118,6 +118,17 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-lg);
+  gap: var(--space-md);
+}
+
+.coursesHeader h3 {
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.coursesSubtitle {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  margin: 0;
 }
 
 .coursesHeader h3 {
@@ -125,7 +136,7 @@
 }
 
 .addButton {
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-md) var(--space-xl);
   background-color: var(--color-primary);
   color: var(--color-background);
   border: none;
@@ -136,11 +147,23 @@
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, background-color;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.addButton::before {
+  content: '+';
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1;
 }
 
 .addButton:hover {
   background-color: var(--color-accent);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .addButton:active {
@@ -153,6 +176,35 @@
   color: var(--color-text-light);
   border: 1px dashed var(--color-border);
   border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.loadExamplesButton {
+  padding: var(--space-md) var(--space-xl);
+  background-color: var(--color-accent);
+  color: var(--color-background);
+  border: none;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, background-color;
+}
+
+.loadExamplesButton:hover {
+  background-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.emptyHint {
+  font-size: var(--text-xs);
+  margin: 0;
+  opacity: 0.7;
 }
 
 .coursesList {

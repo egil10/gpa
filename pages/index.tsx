@@ -69,12 +69,14 @@ export default function Home() {
               Data fra NSD.
             </p>
             <div className={styles.ctaButtons}>
+            <div className={styles.ctaButtons}>
               <Link href="/sok" className={styles.ctaButton}>
-                Start søk
+                🔍 Start søk
               </Link>
               <Link href="/kalkulator" className={`${styles.ctaButton} ${styles.ctaButtonSecondary}`}>
-                GPA Kalkulator
+                🧮 GPA Kalkulator
               </Link>
+            </div>
             </div>
           </div>
         </div>
