@@ -2,58 +2,77 @@
 
 En moderne plattform for å utforske karakterfordelinger ved norske universiteter. Bygget med Next.js og inspirert av sveitsisk akademisk design.
 
-## Funksjoner
+## 🚀 Funksjoner
 
-- 🔍 Søk etter karakterstatistikk for spesifikke emner
-- 📊 Visualisering av karakterfordelinger
-- 🏛️ Støtte for 5 norske universiteter (UiO, NTNU, OsloMet, UiB, BI)
-- 🧮 GPA Kalkulator med ECTS-poeng
-  - Støtter universitetskarakterer (A-F) og videregående (1-6)
-  - Legg til emnenavn og juster karakterer for å se GPA-endringer
-  - Real-time beregning med smooth animasjoner
-- 📱 Responsivt design
-- 🎨 Sveitsisk akademisk designstil
-- ⚡ Høy ytelse med GPU-akselererte animasjoner
+- 🔍 **Søk etter karakterstatistikk** - Finn karakterfordelinger for spesifikke emner med autocomplete
+- 📊 **Visualisering** - Interaktive grafer for karakterfordelinger
+- 🏛️ **5 universiteter** - Støtte for UiO, NTNU, OsloMet, UiB, og BI
+- 🧮 **GPA Kalkulator** - Beregn GPA med ECTS-poeng (universitet og videregående)
+- 📱 **Responsivt design** - Fungerer på alle enheter
+- ⚡ **Høy ytelse** - GPU-akselererte animasjoner for smooth opplevelse
 
-## Teknologi
+## 🛠️ Teknologi
 
-- **Next.js 14** - React-rammeverk med statisk eksport for GitHub Pages
+- **Next.js 14** - React-rammeverk med statisk eksport
 - **TypeScript** - Typesikkerhet
 - **Recharts** - Datavisualisering
+- **Lucide React** - Ikoner
 - **CSS Modules** - Modulær styling
 
-## Installasjon
+## 📦 Installasjon
 
 ```bash
 npm install
 ```
 
-## Utvikling
+## 🏃 Kjøre Lokalt
 
 ```bash
+npm install
 npm run dev
 ```
 
 Åpne [http://localhost:3000](http://localhost:3000) i nettleseren.
 
-## Bygging for produksjon
+## 🚀 Deployment
+
+**GitHub Actions deployer automatisk fra `main` branch!**
+
+1. Push til `main`:
+   ```bash
+   git push origin main
+   ```
+
+2. Aktiver GitHub Pages:
+   - Settings → Pages → Source: "GitHub Actions"
+
+3. Vent på deployment (2-3 minutter)
+
+4. Din side er live! 🎉
+
+Se [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detaljer.
+
+## 🏗️ Bygging
 
 ```bash
 npm run build
 ```
 
-Dette genererer en `out`-mappe som kan deployes til GitHub Pages.
+Genererer en `out`-mappe klar for deployment.
 
-## GitHub Pages Deployment
+## 📚 Dokumentasjon
 
-1. Bygg prosjektet: `npm run build`
-2. Push `out`-mappen til `gh-pages` branch, eller
-3. Konfigurer GitHub Actions til å automatisk bygge og deploye (inkludert i prosjektet)
+Se [docs/](docs/) mappen for detaljert dokumentasjon:
 
-## Data
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Prosjektstruktur og arkitektur
+- [DATA_RETRIEVAL.md](docs/DATA_RETRIEVAL.md) - Hvordan datahenting fungerer
+- [API.md](docs/API.md) - API dokumentasjon
+- [DEPLOYMENT.md](docs/DEPLOYMENT.md) - Deployment guide
 
-Data hentes fra [NSD (Norsk senter for forskningsdata)](https://nsd.no) via deres API.
+## 📊 Data
 
-## Lisens
+Data hentes **on-demand** fra [NSD (Norsk senter for forskningsdata)](https://nsd.no) via deres API når brukere søker. Ingen caching - hver søk gjør en direkte API-kall.
+
+## 📄 Lisens
 
 ISC
