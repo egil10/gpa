@@ -1,10 +1,11 @@
 .navbar {
-  border-bottom: 1px solid var(--grok-border);
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-primary);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .navContent {
@@ -18,13 +19,13 @@
   font-size: var(--text-lg);
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--grok-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-space);
   transition: color 0.2s ease;
 }
 
 .logo:hover {
-  color: var(--grok-blue);
+  color: var(--text-secondary);
 }
 
 .navLinks {
@@ -36,7 +37,7 @@
 .navLinks a {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -50,12 +51,12 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--grok-blue);
+  background: var(--accent);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navLinks a:hover {
-  color: var(--grok-blue);
+  color: var(--text-primary);
 }
 
 .navLinks a:hover::after {

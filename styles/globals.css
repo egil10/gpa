@@ -2,25 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Grok Design System - xAI Grokipedia Style */
+/* Light Theme - Clean White/Black/Grey Design */
 
 :root {
-  /* Grok Color Palette */
-  --grok-bg: #000000;
-  --grok-surface: #0a0a0a;
-  --grok-surface-2: #111111;
-  --grok-border: #1f1f1f;
-  --grok-text-primary: #e4e4e7;
-  --grok-text-secondary: #a1a1aa;
-  --grok-text-muted: #52525b;
-  --grok-blue: #00d4ff;
-  --grok-blue-hover: #00e7ff;
-  --grok-orange: #ff6b35;
-  --grok-green: #00ff9d;
+  /* Light Theme Color Palette */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f8f8;
+  --bg-tertiary: #f0f0f0;
+  --surface: #ffffff;
+  --surface-hover: #f5f5f5;
+  --border: #e5e5e5;
+  --border-hover: #d4d4d4;
+  --text-primary: #000000;
+  --text-secondary: #525252;
+  --text-muted: #737373;
+  --text-invert: #ffffff;
+  
+  /* Accent colors - minimal grey scale */
+  --accent: #000000;
+  --accent-hover: #262626;
+  --accent-light: #f5f5f5;
   
   /* Typography */
   --font-inter: 'Inter', system-ui, sans-serif;
   --font-space: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   
   /* Spacing (8px base) */
   --space-xs: 0.25rem;   /* 4px */
@@ -34,6 +40,7 @@
   /* Layout */
   --max-width: 1200px;
   --max-width-content: 800px;
+  --content-max-width: 800px;
 }
 
 * {
@@ -50,27 +57,31 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Hide scrollbars completely but keep functionality */
+/* Hide scrollbars but keep functionality */
 ::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-  background: transparent;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 body {
   font-family: var(--font-inter);
   font-size: 1rem;
   line-height: 1.6;
-  color: var(--grok-text-primary);
-  background-color: var(--grok-bg);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
   overflow-x: hidden;
 }
 
@@ -79,7 +90,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  color: var(--grok-text-primary);
+  color: var(--text-primary);
 }
 
 h1 {
@@ -101,26 +112,26 @@ h4 {
 
 p {
   margin-bottom: var(--space-md);
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
 }
 
 a {
-  color: var(--grok-blue);
+  color: var(--text-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover {
-  color: var(--grok-blue-hover);
+  color: var(--text-secondary);
 }
 
 code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
-  background-color: var(--grok-surface);
+  background-color: var(--bg-tertiary);
   padding: 0.125rem 0.25rem;
   border-radius: 0.375rem;
-  color: var(--grok-text-primary);
+  color: var(--text-primary);
 }
 
 button {
@@ -134,10 +145,10 @@ button {
 input, select, textarea {
   font-family: inherit;
   font-size: inherit;
-  color: var(--grok-text-primary);
+  color: var(--text-primary);
 }
 
-/* Grok Utility Classes */
+/* Utility Classes */
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -150,74 +161,69 @@ input, select, textarea {
   padding: 0 var(--space-lg);
 }
 
-/* Grok Card Style - rounded-2xl (1.5rem) and backdrop-blur-sm */
-.grok-card {
-  background: var(--grok-surface);
-  border: 1px solid var(--grok-border);
-  border-radius: 1.5rem; /* rounded-2xl */
+/* Card Style */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
   padding: var(--space-xl);
-  backdrop-filter: blur(4px); /* backdrop-blur-sm */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.grok-card:hover {
-  border-color: var(--grok-blue);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-  transform: translateY(-2px);
-}
-
-/* Grok Button Styles - exact match to spec */
-.btn-grok-primary {
-  background: var(--grok-blue);
-  color: #000000;
-  font-weight: 500;
-  padding: 0.75rem 1.5rem; /* px-6 py-3 */
-  border-radius: 0.5rem; /* rounded-lg */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 15px -3px rgba(0, 212, 255, 0.2), 0 4px 6px -2px rgba(0, 212, 255, 0.1); /* shadow-lg shadow-grok-blue/20 */
-  border: none;
 }
 
-.btn-grok-primary:hover {
-  background: var(--grok-blue-hover);
-  transform: scale(1.05);
+.card:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
 }
 
-.btn-grok-primary:active {
-  transform: scale(1);
+/* Button Styles */
+.btn-primary {
+  background: var(--accent);
+  color: var(--text-invert);
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--accent);
 }
 
-.btn-grok-secondary {
-  border: 1px solid var(--grok-border);
-  color: var(--grok-text-primary);
-  padding: 0.625rem 1.25rem; /* px-5 py-2.5 */
-  border-radius: 0.5rem; /* rounded-lg */
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
 }
 
-.btn-grok-secondary:hover {
-  background: var(--grok-surface-2);
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
 }
 
-/* Typography Utilities */
-.text-grok-heading {
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+/* Input Style */
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
-.text-grok-title {
-  font-size: 2.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.input::placeholder {
+  color: var(--text-muted);
 }
 
-.text-grok-body {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--grok-text-secondary);
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Animations */
@@ -232,73 +238,8 @@ input, select, textarea {
   }
 }
 
-@keyframes ping {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
-}
-
 .animate-fade-up {
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Typing dots animation - exact match to spec */
-.typing-dots {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-
-.typing-dots span {
-  display: inline-block;
-  width: 0.5rem; /* w-2 */
-  height: 0.5rem; /* h-2 */
-  background: var(--grok-blue); /* bg-grok-blue */
-  border-radius: 50%; /* rounded-full */
-  animation: bounce 1.4s infinite;
-}
-
-.typing-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-/* Hover glow effect - exact match to spec */
-.hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-
-.hover-glow:hover {
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-}
-
-/* Grok Input Style */
-.grok-input {
-  width: 100%;
-  resize: none;
-  background: var(--grok-surface-2);
-  border: 1px solid var(--grok-border);
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  color: var(--grok-text-primary);
-  transition: all 0.2s ease;
-}
-
-.grok-input::placeholder {
-  color: var(--grok-text-muted);
-}
-
-.grok-input:focus {
-  outline: none;
-  border-color: var(--grok-blue);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
 }
 
 /* Optimize rendering */
@@ -320,14 +261,6 @@ button, a, input, select {
   
   h3 {
     font-size: 1.25rem;
-  }
-  
-  .text-grok-heading {
-    font-size: 2rem;
-  }
-  
-  .text-grok-title {
-    font-size: 1.5rem;
   }
   
   .container {

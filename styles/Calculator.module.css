@@ -12,13 +12,13 @@
 
 .intro h1 {
   margin-bottom: var(--space-md);
-  color: var(--grok-text-primary);
+  color: var(--text-primary);
   font-family: var(--font-space);
 }
 
 .subtitle {
   font-size: var(--text-lg);
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 

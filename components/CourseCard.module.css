@@ -1,7 +1,7 @@
 .card {
-  background-color: var(--grok-surface);
-  border: 1px solid var(--grok-border);
-  border-radius: 1.5rem; /* rounded-2xl */
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
   padding: var(--space-xl);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -9,13 +9,13 @@
   text-decoration: none;
   color: inherit;
   will-change: transform, border-color, box-shadow;
-  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .card:hover {
-  border-color: var(--grok-blue);
+  border-color: var(--border-hover);
   transform: translateY(-4px);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); /* hover-glow effect */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: var(--surface-hover);
 }
 
 .header {
@@ -26,16 +26,16 @@
 }
 
 .courseCode {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-xl);
   font-weight: 600;
   margin: 0;
-  color: var(--grok-blue);
+  color: var(--text-primary);
 }
 
 .year {
   font-size: var(--text-sm);
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
 }
 
 .stats {
@@ -53,7 +53,7 @@
 
 .statLabel {
   font-size: var(--text-xs);
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -61,8 +61,8 @@
 .statValue {
   font-size: var(--text-lg);
   font-weight: 600;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--grok-text-primary);
+  font-family: var(--font-mono);
+  color: var(--text-primary);
 }
 
 .bar {
@@ -71,7 +71,7 @@
   overflow: hidden;
   border-radius: 0.5rem;
   margin-top: var(--space-md);
-  background: var(--grok-surface-2);
+  background: var(--bg-tertiary);
 }
 
 .barSegment {

@@ -1,0 +1,138 @@
+.searchBarContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-width: var(--content-max-width, 800px);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  padding-bottom: var(--space-md);
+}
+
+.backdrop {
+  position: absolute;
+  bottom: 0;
+  height: 3.5rem;
+  width: 100%;
+  background: linear-gradient(
+    to top,
+    var(--bg-primary) 0%,
+    var(--bg-primary) 94%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  pointer-events: none;
+}
+
+.searchBar {
+  position: relative;
+  z-index: 10;
+}
+
+.form {
+  width: 100%;
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10rem;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.1s ease-in-out;
+}
+
+.inputContainer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.inputContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: all 0.1s ease;
+  opacity: 0.5;
+}
+
+.clearButton:hover {
+  opacity: 1;
+  background: var(--surface-hover);
+}
+
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--text-invert);
+  transition: all 0.1s ease;
+  flex-shrink: 0;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: scale(1);
+}
+
+.submitButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .searchBarContainer {
+    padding: 0 var(--space-sm);
+    padding-bottom: var(--space-sm);
+  }
+  
+  .input {
+    font-size: 0.9375rem;
+  }
+}
+

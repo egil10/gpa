@@ -24,8 +24,8 @@ let cache: CachedData | null = null;
  * Load cache from file (server-side only)
  */
 export function loadCache(): CachedData | null {
+  // Client-side: cache is loaded via getStaticProps or API route
   if (typeof window !== 'undefined') {
-    // Client-side: cache is loaded via getStaticProps or API route
     return null;
   }
 
@@ -35,19 +35,19 @@ export function loadCache(): CachedData | null {
 
   try {
     // Only import fs on server-side (Node.js)
-    if (typeof require !== 'undefined') {
-      const fs = require('fs');
-      const path = require('path');
-      const cacheFile = path.join(process.cwd(), 'data', 'cache.json');
-      
-      if (fs.existsSync(cacheFile)) {
-        const content = fs.readFileSync(cacheFile, 'utf-8');
-        cache = JSON.parse(content);
-        return cache;
-      }
+    // Webpack will exclude this from client bundles via webpack config
+    const fs = require('fs');
+    const path = require('path');
+    const cacheFile = path.join(process.cwd(), 'data', 'cache.json');
+    
+    if (fs.existsSync(cacheFile)) {
+      const content = fs.readFileSync(cacheFile, 'utf-8');
+      cache = JSON.parse(content);
+      return cache;
     }
   } catch (error) {
     // Silently fail - cache is optional
+    // This is expected on client-side where fs is not available
   }
 
   return null;

@@ -1,16 +1,16 @@
 .card {
-  background-color: var(--grok-surface);
-  border: 1px solid var(--grok-border);
-  border-radius: 1.5rem; /* rounded-2xl */
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
   padding: var(--space-xl);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(4px); /* backdrop-blur-sm */
 }
 
 .card:hover {
-  border-color: var(--grok-blue);
-  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); /* hover-glow effect */
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
+  background: var(--surface-hover);
 }
 
 .header {
@@ -25,7 +25,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -35,27 +35,27 @@
 }
 
 .trend.up {
-  color: var(--grok-green);
+  color: var(--text-primary);
 }
 
 .trend.down {
-  color: var(--grok-orange);
+  color: var(--text-secondary);
 }
 
 .trend.neutral {
-  color: var(--grok-text-muted);
+  color: var(--text-muted);
 }
 
 .value {
   font-size: var(--text-3xl);
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   margin-bottom: var(--space-sm);
-  color: var(--grok-blue);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: var(--text-sm);
-  color: var(--grok-text-secondary);
+  color: var(--text-secondary);
   margin: 0;
 }
