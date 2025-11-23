@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- **Total courses**: 44 courses
+- **Total courses**: 44 courses 
 - **Location**: `lib/courses.ts` in the `POPULAR_COURSES` array
 - **Breakdown by institution**:
   - UiO: 17 courses
