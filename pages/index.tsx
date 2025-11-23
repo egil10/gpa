@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ArrowUpDown, Filter, Search, ArrowUp, X, Plus } from 'lucide-react';
+import Image from 'next/image';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
@@ -30,6 +31,7 @@ export default function Home() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 12 courses are loaded
   const [lastSortBy, setLastSortBy] = useState<SortOption | null>(null); // Track last sort option to detect changes
   const [courseOrder, setCourseOrder] = useState<string[]>([]); // Maintain stable order of courses
+  const [filterMessage, setFilterMessage] = useState<string>(''); // Message to show when applying filters
   const coursesDataRef = useRef<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const loadingCoursesRef = useRef<Set<string>>(new Set());
 
@@ -688,12 +690,33 @@ export default function Home() {
 
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Show message if no search query but filters are being applied
+    const newSearchQuery = searchInput.trim();
+    if (!newSearchQuery) {
+      const institutionName = pendingInstitution !== 'all' 
+        ? UNIVERSITIES[pendingInstitution]?.shortName || pendingInstitution
+        : '';
+      if (institutionName || pendingSortBy !== 'most-a') {
+        setFilterMessage(
+          institutionName 
+            ? `Viser emner fra ${institutionName} basert på valgte filtre. Skriv inn emnekode eller navn for å søke.`
+            : 'Filtrer vil gjelde for viste emner. Skriv inn emnekode eller navn for å søke.'
+        );
+      } else {
+        setFilterMessage('Skriv inn emnekode eller navn i søkefeltet for å søke etter spesifikke emner.');
+      }
+      // Clear message after 4 seconds
+      setTimeout(() => setFilterMessage(''), 4000);
+    } else {
+      setFilterMessage('');
+    }
+    
     // Apply pending filters and sort
     setSortBy(pendingSortBy);
     setSelectedInstitution(pendingInstitution);
     
     // Apply search query from input
-    const newSearchQuery = searchInput.trim();
     setSearchQuery(newSearchQuery);
     
     // Reset display to initial state - start fresh
@@ -801,6 +824,11 @@ export default function Home() {
         <div className="container">
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
+              <span className={styles.heroLogo}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M 2 32 C 2 32, 6 26, 10 24 C 14 22, 16 20.5, 20 20 C 24 20.5, 26 22, 30 24 C 34 26, 38 32, 38 32" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+              </span>
               Karakterfordeling
             </h1>
             <BottomSearchBar />
@@ -816,6 +844,11 @@ export default function Home() {
 
           {/* Sorting and Filtering Controls */}
           <form onSubmit={handleApply} className={styles.controls}>
+            {filterMessage && (
+              <div className={styles.filterMessage}>
+                {filterMessage}
+              </div>
+            )}
             <div className={styles.controlGroup}>
               <label htmlFor="search" className={styles.controlLabel} title="Søk">
                 <Search size={16} />
