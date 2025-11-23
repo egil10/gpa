@@ -1,0 +1,57 @@
+import React from 'react';
+import { Github } from 'lucide-react';
+import styles from './Footer.module.css';
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
+  return (
+    <footer className={styles.footer}>
+      <div className="container">
+        <div className={styles.footerContent}>
+          <div className={styles.footerSection}>
+            <h4>Data</h4>
+            <p>
+              Data hentes fra{' '}
+              <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
+                NSD
+              </a>
+              {' '}(Norsk senter for forskningsdata).
+            </p>
+            <p>
+              <a 
+                href="https://data.norge.no/nlod/no/2.0/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Lisens for bruk
+              </a>
+            </p>
+          </div>
+          <div className={styles.footerSection}>
+            <h4>Om</h4>
+            <p>
+              Karakterstatistikk er en uavhengig plattform for å utforske 
+              karakterfordelinger ved norske universiteter.
+            </p>
+          </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <p className="text-light">© {currentYear} Karakterstatistikk</p>
+          <a 
+            href="https://github.com/egil10/gpa" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.githubLink}
+            aria-label="GitHub repository"
+          >
+            <Github size={18} />
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+

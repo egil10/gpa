@@ -1,0 +1,32 @@
+.calculatorPage {
+  padding: var(--space-3xl) 0;
+  min-height: 80vh;
+}
+
+.intro {
+  max-width: 700px;
+  margin: 0 auto var(--space-3xl);
+  text-align: center;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.intro h1 {
+  margin-bottom: var(--space-md);
+}
+
+.subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-light);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .calculatorPage {
+    padding: var(--space-2xl) 0;
+  }
+  
+  .intro {
+    margin-bottom: var(--space-2xl);
+  }
+}
+

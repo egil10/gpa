@@ -1,0 +1,59 @@
+.card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  padding: var(--space-lg);
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: var(--color-accent);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.trend {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.trend.up {
+  color: #00cc00;
+}
+
+.trend.down {
+  color: var(--color-error);
+}
+
+.trend.neutral {
+  color: var(--color-text-light);
+}
+
+.value {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-bottom: var(--space-sm);
+  color: var(--color-primary);
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+
