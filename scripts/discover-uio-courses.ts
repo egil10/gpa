@@ -33,7 +33,12 @@ async function discoverUiOCourses() {
   const institutionName = 'UiO';
   
   // Fetch years from most recent to oldest
-  const years = [2024, 2023, 2022, 2021, 2020];
+  // Going back as far as API allows (typically 2000+)
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 2000; year--) {
+    years.push(year);
+  }
   const allCoursesMap = new Map<string, CourseExport>();
   
   console.log(`📡 Fetching all courses from ${institutionName}...`);

@@ -29,8 +29,12 @@ async function discoverUiBCourses() {
   const institutionName = 'UiB';
   
   // Fetch years from most recent to oldest
-  // Note: 2025 might not have much data yet, but we'll try
-  const years = [2025, 2024, 2023, 2022, 2021, 2020];
+  // Going back as far as API allows (typically 2000+)
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 2000; year--) {
+    years.push(year);
+  }
   const allCoursesMap = new Map<string, CourseExport>();
   
   console.log(`📡 Fetching all courses from ${institutionName}...`);
