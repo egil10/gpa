@@ -11,7 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { POPULAR_COURSES } from '../lib/courses';
-import { UNIVERSITIES, createSearchPayload } from '../lib/api';
+import { UNIVERSITIES, createSearchPayload, formatCourseCode } from '../lib/api';
 import { GradeData } from '../types';
 
 const DIRECT_API = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
@@ -31,13 +31,17 @@ interface CachedData {
 
 async function fetchCourseData(
   institutionCode: string,
-  courseCode: string
+  courseCode: string,
+  institution: string
 ): Promise<GradeData[]> {
-  const payload = createSearchPayload(institutionCode, courseCode);
+  // Use the same format as the original KarakterWeb implementation
+  // Format: COURSECODE-1 (or COURSECODE1 for BI), uppercase, no spaces
+  const formattedCode = formatCourseCode(courseCode, institution);
   
-  console.log(`Fetching ${courseCode} (${institutionCode})...`);
+  console.log(`Fetching ${courseCode} → ${formattedCode} (${institutionCode})...`);
   
   try {
+    const payload = createSearchPayload(institutionCode, formattedCode);
     const response = await fetch(DIRECT_API, {
       method: 'POST',
       headers: {
@@ -47,13 +51,18 @@ async function fetchCourseData(
     });
 
     if (response.status === 204 || !response.ok) {
-      console.log(`  ⚠️  No data found for ${courseCode}`);
+      console.log(`  ⚠️  No data found for ${courseCode} (tried ${formattedCode})`);
       return [];
     }
 
     const data: GradeData[] = await response.json();
-    console.log(`  ✓ Found ${data.length} entries`);
-    return data;
+    if (data && data.length > 0) {
+      console.log(`  ✓ Found ${data.length} entries`);
+      return data;
+    }
+    
+    console.log(`  ⚠️  No data found for ${courseCode} (empty response)`);
+    return [];
   } catch (error) {
     console.error(`  ✗ Error fetching ${courseCode}:`, error instanceof Error ? error.message : error);
     return [];
@@ -83,7 +92,7 @@ async function fetchAllCourses(): Promise<CachedData> {
     
     const promises = batch.map(async (course) => {
       const key = `${course.institutionCode}-${course.code}`;
-      const data = await fetchCourseData(course.institutionCode, course.code);
+      const data = await fetchCourseData(course.institutionCode, course.code, course.institution);
       
       if (data.length > 0) {
         cache.courses[key] = data;

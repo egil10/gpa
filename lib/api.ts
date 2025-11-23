@@ -182,7 +182,11 @@ export async function fetchAllYearsData(
 }
 
 export function formatCourseCode(courseCode: string, institution: string): string {
+  // Remove spaces and convert to uppercase (matching inspo implementation)
   const cleaned = courseCode.replace(/\s/g, '').toUpperCase();
+  
+  // BI uses format: COURSECODE1 (no dash)
+  // Others use format: COURSECODE-1 (with dash)
   if (institution === 'BI') {
     return `${cleaned}1`;
   }
