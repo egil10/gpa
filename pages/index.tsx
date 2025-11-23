@@ -31,7 +31,7 @@ export default function Home() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 12 courses are loaded
   const [lastSortBy, setLastSortBy] = useState<SortOption | null>(null); // Track last sort option to detect changes
   const [courseOrder, setCourseOrder] = useState<string[]>([]); // Maintain stable order of courses
-  const [filterMessage, setFilterMessage] = useState<string>(''); // Message to show when applying filters
+  const [searchHint, setSearchHint] = useState<string>(''); // Hint message to show in search field
   const coursesDataRef = useRef<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const loadingCoursesRef = useRef<Set<string>>(new Set());
 
@@ -691,25 +691,21 @@ export default function Home() {
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Show message if no search query but filters are being applied
+    // Show hint in search field if no search query but filters are being applied
     const newSearchQuery = searchInput.trim();
     if (!newSearchQuery) {
       const institutionName = pendingInstitution !== 'all' 
         ? UNIVERSITIES[pendingInstitution]?.shortName || pendingInstitution
         : '';
       if (institutionName || pendingSortBy !== 'most-a') {
-        setFilterMessage(
-          institutionName 
-            ? `Viser emner fra ${institutionName} basert på valgte filtre. Skriv inn emnekode eller navn for å søke.`
-            : 'Filtrer vil gjelde for viste emner. Skriv inn emnekode eller navn for å søke.'
-        );
+        setSearchHint('Legg til emnekode eller navn for å søke');
       } else {
-        setFilterMessage('Skriv inn emnekode eller navn i søkefeltet for å søke etter spesifikke emner.');
+        setSearchHint('Legg til emnekode eller navn');
       }
-      // Clear message after 4 seconds
-      setTimeout(() => setFilterMessage(''), 4000);
+      // Clear hint after 3 seconds or when user starts typing
+      setTimeout(() => setSearchHint(''), 3000);
     } else {
-      setFilterMessage('');
+      setSearchHint('');
     }
     
     // Apply pending filters and sort
@@ -828,9 +824,10 @@ export default function Home() {
                 <Image 
                   src="/dist.svg" 
                   alt="Logo" 
-                  width={40} 
-                  height={40}
+                  width={120} 
+                  height={68}
                   priority
+                  style={{ width: 'auto', height: '4rem' }}
                 />
               </span>
               Karakterfordeling
@@ -848,11 +845,6 @@ export default function Home() {
 
           {/* Sorting and Filtering Controls */}
           <form onSubmit={handleApply} className={styles.controls}>
-            {filterMessage && (
-              <div className={styles.filterMessage}>
-                {filterMessage}
-              </div>
-            )}
             <div className={styles.controlGroup}>
               <label htmlFor="search" className={styles.controlLabel} title="Søk">
                 <Search size={16} />
@@ -862,14 +854,20 @@ export default function Home() {
                   id="search"
                   type="text"
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                    // Clear hint when user starts typing
+                    if (e.target.value.trim()) {
+                      setSearchHint('');
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleApply(e as any);
                     }
                   }}
-                  placeholder="Søk etter emnekode eller navn..."
+                  placeholder={searchHint || "Søk etter emnekode eller navn..."}
                   className={styles.searchInput}
                 />
                 {searchInput.trim() && (

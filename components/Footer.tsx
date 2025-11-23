@@ -21,28 +21,33 @@ export default function Footer() {
           <div className={styles.footerSection}>
             <h4>Data</h4>
             <p>
-              Inneholder data under{' '}
+              Inneholder data fra{' '}
+              <a 
+                href="https://dbh.hkdir.no" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Database for statistikk om høyere utdanning (DBH)
+              </a>
+              {' '}ved{' '}
+              <a 
+                href="https://hkdir.no" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Direktoratet for høyere utdanning og kompetanse (HK-dir)
+              </a>
+              , tilgjengeliggjort av{' '}
+              <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
+                NSD (Norsk senter for forskningsdata)
+              </a>
+              {' '}under{' '}
               <a 
                 href="https://data.norge.no/nlod/no/2.0/" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
                 Norsk lisens for offentlige data (NLOD)
-              </a>
-              {' '}tilgjengeliggjort av{' '}
-              <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
-                NSD (Norsk senter for forskningsdata)
-              </a>
-              .
-            </p>
-            <p className={styles.footerSubtext}>
-              Dataen er offentlig tilgjengelig og oppdateres regelmessig.{' '}
-              <a 
-                href="https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                Se dataene direkte hos NSD
               </a>
               .
             </p>
