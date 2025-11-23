@@ -22,14 +22,7 @@ export default function AboutPage() {
             <section className={styles.section}>
               <h2>Data</h2>
               <p>
-                All data hentes fra{' '}
-                <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
-                  NSD (Norsk senter for forskningsdata)
-                </a>
-                . Dataen er offentlig tilgjengelig og oppdateres regelmessig.
-              </p>
-              <p>
-                Dataen er tilgjengelig under{' '}
+                Inneholder data under{' '}
                 <a 
                   href="https://data.norge.no/nlod/no/2.0/" 
                   target="_blank" 
@@ -37,7 +30,16 @@ export default function AboutPage() {
                 >
                   Norsk lisens for offentlige data (NLOD)
                 </a>
+                {' '}tilgjengeliggjort av{' '}
+                <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
+                  NSD (Norsk senter for forskningsdata)
+                </a>
                 .
+              </p>
+              <p>
+                Dataen er offentlig tilgjengelig og oppdateres regelmessig. 
+                Cached data i dette repositoryet er en kopi av offentlig tilgjengelig data 
+                fra NSD og er lisensiert under samme NLOD 2.0 lisens.
               </p>
             </section>
 

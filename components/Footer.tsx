@@ -12,20 +12,19 @@ export default function Footer() {
           <div className={styles.footerSection}>
             <h4>Data</h4>
             <p>
-              Data hentes fra{' '}
-              <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
-                NSD
-              </a>
-              {' '}(Norsk senter for forskningsdata).
-            </p>
-            <p>
+              Inneholder data under{' '}
               <a 
                 href="https://data.norge.no/nlod/no/2.0/" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
-                Lisens for bruk
+                Norsk lisens for offentlige data (NLOD)
               </a>
+              {' '}tilgjengeliggjort av{' '}
+              <a href="https://nsd.no" target="_blank" rel="noopener noreferrer">
+                NSD (Norsk senter for forskningsdata)
+              </a>
+              .
             </p>
           </div>
           <div className={styles.footerSection}>

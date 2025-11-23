@@ -4,6 +4,42 @@
 
 To improve performance and reliability, grade data for popular courses is cached locally. This eliminates CORS issues and provides instant access to historical data.
 
+## License & Publishing to GitHub
+
+**✅ YES, you can publish the cached data to GitHub!**
+
+According to NLOD 2.0 license:
+- ✅ You **CAN** copy and redistribute the data
+- ✅ You **CAN** store it locally and publish it
+- ✅ You **MUST** attribute NSD as the source (already done in footer/about page)
+- ✅ You **MUST** link to the NLOD license (already done)
+
+The cached `data/cache.json` file can be committed to GitHub. The license explicitly allows:
+- Copying and making available the information
+- Storing it in any format
+- Redistributing it
+
+**Attribution Requirements (Already Met):**
+- ✅ NSD is attributed as the source (footer & about page)
+- ✅ NLOD 2.0 license is linked
+- ✅ Proper attribution text: "Inneholder data under Norsk lisens for offentlige data (NLOD) tilgjengeliggjort av NSD"
+
+## File Size Limits
+
+### GitHub Limits:
+- **Individual file**: 100 MB limit
+- **Repository**: No hard limit (but GitHub recommends < 1 GB for optimal performance)
+
+### Expected Cache Size:
+- **232 courses** × **~5-10 years** × **~6 grades** = **~7,000-14,000 entries**
+- Each entry: ~200-500 bytes
+- **Estimated total**: **1.5-7 MB** (well under 100 MB limit)
+
+### If Cache Gets Too Large:
+- Use Git LFS for files > 50 MB
+- Split cache into multiple files by institution
+- Compress JSON (though readable JSON is preferred)
+
 ## How It Works
 
 1. **Cache Storage**: Data is stored in `data/cache.json`
@@ -114,12 +150,23 @@ The script will:
 - Run `npm run fetch-cache` to update
 - Check `metadata.lastUpdated` in cache file
 
-## File Size Considerations
+## API Rate Limits
 
-- Each course entry is ~200-500 bytes
-- 232 courses × 5 years ≈ 1-2 MB
-- This is acceptable for a static site
-- Consider git LFS if file gets too large (>10MB)
+### NSD API:
+- **No documented rate limits** (but be respectful)
+- Script includes **1 second delay** between batches
+- **5 courses per batch** = ~1 request per second
+- **232 courses** = ~46 seconds total (plus API response time)
+
+### If You Hit Limits:
+- Increase delay between batches (edit `fetch-cache.ts`)
+- Reduce batch size (currently 5)
+- Run script multiple times (it will skip already-fetched courses if you modify it)
+
+### Recommended:
+- Run during off-peak hours
+- Don't run multiple instances simultaneously
+- Wait a few minutes between full cache updates
 
 ## Future Improvements
 
