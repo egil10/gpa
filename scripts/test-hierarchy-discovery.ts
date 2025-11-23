@@ -77,25 +77,36 @@ async function testFilteredDiscovery() {
   
   try {
     console.log(`\n📡 Fetching courses for NHH Bachelor program...`);
-    console.log(`   Filters: Progkode=BACHELOR15, Studkode=ØA`);
+    console.log(`   Note: This might require correct filter codes from DBH`);
     
-    const courses = await discoverCoursesAtPath('1240', {
-      'Progkode': ['BACHELOR15'],
-      'Studkode': ['ØA']
-    }, 2024);
+    // First, let's see what courses we can filter from all NHH courses
+    const allCourses = await getAllCoursesForInstitution('1240', 2024);
     
-    console.log(`✅ Found ${courses.length} courses in Bachelor program for 2024\n`);
+    // Filter courses that look like Bachelor courses
+    const bachelorCourses = allCourses.filter(c => 
+      c.courseCode.startsWith('BED') || 
+      c.courseCode.startsWith('MET') ||
+      c.courseCode.startsWith('SAM') ||
+      c.courseCode.startsWith('SOL') ||
+      c.courseCode.startsWith('RET')
+    );
     
-    if (courses.length > 0) {
-      console.log('📚 Courses:');
-      courses.slice(0, 15).forEach((course, idx) => {
+    console.log(`✅ Found ${bachelorCourses.length} potential Bachelor courses (filtered by code prefix)\n`);
+    
+    if (bachelorCourses.length > 0) {
+      console.log('📚 Sample Bachelor courses:');
+      bachelorCourses.slice(0, 15).forEach((course, idx) => {
         console.log(`   ${idx + 1}. ${course.courseCode.padEnd(12)} - ${course.totalStudents.toLocaleString().padStart(6)} students`);
       });
       
-      if (courses.length > 15) {
-        console.log(`   ... and ${courses.length - 15} more courses`);
+      if (bachelorCourses.length > 15) {
+        console.log(`   ... and ${bachelorCourses.length - 15} more courses`);
       }
     }
+    
+    // Also try with study program filter if we have the right codes
+    console.log(`\n💡 Note: Direct study program filtering requires correct Progkode/Studkode values`);
+    console.log(`   The API returned 400 when using BACHELOR15/ØA - these codes may need verification`);
     
   } catch (error) {
     console.error(`❌ Error:`, error instanceof Error ? error.message : error);

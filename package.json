@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "fetch-cache": "tsx scripts/fetch-cache.ts",
     "test-fetch": "tsx scripts/test-fetch.ts",
-    "test-hierarchy": "tsx scripts/test-hierarchy-discovery.ts"
+    "test-hierarchy": "tsx scripts/test-hierarchy-discovery.ts",
+    "discover-nhh": "tsx scripts/discover-nhh-bachelor.ts"
   },
   "dependencies": {
     "lucide-react": "^0.300.0",

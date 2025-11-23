@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CourseInfo, searchCourses, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES } from '@/lib/api';
+import { searchNHHBachelorCourses, nhhCourseToCourseInfo } from '@/lib/nhh-bachelor-courses';
 import styles from './CourseNameAutocomplete.module.css';
 
 interface CourseNameAutocompleteProps {
@@ -36,13 +37,31 @@ export default function CourseNameAutocomplete({
     }
   }, [value]);
 
+  // Load NHH Bachelor courses state
+  const [nhhCourses, setNhhCourses] = useState<CourseInfo[]>([]);
+  const [nhhCoursesLoaded, setNhhCoursesLoaded] = useState(false);
+
+  // Load NHH Bachelor courses when NHH is selected
+  useEffect(() => {
+    if (institution === 'NHH' && !nhhCoursesLoaded) {
+      searchNHHBachelorCourses('').then(courses => {
+        const courseInfos = courses.map(nhhCourseToCourseInfo);
+        setNhhCourses(courseInfos);
+        setNhhCoursesLoaded(true);
+      }).catch(console.error);
+    }
+  }, [institution, nhhCoursesLoaded]);
+
   // Get popular courses for empty query
   const getPopularCourses = useCallback(() => {
+    if (institution === 'NHH' && nhhCoursesLoaded && nhhCourses.length > 0) {
+      return nhhCourses.slice(0, 6);
+    }
     if (institution) {
       return POPULAR_COURSES.filter(c => c.institution === institution).slice(0, 6);
     }
     return POPULAR_COURSES.slice(0, 6);
-  }, [institution]);
+  }, [institution, nhhCourses, nhhCoursesLoaded]);
 
   // Search with debouncing
   const performSearch = useCallback((searchQuery: string) => {
@@ -50,19 +69,35 @@ export default function CourseNameAutocomplete({
       clearTimeout(debounceRef.current);
     }
 
-    debounceRef.current = setTimeout(() => {
+    debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
         const popular = getPopularCourses();
         setSuggestions(popular);
         setShowSuggestions(popular.length > 0);
       } else {
-        const results = searchCourses(searchQuery, institution);
+        let results: CourseInfo[] = [];
+        
+        // If NHH is selected, search NHH Bachelor courses first
+        if (institution === 'NHH' && nhhCoursesLoaded) {
+          const nhhResults = await searchNHHBachelorCourses(searchQuery);
+          results = nhhResults.map(nhhCourseToCourseInfo);
+        }
+        
+        // Also search regular courses
+        const regularResults = searchCourses(searchQuery, institution);
+        
+        // Combine and deduplicate (NHH courses take priority)
+        const regularFiltered = regularResults.filter(r => 
+          !results.some(n => n.code === r.code)
+        );
+        results = [...results, ...regularFiltered].slice(0, 10);
+        
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
       }
       setSelectedIndex(-1);
     }, 200);
-  }, [institution, getPopularCourses]);
+  }, [institution, getPopularCourses, nhhCoursesLoaded]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

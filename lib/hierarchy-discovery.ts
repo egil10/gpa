@@ -73,6 +73,30 @@ export async function fetchWithFilters(
     filter: filterArray,
   };
 
+  // In Node.js environment (like test scripts), call API directly (no CORS)
+  const isNode = typeof window === 'undefined';
+  if (isNode) {
+    const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
+    const response = await fetch(DIRECT_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    
+    if (response.status === 204) {
+      return [];
+    }
+    
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  }
+
+  // In browser, use proxy system
   return fetchWithProxy(payload);
 }
 
