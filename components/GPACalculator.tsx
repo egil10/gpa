@@ -1,5 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Course, GradeSystem, calculateGPA, UNIVERSITY_GRADES, HIGHSCHOOL_GRADES, GRADE_VALUES } from '@/types/gpa';
+import CourseNameAutocomplete from './CourseNameAutocomplete';
+import { CourseInfo } from '@/lib/courses';
+import { UNIVERSITIES } from '@/lib/api';
 import styles from './GPACalculator.module.css';
 
 interface GPACalculatorProps {
@@ -17,6 +20,7 @@ const EXAMPLE_COURSES: Course[] = [
 
 export default function GPACalculator({ initialSystem = 'university' }: GPACalculatorProps) {
   const [system, setSystem] = useState<GradeSystem>(initialSystem);
+  const [institution, setInstitution] = useState<string>('');
   const [courses, setCourses] = useState<Course[]>(() => {
     // Pre-populate with examples on first load
     if (typeof window !== 'undefined') {
@@ -91,19 +95,39 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     <div className={styles.calculator}>
       <div className={styles.header}>
         <h2>GPA Kalkulator</h2>
-        <div className={styles.systemSelector}>
-          <button
-            className={`${styles.systemButton} ${system === 'university' ? styles.active : ''}`}
-            onClick={() => handleSystemChange('university')}
-          >
-            Universitet (A-F)
-          </button>
-          <button
-            className={`${styles.systemButton} ${system === 'highschool' ? styles.active : ''}`}
-            onClick={() => handleSystemChange('highschool')}
-          >
-            Videregående (1-6)
-          </button>
+        <div className={styles.controls}>
+          <div className={styles.systemSelector}>
+            <button
+              className={`${styles.systemButton} ${system === 'university' ? styles.active : ''}`}
+              onClick={() => handleSystemChange('university')}
+            >
+              Universitet (A-F)
+            </button>
+            <button
+              className={`${styles.systemButton} ${system === 'highschool' ? styles.active : ''}`}
+              onClick={() => handleSystemChange('highschool')}
+            >
+              Videregående (1-6)
+            </button>
+          </div>
+          {system === 'university' && (
+            <div className={styles.institutionSelector}>
+              <label htmlFor="gpa-institution">Institusjon (valgfritt)</label>
+              <select
+                id="gpa-institution"
+                value={institution}
+                onChange={(e) => setInstitution(e.target.value)}
+                className={styles.institutionSelect}
+              >
+                <option value="">Alle institusjoner</option>
+                {Object.entries(UNIVERSITIES).map(([key, uni]) => (
+                  <option key={key} value={key}>
+                    {uni.shortName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -175,12 +199,13 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 <div className={styles.courseFields}>
                   <div className={styles.field}>
                     <label>Emnenavn</label>
-                    <input
-                      type="text"
+                    <CourseNameAutocomplete
                       value={course.name}
-                      onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
-                      placeholder="F.eks. Matematikk 1"
-                      className={styles.input}
+                      onChange={(name) => updateCourse(course.id, 'name', name)}
+                      onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
+                      institution={institution || undefined}
+                      placeholder="Søk etter emnenavn eller skriv manuelt..."
+                      disabled={false}
                     />
                   </div>
 

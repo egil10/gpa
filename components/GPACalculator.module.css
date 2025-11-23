@@ -13,10 +13,58 @@
   margin-bottom: var(--space-lg);
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
 .systemSelector {
   display: flex;
   gap: var(--space-sm);
   justify-content: center;
+}
+
+.institutionSelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: center;
+  min-width: 200px;
+}
+
+.institutionSelector label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-light);
+}
+
+.institutionSelect {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background-color: var(--color-background);
+  cursor: pointer;
+  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 250px;
+}
+
+.institutionSelect:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+  }
 }
 
 .systemButton {
