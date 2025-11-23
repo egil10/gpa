@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { Search, X } from 'lucide-react';
 import Layout from '@/components/Layout';
 import GradeChart from '@/components/GradeChart';
+import MultiYearChart from '@/components/MultiYearChart';
 import CourseAutocomplete from '@/components/CourseAutocomplete';
-import { fetchGradeData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
-import { processGradeData, getAvailableYears } from '@/lib/utils';
+import CourseExplorer from '@/components/CourseExplorer';
+import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
+import { processMultiYearData, combineAllYears, getAvailableYears } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { CourseInfo, getInstitutionForCourse } from '@/lib/courses';
 import styles from '@/styles/Search.module.css';
@@ -12,20 +15,32 @@ import styles from '@/styles/Search.module.css';
 export default function SearchPage() {
   const router = useRouter();
   const [courseCode, setCourseCode] = useState('');
-  const [year, setYear] = useState(new Date().getFullYear() - 1);
   const [institution, setInstitution] = useState('UiO');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<CourseStats | null>(null);
+  const [allYearsStats, setAllYearsStats] = useState<Record<number, CourseStats>>({});
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [institutionLocked, setInstitutionLocked] = useState(false);
+  const [showExplorer, setShowExplorer] = useState(false);
 
   const availableYears = getAvailableYears();
+
+  const handleExplorerCourseSelect = (course: CourseInfo) => {
+    setCourseCode(course.code);
+    setInstitution(course.institution);
+    setInstitutionLocked(true);
+    setSelectedCourse(course);
+    setShowExplorer(false);
+    // Auto-trigger search
+    setTimeout(() => {
+      handleSearch();
+    }, 100);
+  };
 
   // Handle URL query parameters
   useEffect(() => {
     if (router.isReady) {
-      const { code, year: yearParam, uni } = router.query;
+      const { code, uni } = router.query;
       if (code) {
         const codeStr = String(code);
         setCourseCode(codeStr);
@@ -42,13 +57,12 @@ export default function SearchPage() {
         setInstitution(String(uni));
         setInstitutionLocked(false);
       }
-      if (yearParam) setYear(Number(yearParam));
     }
   }, [router.isReady, router.query]);
 
   // Auto-search if query params are present
   useEffect(() => {
-    if (router.isReady && router.query.code && router.query.year && router.query.uni) {
+    if (router.isReady && router.query.code && router.query.uni) {
       handleSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,7 +78,7 @@ export default function SearchPage() {
 
     setLoading(true);
     setError(null);
-    setStats(null);
+    setAllYearsStats({});
 
     try {
       const uniData = UNIVERSITIES[institution];
@@ -73,26 +87,34 @@ export default function SearchPage() {
       }
 
       const formattedCode = formatCourseCode(courseCode, institution);
-      const data = await fetchGradeData(uniData.code, formattedCode, year);
-      const processed = processGradeData(data);
+      // Fetch all years at once
+      const data = await fetchAllYearsData(uniData.code, formattedCode);
 
-      if (!processed) {
+      if (!data || data.length === 0) {
         setError('Ingen data funnet for dette emnet');
         return;
       }
 
-      setStats(processed);
+      // Process data grouped by year
+      const multiYearData = processMultiYearData(data);
+      
+      if (Object.keys(multiYearData).length === 0) {
+        setError('Ingen data funnet for dette emnet');
+        return;
+      }
+
+      setAllYearsStats(multiYearData);
       
       // Update URL without reload
       router.push({
         pathname: '/sok',
-        query: { code: courseCode, year, uni: institution },
+        query: { code: courseCode, uni: institution },
       }, undefined, { shallow: true });
     } catch (err) {
       setError(
         err instanceof Error 
           ? err.message 
-          : 'Kunne ikke hente data. Sjekk at emnekoden og året er riktig.'
+          : 'Kunne ikke hente data. Sjekk at emnekoden er riktig.'
       );
     } finally {
       setLoading(false);
@@ -118,7 +140,6 @@ export default function SearchPage() {
                 onClick={() => {
                   setCourseCode('IN2010');
                   setInstitution('UiO');
-                  setYear(2022);
                 }}
                 className={styles.quickButton}
               >
@@ -129,7 +150,6 @@ export default function SearchPage() {
                 onClick={() => {
                   setCourseCode('TDT4100');
                   setInstitution('NTNU');
-                  setYear(2022);
                 }}
                 className={styles.quickButton}
               >
@@ -140,14 +160,37 @@ export default function SearchPage() {
                 onClick={() => {
                   setCourseCode('ECON1100');
                   setInstitution('UiO');
-                  setYear(2022);
                 }}
                 className={styles.quickButton}
               >
                 ECON1100 (UiO)
               </button>
+              <button
+                type="button"
+                onClick={() => setShowExplorer(!showExplorer)}
+                className={`${styles.quickButton} ${styles.explorerToggle} ${showExplorer ? styles.active : ''}`}
+              >
+                {showExplorer ? (
+                  <>
+                    <X size={16} />
+                    <span>Lukk</span>
+                  </>
+                ) : (
+                  <>
+                    <Search size={16} />
+                    <span>Utforsk alle emner</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
+
+          {showExplorer && (
+            <CourseExplorer
+              onCourseSelect={handleExplorerCourseSelect}
+              selectedInstitution={institutionLocked ? institution : undefined}
+            />
+          )}
 
           <form onSubmit={handleSearch} className={styles.searchForm}>
             <div className={styles.formRow}>
@@ -262,26 +305,21 @@ export default function SearchPage() {
             </div>
           )}
 
-          {stats && (
+          {Object.keys(allYearsStats).length > 0 && (
             <div className={styles.results}>
-              <GradeChart
-                data={stats.distributions}
-                totalStudents={stats.totalStudents}
-                courseCode={stats.courseCode}
-                year={stats.year}
+              <MultiYearChart
+                allYearsData={allYearsStats}
+                courseCode={courseCode}
+                institution={institution}
               />
               
               <div className={styles.additionalStats}>
                 <div className={styles.statBox}>
-                  <h4>Total antall kandidater</h4>
-                  <p className={styles.statValue}>{stats.totalStudents}</p>
+                  <h4>Tilgjengelige år</h4>
+                  <p className={styles.statValue}>
+                    {Object.keys(allYearsStats).length} år
+                  </p>
                 </div>
-                {stats.averageGrade && (
-                  <div className={styles.statBox}>
-                    <h4>Gjennomsnittlig karakter</h4>
-                    <p className={styles.statValue}>{stats.averageGrade.toFixed(2)}</p>
-                  </div>
-                )}
                 <div className={styles.statBox}>
                   <h4>Institusjon</h4>
                   <p className={styles.statValue}>

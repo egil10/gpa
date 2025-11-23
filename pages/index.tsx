@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Search, Calculator } from 'lucide-react';
 import Layout from '@/components/Layout';
 import StatCard from '@/components/StatCard';
 import CourseCard from '@/components/CourseCard';
 import Link from 'next/link';
 import styles from '@/styles/Home.module.css';
 import { CourseStats } from '@/types';
+import { POPULAR_COURSES, CourseInfo } from '@/lib/courses';
+import { UNIVERSITIES } from '@/lib/api';
 
 // Sample featured courses - in a real app, these would come from analytics
 const FEATURED_COURSES: Array<CourseStats & { institution: string }> = [
@@ -56,6 +59,17 @@ const FEATURED_COURSES: Array<CourseStats & { institution: string }> = [
 ];
 
 export default function Home() {
+  // Get one random course from each institution
+  const randomCourses = useMemo(() => {
+    const institutions = ['UiO', 'NTNU', 'OsloMet', 'UiB', 'BI'];
+    return institutions.map(inst => {
+      const courses = POPULAR_COURSES.filter(c => c.institution === inst);
+      if (courses.length === 0) return null;
+      const randomIndex = Math.floor(Math.random() * courses.length);
+      return courses[randomIndex];
+    }).filter(Boolean) as CourseInfo[];
+  }, []);
+
   return (
     <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">
       <div className={styles.hero}>
@@ -71,16 +85,49 @@ export default function Home() {
             <div className={styles.ctaButtons}>
             <div className={styles.ctaButtons}>
               <Link href="/sok" className={styles.ctaButton}>
-                🔍 Start søk
+                <Search size={18} />
+                <span>Start søk</span>
               </Link>
               <Link href="/kalkulator" className={`${styles.ctaButton} ${styles.ctaButtonSecondary}`}>
-                🧮 GPA Kalkulator
+                <Calculator size={18} />
+                <span>GPA Kalkulator</span>
               </Link>
             </div>
             </div>
           </div>
         </div>
       </div>
+
+      <section className={styles.dashboardSection}>
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Eksempel-emner</h2>
+            <p className={styles.sectionSubtitle}>
+              Et tilfeldig utvalg fra hvert universitet
+            </p>
+          </div>
+          <div className={styles.dashboardGrid}>
+            {randomCourses.map((course) => (
+              <Link
+                key={`${course.code}-${course.institution}`}
+                href={`/sok?code=${course.code}&uni=${course.institution}`}
+                className={styles.dashboardCard}
+              >
+                <div className={styles.dashboardCardHeader}>
+                  <span className={styles.dashboardCode}>{course.code}</span>
+                  <span className={styles.dashboardInstitution}>
+                    {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                  </span>
+                </div>
+                <h3 className={styles.dashboardTitle}>{course.name}</h3>
+                <div className={styles.dashboardFooter}>
+                  <span className={styles.dashboardLink}>Se statistikk →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className={styles.statsSection}>
         <div className="container">

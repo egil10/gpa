@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { BookOpen, X } from 'lucide-react';
 import { Course, GradeSystem, calculateGPA, UNIVERSITY_GRADES, HIGHSCHOOL_GRADES, GRADE_VALUES } from '@/types/gpa';
 import CourseNameAutocomplete from './CourseNameAutocomplete';
 import { CourseInfo } from '@/lib/courses';
@@ -21,6 +22,7 @@ const EXAMPLE_COURSES: Course[] = [
 export default function GPACalculator({ initialSystem = 'university' }: GPACalculatorProps) {
   const [system, setSystem] = useState<GradeSystem>(initialSystem);
   const [institution, setInstitution] = useState<string>('');
+  const [bonusPoints, setBonusPoints] = useState({ realfag: 0, other: 0 }); // High school bonus points
   const [courses, setCourses] = useState<Course[]>(() => {
     // Pre-populate with examples on first load
     if (typeof window !== 'undefined') {
@@ -35,6 +37,10 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
   const handleSystemChange = useCallback((newSystem: GradeSystem) => {
     setSystem(newSystem);
+    // Reset bonus points when switching systems
+    if (newSystem === 'university') {
+      setBonusPoints({ realfag: 0, other: 0 });
+    }
     // Update all courses to new system with default values
     setCourses((prev) =>
       prev.map((course) => ({
@@ -46,7 +52,14 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     );
   }, []);
 
-  const calculation = useMemo(() => calculateGPA(courses), [courses]);
+  const totalBonusPoints = useMemo(() => {
+    if (system === 'highschool') {
+      return Math.min(bonusPoints.realfag + bonusPoints.other, 4); // Max 4 total
+    }
+    return 0;
+  }, [system, bonusPoints]);
+
+  const calculation = useMemo(() => calculateGPA(courses, totalBonusPoints), [courses, totalBonusPoints]);
 
   const addCourse = useCallback(() => {
     const newCourse: Course = {
@@ -134,7 +147,16 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
       <div className={styles.gpaDisplay}>
         <div className={styles.gpaValue}>
           <span className={styles.gpaLabel}>GPA</span>
-          <span className={styles.gpaNumber}>{calculation.gpa.toFixed(2)}</span>
+          <div className={styles.gpaNumber}>
+            {calculation.gpaWithBonus !== undefined 
+              ? calculation.gpaWithBonus.toFixed(2) 
+              : calculation.gpa.toFixed(2)}
+            {calculation.gpaWithBonus !== undefined && calculation.gpaWithBonus !== calculation.gpa && (
+              <span className={styles.gpaBonus}>
+                (inkl. {totalBonusPoints} tilleggspoeng)
+              </span>
+            )}
+          </div>
         </div>
         <div className={styles.gpaDetails}>
           <div className={styles.detailItem}>
@@ -145,8 +167,128 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
             <span className={styles.detailLabel}>Vektet sum</span>
             <span className={styles.detailValue}>{calculation.weightedSum.toFixed(1)}</span>
           </div>
+          {calculation.gpaWithBonus !== undefined && (
+            <div className={styles.detailItem}>
+              <span className={styles.detailLabel}>GPA uten tilleggspoeng</span>
+              <span className={styles.detailValue}>{calculation.gpa.toFixed(2)}</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {system === 'highschool' && (
+        <div className={styles.bonusPointsSection}>
+          <h3>Tilleggspoeng</h3>
+          <p className={styles.bonusPointsInfo}>
+            Du kan få maksimalt 4 tilleggspoeng totalt (2 for realfag + 2 for andre fag).
+            Hvert poeng gir +0.1 til GPA.
+          </p>
+          <div className={styles.bonusPointsGrid}>
+            <div className={styles.bonusPointsField}>
+              <label htmlFor="realfag-bonus">Realfag (maks 2)</label>
+              <div className={styles.bonusPointsControls}>
+                <button
+                  type="button"
+                  onClick={() => setBonusPoints(prev => ({
+                    ...prev,
+                    realfag: Math.max(0, prev.realfag - 0.5)
+                  }))}
+                  className={styles.bonusButton}
+                  disabled={bonusPoints.realfag === 0}
+                >
+                  −
+                </button>
+                <input
+                  id="realfag-bonus"
+                  type="number"
+                  min="0"
+                  max="2"
+                  step="0.5"
+                  value={bonusPoints.realfag}
+                  onChange={(e) => {
+                    const value = Math.min(2, Math.max(0, parseFloat(e.target.value) || 0));
+                    const maxOther = 4 - value;
+                    setBonusPoints(prev => ({
+                      realfag: value,
+                      other: Math.min(prev.other, maxOther)
+                    }));
+                  }}
+                  className={styles.bonusInput}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const maxRealfag = Math.min(2, 4 - bonusPoints.other);
+                    setBonusPoints(prev => ({
+                      ...prev,
+                      realfag: Math.min(maxRealfag, prev.realfag + 0.5)
+                    }));
+                  }}
+                  className={styles.bonusButton}
+                  disabled={bonusPoints.realfag >= 2 || totalBonusPoints >= 4}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className={styles.bonusPointsField}>
+              <label htmlFor="other-bonus">Andre fag (maks 2)</label>
+              <div className={styles.bonusPointsControls}>
+                <button
+                  type="button"
+                  onClick={() => setBonusPoints(prev => ({
+                    ...prev,
+                    other: Math.max(0, prev.other - 0.5)
+                  }))}
+                  className={styles.bonusButton}
+                  disabled={bonusPoints.other === 0}
+                >
+                  −
+                </button>
+                <input
+                  id="other-bonus"
+                  type="number"
+                  min="0"
+                  max="2"
+                  step="0.5"
+                  value={bonusPoints.other}
+                  onChange={(e) => {
+                    const value = Math.min(2, Math.max(0, parseFloat(e.target.value) || 0));
+                    const maxRealfag = 4 - value;
+                    setBonusPoints(prev => ({
+                      realfag: Math.min(prev.realfag, maxRealfag),
+                      other: value
+                    }));
+                  }}
+                  className={styles.bonusInput}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const maxOther = Math.min(2, 4 - bonusPoints.realfag);
+                    setBonusPoints(prev => ({
+                      ...prev,
+                      other: Math.min(maxOther, prev.other + 0.5)
+                    }));
+                  }}
+                  className={styles.bonusButton}
+                  disabled={bonusPoints.other >= 2 || totalBonusPoints >= 4}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className={styles.bonusPointsTotal}>
+            <span>Totalt tilleggspoeng: <strong>{totalBonusPoints}</strong> (maks 4)</span>
+            {totalBonusPoints > 0 && (
+              <span className={styles.bonusPointsEffect}>
+                Gir +{totalBonusPoints * 0.1} til GPA
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className={styles.coursesSection}>
         <div className={styles.coursesHeader}>
@@ -177,7 +319,8 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               }}
               className={styles.loadExamplesButton}
             >
-              📚 Last inn eksempel-emner (5 stk)
+              <BookOpen size={18} />
+              <span>Last inn eksempel-emner (5 stk)</span>
             </button>
             <p className={styles.emptyHint}>eller klikk "Legg til emne" for å legge til manuelt</p>
           </div>
@@ -272,6 +415,14 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                 </div>
               </div>
             ))}
+            <button
+              onClick={addCourse}
+              className={styles.addCourseButton}
+              aria-label="Legg til nytt emne"
+              title="Legg til nytt emne"
+            >
+              +
+            </button>
           </div>
         )}
       </div>
