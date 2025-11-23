@@ -35,6 +35,10 @@
   --space-xl: 2rem;      /* 32px */
   --space-2xl: 3rem;     /* 48px */
   --space-3xl: 4rem;     /* 64px */
+  --space-4xl: 5rem;     /* 80px */
+  --space-5xl: 6rem;     /* 96px */
+  --space-6xl: 7rem;     /* 112px */
+  --space-7xl: 8rem;    /* 128px */
   
   /* Layout */
   --max-width: 1200px;

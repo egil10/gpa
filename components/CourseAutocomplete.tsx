@@ -76,8 +76,8 @@ export default function CourseAutocomplete({
         setShowSuggestions(popular.length > 0);
       } else {
         try {
-          const results = await searchAllCourses(searchQuery, institution, 20);
-          setSuggestions(results);
+          const results = await searchAllCourses(searchQuery, institution, 3);
+          setSuggestions(results.slice(0, 3));
           
           // Hide suggestions if query exactly matches a suggestion
           const exactMatch = results.find(

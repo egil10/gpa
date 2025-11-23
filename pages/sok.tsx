@@ -86,6 +86,16 @@ export default function SearchPage() {
   return (
     <Layout title={courseCode || 'Emne'} description={`Karakterstatistikk for ${courseCode}`}>
       <div className={styles.searchPage}>
+        {courseCode && (
+          <div className={styles.courseHeader}>
+            <div className="container">
+              <h1 className={styles.courseCode}>{courseCode}</h1>
+              {UNIVERSITIES[institution] && (
+                <p className={styles.institutionName}>{UNIVERSITIES[institution].name}</p>
+              )}
+            </div>
+          </div>
+        )}
         <div className="container">
           {loading && (
             <div className={styles.loading}>

@@ -1,16 +1,18 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { RefreshCw, ArrowUpDown, Filter, Search, ArrowUp, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { ArrowUpDown, Filter, Search, ArrowUp, X, Plus } from 'lucide-react';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processGradeData } from '@/lib/utils';
 import { CourseStats } from '@/types';
-import { loadAllCourses, getPopularCourses } from '@/lib/all-courses';
+import { loadAllCourses } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
 import styles from '@/styles/Home.module.css';
 
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students';
+
+const COURSES_PER_PAGE = 9;
 
 export default function Home() {
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
@@ -19,13 +21,18 @@ export default function Home() {
   const [loadingCourses, setLoadingCourses] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>('most-a');
   const [selectedInstitution, setSelectedInstitution] = useState<string>('all');
-  const [searchInput, setSearchInput] = useState<string>(''); // What user types
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Actual filter value
-  const [loadedCount, setLoadedCount] = useState(0); // Track how many courses we've loaded data for
-  const [targetCount, setTargetCount] = useState(15); // Target: load 15 initially
-  const [isAutoLoading, setIsAutoLoading] = useState(true); // Auto-load until we reach target
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [pendingSortBy, setPendingSortBy] = useState<SortOption>('most-a');
+  const [pendingInstitution, setPendingInstitution] = useState<string>('all');
+  const [displayCount, setDisplayCount] = useState(COURSES_PER_PAGE); // How many courses to show
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 9 courses are loaded
+  const [lastSortBy, setLastSortBy] = useState<SortOption | null>(null); // Track last sort option to detect changes
+  const [courseOrder, setCourseOrder] = useState<string[]>([]); // Maintain stable order of courses
+  const coursesDataRef = useRef<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
+  const loadingCoursesRef = useRef<Set<string>>(new Set());
 
-  // Load course list metadata (fast - just codes/names)
+  // Load course list metadata
   useEffect(() => {
     const loadCourseList = async () => {
       setLoading(true);
@@ -41,127 +48,18 @@ export default function Home() {
     loadCourseList();
   }, []);
 
-  // Lazy load grade data for courses (loads 3 at a time)
-  const loadCoursesData = useCallback(async (coursesToLoad: CourseInfo[], batchSize: number = 3) => {
-    const coursesToFetch = coursesToLoad.filter(course => {
-      const key = `${course.institution}-${course.code}`;
-      return !coursesData.has(key) && !loadingCourses.has(key);
-    });
-
-    if (coursesToFetch.length === 0) return 0;
-
-    // Take only the batch size we need
-    const batch = coursesToFetch.slice(0, batchSize);
-    
-    // Mark as loading
-    setLoadingCourses(prev => {
-      const next = new Set(prev);
-      batch.forEach(c => next.add(`${c.institution}-${c.code}`));
-      return next;
-    });
-
-    // Fetch the batch
-    const batchPromises = batch.map(async (course): Promise<{ key: string; data: CourseStats & { institution: string; courseName: string } } | null> => {
-      try {
-        const uniData = UNIVERSITIES[course.institution];
-        if (!uniData) return null;
-        
-        const formattedCode = formatCourseCode(course.code, course.institution);
-        const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-        
-        if (!data || data.length === 0) return null;
-        
-        // Get the most recent year's data
-        const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
-        const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-        
-        const stats = processGradeData(yearData);
-        if (!stats) return null;
-        
-        return {
-          key: `${course.institution}-${course.code}`,
-          data: {
-            ...stats,
-            institution: course.institution,
-            courseName: course.name,
-          },
-        };
-      } catch (error) {
-        return null;
-      }
-    });
-    
-    const results = await Promise.all(batchPromises);
-    type ResultItem = { 
-      key: string; 
-      data: CourseStats & { institution: string; courseName: string } 
-    };
-    const validResults: ResultItem[] = results.filter((r): r is ResultItem => r !== null);
-    
-    // Update cache
-    setCoursesData(prev => {
-      const next = new Map(prev);
-      validResults.forEach(({ key, data }) => next.set(key, data));
-      return next;
-    });
-
-    // Remove from loading set
-    setLoadingCourses(prev => {
-      const next = new Set(prev);
-      batch.forEach(c => next.delete(`${c.institution}-${c.code}`));
-      return next;
-    });
-
-    return validResults.length;
-  }, [coursesData, loadingCourses]);
-
-  // Auto-load full data for courses (simple sequential loading)
+  // Reset initial load when institution changes
   useEffect(() => {
-    if (allCourses.length === 0) return;
-    if (!isAutoLoading) return;
-    if (loadingCourses.size > 0) return; // Wait for current batch to finish
-    if (searchQuery.trim()) return; // Don't auto-load when searching
-
-    // Filter courses by institution
-    let filtered = selectedInstitution !== 'all'
-      ? allCourses.filter(c => c.institution === selectedInstitution)
-      : allCourses;
-
-    // Find courses that need data loaded (just pick next ones sequentially)
-    const coursesNeedingData = filtered
-      .filter(course => {
-        const key = `${course.institution}-${course.code}`;
-        return !coursesData.has(key) && !loadingCourses.has(key);
-      })
-      .slice(0, 3); // Load 3 at a time
-
-    if (coursesNeedingData.length === 0) {
-      // Check if we have enough courses with data for current filter
-      const coursesWithData = filtered.filter(c => {
-        const key = `${c.institution}-${c.code}`;
-        return coursesData.has(key);
-      });
-      
-      if (coursesWithData.length >= targetCount) {
-        setIsAutoLoading(false);
-      }
-      return;
+    if (allCourses.length > 0) {
+      setInitialLoadComplete(false);
     }
+  }, [selectedInstitution]);
 
-    // Load next batch of 3
-    loadCoursesData(coursesNeedingData, 3).then(loaded => {
-      if (loaded > 0) {
-        setLoadedCount(prev => prev + loaded);
-      }
-    });
-  }, [allCourses, selectedInstitution, searchQuery, loadCoursesData, targetCount, isAutoLoading, loadingCourses]);
-  
-  // Separate effect to check if we've loaded enough
+  // Check if initial load is complete (we have at least 9 courses loaded)
   useEffect(() => {
-    if (searchQuery.trim()) return;
-    if (!isAutoLoading) return;
+    if (searchQuery.trim() || initialLoadComplete) return;
     
-    let filtered = selectedInstitution !== 'all'
+    const filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
     
@@ -170,10 +68,99 @@ export default function Home() {
       return coursesData.has(key);
     });
     
-    if (coursesWithData.length >= targetCount) {
-      setIsAutoLoading(false);
+    if (coursesWithData.length >= COURSES_PER_PAGE && loadingCourses.size === 0) {
+      setInitialLoadComplete(true);
     }
-  }, [coursesData, allCourses, selectedInstitution, searchQuery, targetCount, isAutoLoading]);
+  }, [coursesData, allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadingCourses]);
+
+  // Load initial 9 courses
+  useEffect(() => {
+    if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
+    
+    const filtered = selectedInstitution !== 'all'
+      ? allCourses.filter(c => c.institution === selectedInstitution)
+      : allCourses;
+
+    const coursesToLoad = filtered
+      .filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return !coursesData.has(key) && !loadingCourses.has(key);
+      })
+      .slice(0, COURSES_PER_PAGE);
+
+    if (coursesToLoad.length === 0) {
+      // If no courses to load, check if we have enough loaded
+      const filteredWithData = filtered.filter(c => {
+        const key = `${c.institution}-${c.code}`;
+        return coursesData.has(key);
+      });
+      if (filteredWithData.length >= COURSES_PER_PAGE) {
+        setInitialLoadComplete(true);
+      }
+      return;
+    }
+
+    // Mark as loading
+    setLoadingCourses(prev => {
+      const next = new Set(prev);
+      coursesToLoad.forEach(c => next.add(`${c.institution}-${c.code}`));
+      return next;
+    });
+
+    // Fetch the courses
+    Promise.all(
+      coursesToLoad.map(async (course) => {
+        try {
+          const uniData = UNIVERSITIES[course.institution];
+          if (!uniData) return null;
+          
+          const formattedCode = formatCourseCode(course.code, course.institution);
+          const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
+          
+          if (!data || data.length === 0) return null;
+          
+          const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
+          const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
+          
+          const stats = processGradeData(yearData);
+          if (!stats) return null;
+          
+          return {
+            key: `${course.institution}-${course.code}`,
+            data: {
+              ...stats,
+              institution: course.institution,
+              courseName: course.name,
+            },
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+    ).then(results => {
+      const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
+      
+      setCoursesData(prev => {
+        const next = new Map(prev);
+        validResults.forEach(({ key, data }) => next.set(key, data));
+        return next;
+      });
+
+      setLoadingCourses(prev => {
+        const next = new Set(prev);
+        coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
+        return next;
+      });
+    });
+  }, [allCourses, selectedInstitution, searchQuery, coursesData, loadingCourses, initialLoadComplete]);
+
+  // Reset course order when sort option, institution, or search changes
+  useEffect(() => {
+    if (sortBy !== lastSortBy || selectedInstitution !== 'all' || searchQuery.trim()) {
+      setCourseOrder([]);
+      setLastSortBy(sortBy);
+    }
+  }, [sortBy, selectedInstitution, searchQuery, lastSortBy]);
 
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
@@ -200,7 +187,58 @@ export default function Home() {
       })
       .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
 
-    // Sort using loaded data only
+    // If we have a stable order and sort hasn't changed, maintain it
+    if (courseOrder.length > 0 && sortBy === lastSortBy && !searchQuery.trim()) {
+      // Sort by existing order first, then append new courses
+      const orderedCourses: (CourseStats & { institution: string; courseName: string })[] = [];
+      const unorderedCourses: (CourseStats & { institution: string; courseName: string })[] = [];
+      
+      coursesWithData.forEach(course => {
+        const key = `${course.institution}-${course.courseCode}`;
+        if (courseOrder.includes(key)) {
+          orderedCourses.push(course);
+        } else {
+          unorderedCourses.push(course);
+        }
+      });
+      
+      // Sort ordered courses by their position in courseOrder
+      orderedCourses.sort((a, b) => {
+        const keyA = `${a.institution}-${a.courseCode}`;
+        const keyB = `${b.institution}-${b.courseCode}`;
+        return courseOrder.indexOf(keyA) - courseOrder.indexOf(keyB);
+      });
+      
+      // Sort new courses and append
+      unorderedCourses.sort((a, b) => {
+        switch (sortBy) {
+          case 'most-a': {
+            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            return bPercent - aPercent;
+          }
+          case 'least-a': {
+            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            return aPercent - bPercent;
+          }
+          case 'highest-avg':
+            return (b.averageGrade || 0) - (a.averageGrade || 0);
+          case 'lowest-avg':
+            return (a.averageGrade || 0) - (b.averageGrade || 0);
+          case 'most-students':
+            return b.totalStudents - a.totalStudents;
+          case 'least-students':
+            return a.totalStudents - b.totalStudents;
+          default:
+            return 0;
+        }
+      });
+      
+      return [...orderedCourses, ...unorderedCourses];
+    }
+
+    // Sort using loaded data only (when order should be reset)
     coursesWithData.sort((a, b) => {
       switch (sortBy) {
         case 'most-a': {
@@ -227,66 +265,297 @@ export default function Home() {
     });
     
     return coursesWithData;
-  }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery]);
+  }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy]);
 
-  // Load data for courses matching search query
+  // Update course order when sorting (separate effect to avoid infinite loop)
+  useEffect(() => {
+    if (filteredAndSortedCourses.length > 0 && (courseOrder.length === 0 || sortBy !== lastSortBy) && !searchQuery.trim()) {
+      const newOrder = filteredAndSortedCourses.map(c => `${c.institution}-${c.courseCode}`);
+      setCourseOrder(newOrder);
+      setLastSortBy(sortBy);
+    }
+  }, [filteredAndSortedCourses, sortBy, courseOrder.length, lastSortBy, searchQuery]);
+
+  // Load more courses when user clicks "load more"
+  const handleLoadMore = useCallback(() => {
+    // First, check if we have more courses already loaded that we can show
+    if (displayCount < filteredAndSortedCourses.length) {
+      // Just increment display count to show more already-loaded courses
+      setDisplayCount(prev => prev + COURSES_PER_PAGE);
+      return;
+    }
+
+    // Otherwise, load new course data
+    let coursesToLoad: typeof allCourses = [];
+    
+    if (searchQuery.trim()) {
+      // If searching, load matching courses
+      const query = searchQuery.trim().toUpperCase();
+      const matchingCourses = allCourses.filter(c => {
+        const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
+        const matchesSearch = c.code.toUpperCase().includes(query) ||
+          (c.name && c.name.toUpperCase().includes(query));
+        return matchesInstitution && matchesSearch;
+      });
+      
+      coursesToLoad = matchingCourses
+        .filter(course => {
+          const key = `${course.institution}-${course.code}`;
+          return !coursesData.has(key) && !loadingCourses.has(key);
+        })
+        .slice(0, COURSES_PER_PAGE);
+    } else {
+      // If not searching, load filtered courses
+      const filtered = selectedInstitution !== 'all'
+        ? allCourses.filter(c => c.institution === selectedInstitution)
+        : allCourses;
+
+      coursesToLoad = filtered
+        .filter(course => {
+          const key = `${course.institution}-${course.code}`;
+          return !coursesData.has(key) && !loadingCourses.has(key);
+        })
+        .slice(0, COURSES_PER_PAGE);
+    }
+
+    if (coursesToLoad.length === 0) return;
+
+    // Mark as loading
+    setLoadingCourses(prev => {
+      const next = new Set(prev);
+      coursesToLoad.forEach(c => next.add(`${c.institution}-${c.code}`));
+      return next;
+    });
+
+    // Fetch the courses
+    Promise.all(
+      coursesToLoad.map(async (course) => {
+        try {
+          const uniData = UNIVERSITIES[course.institution];
+          if (!uniData) return null;
+          
+          const formattedCode = formatCourseCode(course.code, course.institution);
+          const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
+          
+          if (!data || data.length === 0) return null;
+          
+          const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
+          const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
+          
+          const stats = processGradeData(yearData);
+          if (!stats) return null;
+          
+          return {
+            key: `${course.institution}-${course.code}`,
+            data: {
+              ...stats,
+              institution: course.institution,
+              courseName: course.name,
+            },
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+    ).then(results => {
+      const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
+      
+      setCoursesData(prev => {
+        const next = new Map(prev);
+        validResults.forEach(({ key, data }) => next.set(key, data));
+        return next;
+      });
+
+      setLoadingCourses(prev => {
+        const next = new Set(prev);
+        coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
+        return next;
+      });
+
+      // Append new course keys to the order (maintain stable order)
+      setCourseOrder(prev => {
+        const newKeys = validResults.map(r => r.key);
+        return [...prev, ...newKeys.filter(k => !prev.includes(k))];
+      });
+
+      setDisplayCount(prev => prev + COURSES_PER_PAGE);
+    });
+  }, [allCourses, selectedInstitution, coursesData, loadingCourses, displayCount, filteredAndSortedCourses.length, searchQuery]);
+
+  // Sync refs with state
+  useEffect(() => {
+    coursesDataRef.current = coursesData;
+  }, [coursesData]);
+
+  useEffect(() => {
+    loadingCoursesRef.current = loadingCourses;
+  }, [loadingCourses]);
+
+  // Load data for courses matching search query (with debouncing)
   useEffect(() => {
     if (allCourses.length === 0 || !searchQuery.trim()) {
-      // Reset auto-loading when search is cleared
-      if (!searchQuery.trim() && !isAutoLoading) {
-        setIsAutoLoading(true);
-        setLoadedCount(0);
-        setTargetCount(15);
+      // Reset display count when search is cleared
+      if (!searchQuery.trim()) {
+        setDisplayCount(COURSES_PER_PAGE);
       }
       return;
     }
     
-    // When searching, disable auto-loading and load search results
-    setIsAutoLoading(false);
-    const query = searchQuery.trim().toUpperCase();
-    const matchingCourses = allCourses.filter(c => {
-      const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
-      const matchesSearch = c.code.toUpperCase().includes(query) ||
-        (c.name && c.name.toUpperCase().includes(query));
-      return matchesInstitution && matchesSearch;
-    });
-    
-    // Load data for matching courses (limit to first 100 to avoid too many requests)
-    loadCoursesData(matchingCourses.slice(0, 100), 10); // Load 10 at a time for search
-  }, [searchQuery, allCourses, selectedInstitution, loadCoursesData, isAutoLoading]);
+    let cancelled = false;
+    const debounceTimer = setTimeout(() => {
+      const query = searchQuery.trim().toUpperCase();
+      const matchingCourses = allCourses.filter(c => {
+        const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
+        const matchesSearch = c.code.toUpperCase().includes(query) ||
+          (c.name && c.name.toUpperCase().includes(query));
+        return matchesInstitution && matchesSearch;
+      });
 
-  // Load more courses when user clicks "load more"
-  const handleLoadMore = useCallback(() => {
-    setTargetCount(prev => prev + 15); // Load 15 more
-    setIsAutoLoading(true); // Re-enable auto-loading
+      // Use refs to check current state (avoid nested setState)
+      const coursesToLoad = matchingCourses
+        .filter(course => {
+          const key = `${course.institution}-${course.code}`;
+          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+        })
+        .slice(0, 20);
+
+      if (coursesToLoad.length === 0 || cancelled) {
+        return;
+      }
+
+      // Mark as loading (separate state updates)
+      setLoadingCourses(prev => {
+        const next = new Set(prev);
+        coursesToLoad.forEach(c => next.add(`${c.institution}-${c.code}`));
+        return next;
+      });
+
+      // Fetch courses
+      Promise.all(
+        coursesToLoad.map(async (course) => {
+          if (cancelled) return null;
+          try {
+            const uniData = UNIVERSITIES[course.institution];
+            if (!uniData) return null;
+            
+            const formattedCode = formatCourseCode(course.code, course.institution);
+            const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
+            
+            if (!data || data.length === 0) return null;
+            
+            const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
+            const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
+            
+            const stats = processGradeData(yearData);
+            if (!stats) return null;
+            
+            return {
+              key: `${course.institution}-${course.code}`,
+              data: {
+                ...stats,
+                institution: course.institution,
+                courseName: course.name,
+              },
+            };
+          } catch (error) {
+            return null;
+          }
+        })
+      ).then(results => {
+        if (cancelled) return;
+        
+        const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
+        
+        // Update courses data
+        setCoursesData(prev => {
+          const next = new Map(prev);
+          validResults.forEach(({ key, data }) => next.set(key, data));
+          return next;
+        });
+
+        // Update loading state
+        setLoadingCourses(prev => {
+          const next = new Set(prev);
+          coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
+          return next;
+        });
+      });
+    }, 300); // Debounce search to reduce lag
+
+    return () => {
+      cancelled = true;
+      clearTimeout(debounceTimer);
+    };
+  }, [searchQuery, allCourses, selectedInstitution]);
+
+  // Initialize pending values
+  useEffect(() => {
+    setPendingSortBy(sortBy);
+    setPendingInstitution(selectedInstitution);
   }, []);
 
-  const handleRefresh = () => {
-    // Clear cache and reload course list
-    setCoursesData(new Map());
-    setLoadingCourses(new Set());
-    setLoadedCount(0);
-    setTargetCount(15);
-    setIsAutoLoading(true);
-    setSearchQuery('');
-    setSearchInput('');
-    // Reload course list
-    loadAllCourses().then(courses => {
-      setAllCourses(courses);
-    }).catch(error => {
-      console.error('Failed to reload courses:', error);
-    });
+  const handleApply = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSortBy(pendingSortBy);
+    setSelectedInstitution(pendingInstitution);
+    setSearchQuery(searchInput.trim());
+    setDisplayCount(COURSES_PER_PAGE); // Reset to 9 when applying
   };
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSearchQuery(searchInput.trim());
+    setDisplayCount(COURSES_PER_PAGE); // Reset to 9 when searching
   };
 
   const handleSearchClear = () => {
     setSearchInput('');
     setSearchQuery('');
+    setDisplayCount(COURSES_PER_PAGE);
   };
+
+  // Limit displayed courses to displayCount (always limit to 9 at a time)
+  const displayedCourses = useMemo(() => {
+    return filteredAndSortedCourses.slice(0, displayCount);
+  }, [filteredAndSortedCourses, displayCount]);
+
+  // Check if there are more courses to load or display
+  const hasMoreCourses = useMemo(() => {
+    // Check if we have more courses already loaded that we haven't displayed
+    if (displayCount < filteredAndSortedCourses.length) {
+      return true;
+    }
+    
+    // If searching, check if there are more matching courses that need data loaded
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toUpperCase();
+      const matchingCourses = allCourses.filter(c => {
+        const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
+        const matchesSearch = c.code.toUpperCase().includes(query) ||
+          (c.name && c.name.toUpperCase().includes(query));
+        return matchesInstitution && matchesSearch;
+      });
+      
+      const coursesWithData = matchingCourses.filter(c => {
+        const key = `${c.institution}-${c.code}`;
+        return coursesData.has(key);
+      });
+      
+      return coursesWithData.length < matchingCourses.length;
+    }
+    
+    // Check if there are more courses that need data loaded
+    const filtered = selectedInstitution !== 'all'
+      ? allCourses.filter(c => c.institution === selectedInstitution)
+      : allCourses;
+    
+    const coursesWithData = filtered.filter(c => {
+      const key = `${c.institution}-${c.code}`;
+      return coursesData.has(key);
+    });
+    
+    return coursesWithData.length < filtered.length;
+  }, [allCourses, selectedInstitution, coursesData, searchQuery, displayCount, filteredAndSortedCourses.length]);
 
   return (
     <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">
@@ -305,15 +574,6 @@ export default function Home() {
         <div className="container">
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Karakterfordelinger</h2>
-            <button
-              onClick={handleRefresh}
-              className={styles.refreshButton}
-              disabled={loading}
-              aria-label="Refresh courses"
-              title="Oppdater"
-            >
-              <RefreshCw size={18} className={loading ? styles.spinning : ''} />
-            </button>
           </div>
 
           {/* Sorting and Filtering Controls */}
@@ -357,8 +617,8 @@ export default function Home() {
               </label>
               <select
                 id="sortBy"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                value={pendingSortBy}
+                onChange={(e) => setPendingSortBy(e.target.value as SortOption)}
                 className={styles.select}
               >
                 <option value="most-a">Mest A-er</option>
@@ -375,8 +635,8 @@ export default function Home() {
               </label>
               <select
                 id="institution"
-                value={selectedInstitution}
-                onChange={(e) => setSelectedInstitution(e.target.value)}
+                value={pendingInstitution}
+                onChange={(e) => setPendingInstitution(e.target.value)}
                 className={styles.select}
               >
                 <option value="all">Alle</option>
@@ -386,6 +646,16 @@ export default function Home() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className={styles.controlGroup}>
+              <button
+                type="submit"
+                className={styles.applyButton}
+                aria-label="Apply filters"
+              >
+                <ArrowUp size={16} />
+                <span>Bruk</span>
+              </button>
             </div>
           </form>
 
@@ -397,7 +667,7 @@ export default function Home() {
             <>
               <div className={styles.resultsInfo}>
                 <p>
-                  Viser {filteredAndSortedCourses.length} emner
+                  Viser {displayedCourses.length} emner
                 </p>
                 {searchQuery.trim() && (
                   <button
@@ -410,7 +680,7 @@ export default function Home() {
                 )}
               </div>
               <div className={styles.cardsGrid}>
-                {filteredAndSortedCourses.map((course, index) => (
+                {displayedCourses.map((course, index) => (
                   <CourseDistributionCard
                     key={`${course.courseCode}-${course.year}-${course.institution}-${index}`}
                     course={course}
@@ -418,16 +688,16 @@ export default function Home() {
                   />
                 ))}
               </div>
-              {!searchQuery.trim() && !isAutoLoading && filteredAndSortedCourses.length > 0 && (
+              {hasMoreCourses && (
                 <div className={styles.loadMoreContainer}>
-                  <button onClick={handleLoadMore} className={styles.loadMoreButton} disabled={loadingCourses.size > 0}>
-                    {loadingCourses.size > 0 ? 'Laster...' : 'Last flere emner'}
+                  <button 
+                    onClick={handleLoadMore} 
+                    className={styles.loadMoreButtonInline} 
+                    disabled={loadingCourses.size > 0}
+                    aria-label="Last flere emner"
+                  >
+                    {loadingCourses.size > 0 ? 'Laster...' : 'Last inn flere'}
                   </button>
-                </div>
-              )}
-              {isAutoLoading && loadingCourses.size === 0 && filteredAndSortedCourses.length < targetCount && (
-                <div className={styles.loadingMore}>
-                  <p>Laster flere emner...</p>
                 </div>
               )}
             </>

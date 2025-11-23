@@ -141,27 +141,27 @@
 /* Suggestions dropdown */
 .suggestions {
   position: absolute;
-  bottom: calc(100% + 0.5rem);
+  top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   max-height: 20rem;
   overflow-y: auto;
   z-index: 50;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .suggestionsHeader {
-  padding: 0.75rem 1rem;
-  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
+  border-bottom: none;
 }
 
 .suggestionItem {
@@ -169,16 +169,12 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.75rem;
   text-align: left;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: all 0.1s ease;
-  border-bottom: 1px solid var(--border);
-}
-
-.suggestionItem:last-child {
   border-bottom: none;
 }
 
@@ -204,11 +200,12 @@
 }
 
 .suggestionName {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 0.125rem;
 }
 
 .suggestionInstitution {
@@ -236,6 +233,6 @@
 
   .suggestions {
     max-height: 16rem;
-    bottom: calc(100% + 0.25rem);
+    top: calc(100% + 0.25rem);
   }
 }

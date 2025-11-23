@@ -69,8 +69,8 @@ export default function CourseNameAutocomplete({
       } else {
         try {
           // Search by name - searchAllCourses searches both code and name
-          const results = await searchAllCourses(searchQuery, institution, 10);
-          setSuggestions(results);
+          const results = await searchAllCourses(searchQuery, institution, 3);
+          setSuggestions(results.slice(0, 3));
           
           // Hide suggestions if query exactly matches a suggestion name
           const exactMatch = results.find(

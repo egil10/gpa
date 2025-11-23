@@ -63,35 +63,38 @@ export default function BottomSearchBar() {
         // Don't show suggestions when input is empty
         setSuggestions([]);
         setShowSuggestions(false);
+        setSelectedCourse(null);
       } else {
         try {
-          const results = await searchAllCourses(searchQuery, undefined, 10);
-          setSuggestions(results);
+          // Limit to 3 suggestions
+          const results = await searchAllCourses(searchQuery, undefined, 3);
+          setSuggestions(results.slice(0, 3));
           setShowSuggestions(results.length > 0);
+          
+          // Check if query matches a course (only if we have results)
+          if (results.length > 0) {
+            getCourseByCode(searchQuery.trim(), undefined).then(course => {
+              setSelectedCourse(course);
+            }).catch(() => {
+              setSelectedCourse(null);
+            });
+          } else {
+            setSelectedCourse(null);
+          }
         } catch (error) {
           console.error('Search error:', error);
           setSuggestions([]);
           setShowSuggestions(false);
+          setSelectedCourse(null);
         }
       }
       setSelectedIndex(-1);
-    }, 200);
+    }, 300); // Increased debounce to 300ms to reduce lag
   }, []);
 
-  // Check if query matches a course
+  // Perform search when query changes (debounced)
   useEffect(() => {
-    if (query.trim()) {
-      getCourseByCode(query.trim(), undefined).then(course => {
-        setSelectedCourse(course);
-      });
-      // Only perform search when there's a query
-      performSearch(query);
-    } else {
-      setSelectedCourse(null);
-      // Hide suggestions when query is empty
-      setShowSuggestions(false);
-      setSuggestions([]);
-    }
+    performSearch(query);
   }, [query, performSearch]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,23 +148,25 @@ export default function BottomSearchBar() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || suggestions.length === 0) return;
-
     switch (e.key) {
       case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex((prev) => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        if (showSuggestions && suggestions.length > 0) {
+          e.preventDefault();
+          setSelectedIndex((prev) => 
+            prev < suggestions.length - 1 ? prev + 1 : prev
+          );
+        }
         break;
       case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        if (showSuggestions && suggestions.length > 0) {
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        }
         break;
       case 'Enter':
         e.preventDefault();
         // On Enter, actually submit/navigate
-        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+        if (showSuggestions && selectedIndex >= 0 && selectedIndex < suggestions.length) {
           const course = suggestions[selectedIndex];
           setQuery(course.code);
           setSelectedCourse(course);
@@ -172,10 +177,7 @@ export default function BottomSearchBar() {
           handleSelectCourse(selectedCourse);
         } else if (query.trim()) {
           // Submit the form with current query
-          const form = inputRef.current?.closest('form');
-          if (form) {
-            form.requestSubmit();
-          }
+          handleSubmit(e);
         }
         break;
       case 'Escape':
@@ -281,7 +283,9 @@ export default function BottomSearchBar() {
                     >
                       <div className={styles.suggestionContent}>
                         <div className={styles.suggestionCode}>{course.code}</div>
-                        <div className={styles.suggestionName}>{course.name}</div>
+                        {course.name && course.name !== course.code && (
+                          <div className={styles.suggestionName}>{course.name}</div>
+                        )}
                       </div>
                       <div className={styles.suggestionInstitution}>
                         {UNIVERSITIES[course.institution]?.shortName || course.institution}

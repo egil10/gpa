@@ -41,9 +41,15 @@ const CORS_PROXIES = [
 const isDevelopment = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
+// Check if we're on GitHub Pages (where Vercel proxy doesn't exist)
+const isGitHubPages = typeof window !== 'undefined' &&
+  (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
+
 // Get the Vercel proxy URL (relative path - works when deployed on Vercel)
 const getVercelProxyUrl = () => {
   if (typeof window === 'undefined') return null;
+  // Skip Vercel proxy on GitHub Pages - it doesn't exist there
+  if (isGitHubPages) return null;
   // Use relative path - Vercel will route /api/proxy to the serverless function
   // Works with basePath in next.config.js (e.g., /gpa/api/proxy)
   return '/api/proxy';
@@ -170,8 +176,8 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     }
   }
 
-  // In production, try Vercel proxy first (if available)
-  if (useVercelProxy) {
+  // In production, try Vercel proxy first (if available and not on GitHub Pages)
+  if (useVercelProxy && !isGitHubPages) {
     const vercelProxyUrl = getVercelProxyUrl();
     if (vercelProxyUrl) {
       try {
@@ -195,7 +201,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
         return data;
       } catch (error) {
         // If Vercel proxy fails, fall back to public proxies
-        console.warn('Vercel proxy failed, falling back to public proxies:', error);
+        // Only log warning if it's not a 405 (which means proxy doesn't exist)
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!errorMessage.includes('405')) {
+          console.warn('Vercel proxy failed, falling back to public proxies:', error);
+        }
         return fetchWithProxy(payload, 0, false);
       }
     }
@@ -221,6 +231,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       body: JSON.stringify(payload),
     });
 
+    // Handle rate limiting (429) - don't retry immediately
+    if (response.status === 429) {
+      throw new Error(`Rate limited by proxy ${proxyIndex}. Please try again later.`);
+    }
+
     if (response.status === 204 || !response.ok) {
       throw new Error(`Proxy ${proxyIndex} returned ${response.status}`);
     }
@@ -235,12 +250,22 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
 
     return data;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    // Don't retry on rate limit errors - throw immediately
+    if (errorMessage.includes('Rate limited') || errorMessage.includes('429')) {
+      throw new Error(
+        `Kunne ikke hente data: Rate limit nådd. ` +
+        `Vennligst prøv igjen om noen minutter.`
+      );
+    }
+
     // Try next proxy if available
     if (proxyIndex < CORS_PROXIES.length - 1) {
       console.warn(`Proxy ${proxyIndex} failed, trying next...`);
       return fetchWithProxy(payload, proxyIndex + 1, false);
     }
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    
     throw new Error(
       `Kunne ikke hente data fra NSD API. ` +
       `Dette skyldes CORS-restriksjoner. ` +

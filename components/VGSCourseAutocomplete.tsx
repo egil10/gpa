@@ -56,11 +56,11 @@ export default function VGSCourseAutocomplete({
     debounceRef.current = setTimeout(() => {
       if (searchQuery.trim().length === 0) {
         const popular = getPopularCourses();
-        setSuggestions(popular);
+        setSuggestions(popular.slice(0, 3));
         setShowSuggestions(popular.length > 0);
       } else {
         const results = searchVGSCourses(searchQuery);
-        setSuggestions(results);
+        setSuggestions(results.slice(0, 3));
         setShowSuggestions(results.length > 0);
       }
       setSelectedIndex(-1);
