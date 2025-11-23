@@ -65,13 +65,13 @@ export default function Home() {
     
     const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
-      return coursesData.has(key);
+      return coursesDataRef.current.has(key);
     });
     
-    if (coursesWithData.length >= COURSES_PER_PAGE && loadingCourses.size === 0) {
+    if (coursesWithData.length >= COURSES_PER_PAGE && loadingCoursesRef.current.size === 0) {
       setInitialLoadComplete(true);
     }
-  }, [coursesData, allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadingCourses]);
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete]);
 
   // Load initial 9 courses
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function Home() {
     const coursesToLoad = filtered
       .filter(course => {
         const key = `${course.institution}-${course.code}`;
-        return !coursesData.has(key) && !loadingCourses.has(key);
+        return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
       })
       .slice(0, COURSES_PER_PAGE);
 
@@ -92,7 +92,7 @@ export default function Home() {
       // If no courses to load, check if we have enough loaded
       const filteredWithData = filtered.filter(c => {
         const key = `${c.institution}-${c.code}`;
-        return coursesData.has(key);
+        return coursesDataRef.current.has(key);
       });
       if (filteredWithData.length >= COURSES_PER_PAGE) {
         setInitialLoadComplete(true);
@@ -152,7 +152,7 @@ export default function Home() {
         return next;
       });
     });
-  }, [allCourses, selectedInstitution, searchQuery, coursesData, loadingCourses, initialLoadComplete]);
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete]);
 
   // Reset course order when sort option, institution, or search changes
   useEffect(() => {
@@ -169,13 +169,31 @@ export default function Home() {
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
     
-    // Apply search filter
+    // Apply search filter with priority: code starts with > code contains > name starts with > name contains
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
-      filtered = filtered.filter(c => 
-        c.code.toUpperCase().includes(query) ||
-        (c.name && c.name.toUpperCase().includes(query))
-      );
+      const codeStartsWith: typeof filtered = [];
+      const codeContains: typeof filtered = [];
+      const nameStartsWith: typeof filtered = [];
+      const nameContains: typeof filtered = [];
+      
+      filtered.forEach(c => {
+        const codeUpper = c.code.toUpperCase();
+        const nameUpper = c.name ? c.name.toUpperCase() : '';
+        
+        if (codeUpper.startsWith(query)) {
+          codeStartsWith.push(c);
+        } else if (codeUpper.includes(query)) {
+          codeContains.push(c);
+        } else if (nameUpper.startsWith(query)) {
+          nameStartsWith.push(c);
+        } else if (nameUpper.includes(query)) {
+          nameContains.push(c);
+        }
+      });
+      
+      // Combine with priority order
+      filtered = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
     }
 
     // Get courses with loaded data
@@ -289,19 +307,38 @@ export default function Home() {
     let coursesToLoad: typeof allCourses = [];
     
     if (searchQuery.trim()) {
-      // If searching, load matching courses
+      // If searching, load matching courses with priority sorting
       const query = searchQuery.trim().toUpperCase();
-      const matchingCourses = allCourses.filter(c => {
+      const codeStartsWith: typeof allCourses = [];
+      const codeContains: typeof allCourses = [];
+      const nameStartsWith: typeof allCourses = [];
+      const nameContains: typeof allCourses = [];
+      
+      allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
-        const matchesSearch = c.code.toUpperCase().includes(query) ||
-          (c.name && c.name.toUpperCase().includes(query));
-        return matchesInstitution && matchesSearch;
+        if (!matchesInstitution) return;
+        
+        const codeUpper = c.code.toUpperCase();
+        const nameUpper = c.name ? c.name.toUpperCase() : '';
+        
+        if (codeUpper.startsWith(query)) {
+          codeStartsWith.push(c);
+        } else if (codeUpper.includes(query)) {
+          codeContains.push(c);
+        } else if (nameUpper.startsWith(query)) {
+          nameStartsWith.push(c);
+        } else if (nameUpper.includes(query)) {
+          nameContains.push(c);
+        }
       });
       
+      const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
+      
+      // Use refs to check which courses are already loaded
       coursesToLoad = matchingCourses
         .filter(course => {
           const key = `${course.institution}-${course.code}`;
-          return !coursesData.has(key) && !loadingCourses.has(key);
+          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
         })
         .slice(0, COURSES_PER_PAGE);
     } else {
@@ -310,10 +347,11 @@ export default function Home() {
         ? allCourses.filter(c => c.institution === selectedInstitution)
         : allCourses;
 
+      // Use refs to check which courses are already loaded
       coursesToLoad = filtered
         .filter(course => {
           const key = `${course.institution}-${course.code}`;
-          return !coursesData.has(key) && !loadingCourses.has(key);
+          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
         })
         .slice(0, COURSES_PER_PAGE);
     }
@@ -380,7 +418,7 @@ export default function Home() {
 
       setDisplayCount(prev => prev + COURSES_PER_PAGE);
     });
-  }, [allCourses, selectedInstitution, coursesData, loadingCourses, displayCount, filteredAndSortedCourses.length, searchQuery]);
+  }, [allCourses, selectedInstitution, displayCount, filteredAndSortedCourses.length, searchQuery]);
 
   // Sync refs with state
   useEffect(() => {
@@ -391,7 +429,7 @@ export default function Home() {
     loadingCoursesRef.current = loadingCourses;
   }, [loadingCourses]);
 
-  // Load data for courses matching search query (with debouncing)
+  // Load data for courses matching search query (with debouncing - only load initial batch)
   useEffect(() => {
     if (allCourses.length === 0 || !searchQuery.trim()) {
       // Reset display count when search is cleared
@@ -402,84 +440,124 @@ export default function Home() {
     }
     
     let cancelled = false;
+    const INITIAL_BATCH_SIZE = 50; // Load initial 50 courses
+    const MAX_CONCURRENT_REQUESTS = 10; // Limit concurrent API calls
+    
     const debounceTimer = setTimeout(() => {
+      if (cancelled) return;
+      
       const query = searchQuery.trim().toUpperCase();
-      const matchingCourses = allCourses.filter(c => {
+      // Filter and sort matches by priority: code starts with > code contains > name starts with > name contains
+      const codeStartsWith: typeof allCourses = [];
+      const codeContains: typeof allCourses = [];
+      const nameStartsWith: typeof allCourses = [];
+      const nameContains: typeof allCourses = [];
+      
+      allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
-        const matchesSearch = c.code.toUpperCase().includes(query) ||
-          (c.name && c.name.toUpperCase().includes(query));
-        return matchesInstitution && matchesSearch;
+        if (!matchesInstitution) return;
+        
+        const codeUpper = c.code.toUpperCase();
+        const nameUpper = c.name ? c.name.toUpperCase() : '';
+        
+        if (codeUpper.startsWith(query)) {
+          codeStartsWith.push(c);
+        } else if (codeUpper.includes(query)) {
+          codeContains.push(c);
+        } else if (nameUpper.startsWith(query)) {
+          nameStartsWith.push(c);
+        } else if (nameUpper.includes(query)) {
+          nameContains.push(c);
+        }
       });
-
-      // Use refs to check current state (avoid nested setState)
-      const coursesToLoad = matchingCourses
-        .filter(course => {
-          const key = `${course.institution}-${course.code}`;
-          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-        })
-        .slice(0, 20);
+      
+      const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
+      
+      // Only load initial batch - user can load more via "Load More" button
+      const initialBatch = matchingCourses.slice(0, INITIAL_BATCH_SIZE);
+      
+      // Use refs to check current state
+      const coursesToLoad = initialBatch.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+      });
 
       if (coursesToLoad.length === 0 || cancelled) {
         return;
       }
 
-      // Mark as loading (separate state updates)
+      // Mark as loading
       setLoadingCourses(prev => {
         const next = new Set(prev);
         coursesToLoad.forEach(c => next.add(`${c.institution}-${c.code}`));
         return next;
       });
 
-      // Fetch courses
-      Promise.all(
-        coursesToLoad.map(async (course) => {
-          if (cancelled) return null;
-          try {
-            const uniData = UNIVERSITIES[course.institution];
-            if (!uniData) return null;
-            
-            const formattedCode = formatCourseCode(course.code, course.institution);
-            const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-            
-            if (!data || data.length === 0) return null;
-            
-            const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
-            const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-            
-            const stats = processGradeData(yearData);
-            if (!stats) return null;
-            
-            return {
-              key: `${course.institution}-${course.code}`,
-              data: {
-                ...stats,
-                institution: course.institution,
-                courseName: course.name,
-              },
-            };
-          } catch (error) {
-            return null;
+      // Fetch courses in chunks to avoid overwhelming the server
+      const chunkSize = MAX_CONCURRENT_REQUESTS;
+      (async () => {
+        for (let i = 0; i < coursesToLoad.length; i += chunkSize) {
+          if (cancelled) break;
+          
+          const chunk = coursesToLoad.slice(i, i + chunkSize);
+          const results = await Promise.all(
+            chunk.map(async (course) => {
+              if (cancelled) return null;
+              try {
+                const uniData = UNIVERSITIES[course.institution];
+                if (!uniData) return null;
+                
+                const formattedCode = formatCourseCode(course.code, course.institution);
+                const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
+                
+                if (!data || data.length === 0) return null;
+                
+                const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
+                const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
+                
+                const stats = processGradeData(yearData);
+                if (!stats) return null;
+                
+                return {
+                  key: `${course.institution}-${course.code}`,
+                  data: {
+                    ...stats,
+                    institution: course.institution,
+                    courseName: course.name,
+                  },
+                };
+              } catch (error) {
+                return null;
+              }
+            })
+          );
+          
+          if (cancelled) break;
+          
+          const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
+          
+          // Update courses data
+          setCoursesData(prev => {
+            const next = new Map(prev);
+            validResults.forEach(({ key, data }) => next.set(key, data));
+            return next;
+          });
+
+          // Small delay between chunks to avoid rate limiting
+          if (i + chunkSize < coursesToLoad.length && !cancelled) {
+            await new Promise(resolve => setTimeout(resolve, 100));
           }
-        })
-      ).then(results => {
-        if (cancelled) return;
-        
-        const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
-        
-        // Update courses data
-        setCoursesData(prev => {
-          const next = new Map(prev);
-          validResults.forEach(({ key, data }) => next.set(key, data));
-          return next;
-        });
+        }
 
         // Update loading state
-        setLoadingCourses(prev => {
-          const next = new Set(prev);
-          coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
-          return next;
-        });
-      });
+        if (!cancelled) {
+          setLoadingCourses(prev => {
+            const next = new Set(prev);
+            coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
+            return next;
+          });
+        }
+      })();
     }, 300); // Debounce search to reduce lag
 
     return () => {
@@ -529,16 +607,35 @@ export default function Home() {
     // If searching, check if there are more matching courses that need data loaded
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
-      const matchingCourses = allCourses.filter(c => {
+      // Filter with priority sorting (same as above)
+      const codeStartsWith: typeof allCourses = [];
+      const codeContains: typeof allCourses = [];
+      const nameStartsWith: typeof allCourses = [];
+      const nameContains: typeof allCourses = [];
+      
+      allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
-        const matchesSearch = c.code.toUpperCase().includes(query) ||
-          (c.name && c.name.toUpperCase().includes(query));
-        return matchesInstitution && matchesSearch;
+        if (!matchesInstitution) return;
+        
+        const codeUpper = c.code.toUpperCase();
+        const nameUpper = c.name ? c.name.toUpperCase() : '';
+        
+        if (codeUpper.startsWith(query)) {
+          codeStartsWith.push(c);
+        } else if (codeUpper.includes(query)) {
+          codeContains.push(c);
+        } else if (nameUpper.startsWith(query)) {
+          nameStartsWith.push(c);
+        } else if (nameUpper.includes(query)) {
+          nameContains.push(c);
+        }
       });
+      
+      const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
       
       const coursesWithData = matchingCourses.filter(c => {
         const key = `${c.institution}-${c.code}`;
-        return coursesData.has(key);
+        return coursesDataRef.current.has(key);
       });
       
       return coursesWithData.length < matchingCourses.length;
@@ -551,11 +648,11 @@ export default function Home() {
     
     const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
-      return coursesData.has(key);
+      return coursesDataRef.current.has(key);
     });
     
     return coursesWithData.length < filtered.length;
-  }, [allCourses, selectedInstitution, coursesData, searchQuery, displayCount, filteredAndSortedCourses.length]);
+  }, [allCourses, selectedInstitution, searchQuery, displayCount, filteredAndSortedCourses.length]);
 
   return (
     <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">
