@@ -1,11 +1,10 @@
 .navbar {
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  border-bottom: 1px solid var(--grok-border);
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .navContent {
@@ -17,9 +16,15 @@
 
 .logo {
   font-size: var(--text-lg);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--color-primary);
+  color: var(--grok-text-primary);
+  font-family: var(--font-space);
+  transition: color 0.2s ease;
+}
+
+.logo:hover {
+  color: var(--grok-blue);
 }
 
 .navLinks {
@@ -31,15 +36,30 @@
 .navLinks a {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--grok-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.navLinks a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--grok-blue);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navLinks a:hover {
-  color: var(--color-accent);
-  opacity: 1;
+  color: var(--grok-blue);
+}
+
+.navLinks a:hover::after {
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -51,5 +71,3 @@
     font-size: var(--text-xs);
   }
 }
-
-

@@ -1,21 +1,26 @@
-/* Swiss Academic Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Grok Design System - xAI Grokipedia Style */
 
 :root {
-  /* Swiss Academic Color Palette */
-  --color-primary: #000000;
-  --color-secondary: #666666;
-  --color-accent: #0066cc;
-  --color-background: #ffffff;
-  --color-surface: #f8f8f8;
-  --color-border: #e0e0e0;
-  --color-text: #1a1a1a;
-  --color-text-light: #666666;
-  --color-error: #cc0000;
+  /* Grok Color Palette */
+  --grok-bg: #000000;
+  --grok-surface: #0a0a0a;
+  --grok-surface-2: #111111;
+  --grok-border: #1f1f1f;
+  --grok-text-primary: #e4e4e7;
+  --grok-text-secondary: #a1a1aa;
+  --grok-text-muted: #52525b;
+  --grok-blue: #00d4ff;
+  --grok-blue-hover: #00e7ff;
+  --grok-orange: #ff6b35;
+  --grok-green: #00ff9d;
   
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-space: 'Space Grotesk', system-ui, sans-serif;
   
   /* Spacing (8px base) */
   --space-xs: 0.25rem;   /* 4px */
@@ -26,20 +31,9 @@
   --space-2xl: 3rem;     /* 48px */
   --space-3xl: 4rem;     /* 64px */
   
-  /* Typography Scale */
-  --text-xs: 0.75rem;    /* 12px */
-  --text-sm: 0.875rem;   /* 14px */
-  --text-base: 1rem;     /* 16px */
-  --text-lg: 1.125rem;   /* 18px */
-  --text-xl: 1.25rem;    /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 1.875rem;  /* 30px */
-  --text-4xl: 2.25rem;   /* 36px */
-  --text-5xl: 3rem;      /* 48px */
-  
   /* Layout */
   --max-width: 1200px;
-  --grid-gap: var(--space-lg);
+  --max-width-content: 800px;
 }
 
 * {
@@ -52,60 +46,85 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+/* Hide scrollbars but keep functionality */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--grok-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--grok-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--grok-text-muted);
 }
 
 body {
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-family: var(--font-inter);
+  font-size: 1rem;
   line-height: 1.6;
-  color: var(--color-text);
-  background-color: var(--color-background);
+  color: var(--grok-text-primary);
+  background-color: var(--grok-bg);
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-space);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  margin-bottom: var(--space-md);
+  color: var(--grok-text-primary);
 }
 
 h1 {
-  font-size: var(--text-4xl);
+  font-size: 3rem;
   font-weight: 700;
 }
 
 h2 {
-  font-size: var(--text-3xl);
+  font-size: 2.25rem;
 }
 
 h3 {
-  font-size: var(--text-2xl);
+  font-size: 1.875rem;
 }
 
 h4 {
-  font-size: var(--text-xl);
+  font-size: 1.5rem;
 }
 
 p {
   margin-bottom: var(--space-md);
+  color: var(--grok-text-secondary);
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--grok-blue);
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition: color 0.2s ease;
 }
 
 a:hover {
-  opacity: 0.7;
+  color: var(--grok-blue-hover);
 }
 
 code {
-  font-family: var(--font-mono);
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.9em;
-  background-color: var(--color-surface);
+  background-color: var(--grok-surface);
   padding: 0.125rem 0.25rem;
-  border-radius: 2px;
+  border-radius: 0.375rem;
+  color: var(--grok-text-primary);
 }
 
 button {
@@ -113,101 +132,100 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 input, select, textarea {
   font-family: inherit;
   font-size: inherit;
+  color: var(--grok-text-primary);
 }
 
-/* Utility Classes */
+/* Grok Utility Classes */
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--space-lg);
 }
 
-.grid {
-  display: grid;
-  gap: var(--grid-gap);
+.container-content {
+  max-width: var(--max-width-content);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
 }
 
-.flex {
-  display: flex;
+/* Grok Card Style */
+.grok-card {
+  background: var(--grok-surface);
+  border: 1px solid var(--grok-border);
+  border-radius: 1rem;
+  padding: var(--space-xl);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-mono {
-  font-family: var(--font-mono);
-}
-
-.text-light {
-  color: var(--color-text-light);
-}
-
-/* High-Performance Animations */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* GPU-accelerated transitions */
-.transition-fast {
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, opacity;
-}
-
-.transition-smooth {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, opacity;
-}
-
-/* Smooth hover effects */
-.hover-lift {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-.hover-lift:hover {
+.grok-card:hover {
+  border-color: var(--grok-blue);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Fade in animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Grok Button Styles */
+.btn-grok-primary {
+  background: var(--grok-blue);
+  color: #000000;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
 }
 
-@keyframes fadeInUp {
+.btn-grok-primary:hover {
+  background: var(--grok-blue-hover);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+}
+
+.btn-grok-primary:active {
+  transform: scale(1);
+}
+
+.btn-grok-secondary {
+  border: 1px solid var(--grok-border);
+  color: var(--grok-text-primary);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-grok-secondary:hover {
+  background: var(--grok-surface-2);
+  border-color: var(--grok-blue);
+}
+
+/* Typography Utilities */
+.text-grok-heading {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.text-grok-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text-grok-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--grok-text-secondary);
+}
+
+/* Animations */
+@keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -218,32 +236,73 @@ input, select, textarea {
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
+@keyframes ping {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
   }
-  to {
+  50% {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1.5);
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.animate-fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+/* Typing dots animation */
+.typing-dots {
+  display: inline-flex;
+  gap: 0.25rem;
 }
 
-.animate-slide-in {
-  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.typing-dots span {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--grok-blue);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Hover glow effect */
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+}
+
+/* Grok Input Style */
+.grok-input {
+  width: 100%;
+  resize: none;
+  background: var(--grok-surface-2);
+  border: 1px solid var(--grok-border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  color: var(--grok-text-primary);
+  transition: all 0.2s ease;
+}
+
+.grok-input::placeholder {
+  color: var(--grok-text-muted);
+}
+
+.grok-input:focus {
+  outline: none;
+  border-color: var(--grok-blue);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
 }
 
 /* Optimize rendering */
@@ -255,15 +314,27 @@ button, a, input, select {
 
 /* Responsive */
 @media (max-width: 768px) {
-  :root {
-    --text-4xl: 2rem;
-    --text-3xl: 1.5rem;
-    --text-2xl: 1.25rem;
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  .text-grok-heading {
+    font-size: 2rem;
+  }
+  
+  .text-grok-title {
+    font-size: 1.5rem;
   }
   
   .container {
     padding: 0 var(--space-md);
   }
 }
-
-

@@ -1,12 +1,16 @@
 .card {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  padding: var(--space-lg);
-  transition: border-color 0.2s;
+  background-color: var(--grok-surface);
+  border: 1px solid var(--grok-border);
+  border-radius: 1rem;
+  padding: var(--space-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
 }
 
 .card:hover {
-  border-color: var(--color-accent);
+  border-color: var(--grok-blue);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .header {
@@ -21,7 +25,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-text-light);
+  color: var(--grok-text-secondary);
   margin: 0;
 }
 
@@ -31,29 +35,27 @@
 }
 
 .trend.up {
-  color: #00cc00;
+  color: var(--grok-green);
 }
 
 .trend.down {
-  color: var(--color-error);
+  color: var(--grok-orange);
 }
 
 .trend.neutral {
-  color: var(--color-text-light);
+  color: var(--grok-text-muted);
 }
 
 .value {
   font-size: var(--text-3xl);
   font-weight: 700;
-  font-family: var(--font-mono);
+  font-family: 'JetBrains Mono', monospace;
   margin-bottom: var(--space-sm);
-  color: var(--color-primary);
+  color: var(--grok-blue);
 }
 
 .subtitle {
   font-size: var(--text-sm);
-  color: var(--color-text-light);
+  color: var(--grok-text-secondary);
   margin: 0;
 }
-
-
