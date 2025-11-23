@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
   try {
     // Forward request to NSD API
-    const response = await fetch('https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData', {
+    const response = await fetch('https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

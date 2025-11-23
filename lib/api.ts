@@ -2,7 +2,7 @@ import { GradeData, SearchPayload, University } from '@/types';
 import { getCachedData } from './cache';
 
 // NSD API URL - CORS issues in production require a proxy
-const DIRECT_API = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 
 // Multiple CORS proxy options as fallback
 // ⚠️ WARNING: Public CORS proxies are unreliable and often fail.
@@ -14,7 +14,7 @@ const CORS_PROXIES = [
 ];
 
 // Use proxy in production, direct API in development
-const isDevelopment = typeof window !== 'undefined' && 
+const isDevelopment = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 // Try direct API first, then fallback to proxies
@@ -44,6 +44,7 @@ export function createSearchPayload(
   courseCode: string,
   year?: number
 ): SearchPayload {
+  // Match exact structure from inspiration folder
   return {
     tabell_id: 308,
     api_versjon: 1,
@@ -62,16 +63,16 @@ export function createSearchPayload(
         variabel: 'Emnekode',
         selection: {
           filter: 'item',
-          values: [courseCode],
+          values: [courseCode], // Course code (formatted with -1 suffix)
         },
       },
-    ...(year ? [{
-      variabel: 'Årstall',
-      selection: {
-        filter: 'item',
-        values: [String(year)],
-      },
-    }] : []),
+      ...(year ? [{
+        variabel: 'Årstall',
+        selection: {
+          filter: 'item',
+          values: [String(year)], // Year as string
+        },
+      }] : []),
     ],
   };
 }
@@ -130,7 +131,7 @@ async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0): Promise<G
     } else {
       data = await response.json();
     }
-    
+
     return data;
   } catch (error) {
     // Try next proxy if available
@@ -184,7 +185,7 @@ export async function fetchAllYearsData(
 export function formatCourseCode(courseCode: string, institution: string): string {
   // Remove spaces and convert to uppercase (matching inspo implementation)
   const cleaned = courseCode.replace(/\s/g, '').toUpperCase();
-  
+
   // BI uses format: COURSECODE1 (no dash)
   // Others use format: COURSECODE-1 (with dash)
   if (institution === 'BI') {

@@ -33,7 +33,7 @@ For quick testing, you can use a public CORS proxy:
 
 Update `lib/api.ts`:
 ```typescript
-const API_URL = 'https://corsproxy.io/?https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+const API_URL = 'https://corsproxy.io/?https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 ```
 
 **Warning**: Not reliable for production, but works for testing.

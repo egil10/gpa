@@ -39,7 +39,7 @@ Temporarily use a public CORS proxy (not for production):
 
 Update `lib/api.ts`:
 ```typescript
-const API_URL = 'https://cors-anywhere.herokuapp.com/https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+const API_URL = 'https://cors-anywhere.herokuapp.com/https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 ```
 
 **Note**: These services are unreliable and may have rate limits.

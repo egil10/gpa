@@ -10,19 +10,6 @@
 - The NSD API is **public** - no API keys or authentication needed
 - No backend server required
 - Works directly from the browser (client-side)
-
-### 2. **Direct API Calls**
-When a user searches:
-1. User enters course code (e.g., "IN2010")
-2. Selects institution (e.g., "UiO") and year (e.g., "2022")
-3. Clicks "Søk"
-4. **Browser makes POST request** to: `https://api.nsd.no/dbhapitjener/Tabellen/hentJSONTabellData`
-5. NSD API returns grade distribution data
-6. Data is displayed in charts
-
-### 3. **No Backend Needed**
-- Everything happens in the browser
-- No server-side code required
 - Works perfectly on GitHub Pages (static hosting)
 
 ## Testing If It Works

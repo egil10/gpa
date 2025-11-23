@@ -14,7 +14,7 @@ import { POPULAR_COURSES } from '../lib/courses';
 import { UNIVERSITIES, createSearchPayload, formatCourseCode } from '../lib/api';
 import { GradeData } from '../types';
 
-const DIRECT_API = 'https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData';
+const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 const CACHE_DIR = path.join(process.cwd(), 'data');
 const CACHE_FILE = path.join(CACHE_DIR, 'cache.json');
 
@@ -37,36 +37,73 @@ async function fetchCourseData(
   // Use the same format as the original KarakterWeb implementation
   // Format: COURSECODE-1 (or COURSECODE1 for BI), uppercase, no spaces
   const formattedCode = formatCourseCode(courseCode, institution);
-  
+
   console.log(`Fetching ${courseCode} → ${formattedCode} (${institutionCode})...`);
-  
-  try {
-    const payload = createSearchPayload(institutionCode, formattedCode);
-    const response = await fetch(DIRECT_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+
+  // The original KarakterWeb always includes a year filter
+  // Try fetching for multiple years (2010-2023) and combine results
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2009 }, (_, i) => currentYear - i);
+
+  const allData: GradeData[] = [];
+  let foundAny = false;
+
+  // Try fetching for each year (in batches to avoid overwhelming the API)
+  for (let i = 0; i < years.length; i += 3) {
+    const yearBatch = years.slice(i, i + 3);
+
+    const promises = yearBatch.map(async (year) => {
+      // Try both uppercase and lowercase (API might accept both)
+      const formats = [formattedCode, formattedCode.toLowerCase()];
+
+      for (const codeFormat of formats) {
+        try {
+          const payload = createSearchPayload(institutionCode, codeFormat, year);
+          const response = await fetch(DIRECT_API, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.status === 204 || !response.ok) {
+            continue; // Try next format
+          }
+
+          const data: GradeData[] = await response.json();
+          if (data && data.length > 0) {
+            return data;
+          }
+        } catch (error) {
+          continue; // Try next format
+        }
+      }
+
+      return []; // No data found with either format
     });
 
-    if (response.status === 204 || !response.ok) {
-      console.log(`  ⚠️  No data found for ${courseCode} (tried ${formattedCode})`);
-      return [];
+    const results = await Promise.all(promises);
+    const batchData = results.flat();
+
+    if (batchData.length > 0) {
+      allData.push(...batchData);
+      foundAny = true;
     }
 
-    const data: GradeData[] = await response.json();
-    if (data && data.length > 0) {
-      console.log(`  ✓ Found ${data.length} entries`);
-      return data;
+    // Small delay between batches
+    if (i + 3 < years.length) {
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
-    
-    console.log(`  ⚠️  No data found for ${courseCode} (empty response)`);
-    return [];
-  } catch (error) {
-    console.error(`  ✗ Error fetching ${courseCode}:`, error instanceof Error ? error.message : error);
-    return [];
   }
+
+  if (foundAny) {
+    console.log(`  ✓ Found ${allData.length} entries across ${new Set(allData.map(d => d.Årstall)).size} years`);
+    return allData;
+  }
+
+  console.log(`  ⚠️  No data found for ${courseCode} (tried ${formattedCode} for years ${years[0]}-${years[years.length - 1]})`);
+  return [];
 }
 
 async function fetchAllCourses(): Promise<CachedData> {
@@ -89,24 +126,24 @@ async function fetchAllCourses(): Promise<CachedData> {
   const BATCH_SIZE = 5;
   for (let i = 0; i < POPULAR_COURSES.length; i += BATCH_SIZE) {
     const batch = POPULAR_COURSES.slice(i, i + BATCH_SIZE);
-    
+
     const promises = batch.map(async (course) => {
       const key = `${course.institutionCode}-${course.code}`;
       const data = await fetchCourseData(course.institutionCode, course.code, course.institution);
-      
+
       if (data.length > 0) {
         cache.courses[key] = data;
         successCount++;
         cache.metadata.totalEntries += data.length;
       }
-      
+
       processed++;
       const progress = ((processed / totalCourses) * 100).toFixed(1);
       console.log(`Progress: ${processed}/${totalCourses} (${progress}%)\n`);
     });
 
     await Promise.all(promises);
-    
+
     // Small delay between batches to be nice to the API
     if (i + BATCH_SIZE < POPULAR_COURSES.length) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -145,7 +182,7 @@ async function main() {
 
   // Save to file
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
-  
+
   console.log('\n✅ Cache update complete!');
   console.log(`   - Courses with data: ${cache.metadata.totalCourses}`);
   console.log(`   - Total entries: ${cache.metadata.totalEntries}`);

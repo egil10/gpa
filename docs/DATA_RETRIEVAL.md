@@ -12,7 +12,7 @@ Data is retrieved **on-demand** from the NSD (Norsk senter for forskningsdata) A
   
 - **How**: Each search makes a direct API call to NSD's endpoint:
   ```
-  POST https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData
+  POST https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData
   ```
 
 - **No Caching**: Currently, there is no caching mechanism. Each search makes a fresh API request.

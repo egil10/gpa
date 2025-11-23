@@ -5,7 +5,7 @@
 ### Endpoint
 
 ```
-POST https://api.nsd.no/dbhapitjener/Tabeller/hentJSONTabellData
+POST https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData
 ```
 
 ### Function: `fetchGradeData`
