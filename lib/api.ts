@@ -42,9 +42,16 @@ const CORS_PROXIES = [
 
 // Optional custom proxy URL (e.g., hosted on Vercel/Cloudflare/Netlify)
 // Can be configured via NEXT_PUBLIC_PROXY_URL or legacy NEXT_PUBLIC_CORS_PROXY_URL
-const CUSTOM_PROXY_URL = (process.env.NEXT_PUBLIC_PROXY_URL ||
+// Or loaded at runtime from /proxy-config.json for GitHub Pages deployments
+let CUSTOM_PROXY_URL = (process.env.NEXT_PUBLIC_PROXY_URL ||
   process.env.NEXT_PUBLIC_CORS_PROXY_URL ||
   '').trim();
+
+// Note: For GitHub Pages deployments without a proxy, API calls will be blocked.
+// To enable API calls on GitHub Pages:
+// 1. Set NEXT_PUBLIC_PROXY_URL at build time, OR
+// 2. Deploy to Vercel where the proxy works automatically, OR  
+// 3. Set up a Cloudflare Worker proxy (see docs/GITHUB_PAGES_PROXY_SETUP.md)
 
 // Use proxy in production, direct API in development
 const isBrowser = typeof window !== 'undefined';
@@ -220,6 +227,16 @@ export function createSearchPayload(
 }
 
 export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, useVercelProxy = true): Promise<GradeData[]> {
+  // Block all API calls on GitHub Pages if no custom proxy is configured
+  // This prevents CORS errors and retry loops
+  if (isBrowser && isGitHubPages && !CUSTOM_PROXY_URL) {
+    throw new Error(
+      'API calls are not available on GitHub Pages due to CORS restrictions. ' +
+      'Please deploy to Vercel or configure a Cloudflare Worker proxy. ' +
+      'See docs/GITHUB_PAGES_PROXY_SETUP.md for instructions.'
+    );
+  }
+
   if (isDevelopment) {
     // Direct API call in development
     try {
@@ -387,11 +404,14 @@ export async function fetchGradeData(
     const { getGradeDataFromCache } = await import('./grade-data-cache');
     const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
     if (cached && cached.length > 0) {
+      // Aggregate duplicates from cache
+      const { aggregateDuplicateEntries } = await import('./utils');
+      let aggregated = aggregateDuplicateEntries(cached);
       // Filter by year if specified
       if (year) {
-        return cached.filter(item => parseInt(item.Årstall, 10) === year);
+        aggregated = aggregated.filter(item => parseInt(item.Årstall, 10) === year);
       }
-      return cached;
+      return aggregated;
     }
   }
   
@@ -405,18 +425,27 @@ export async function fetchGradeData(
   }
   
   if (cached && cached.length > 0) {
+    // Aggregate duplicates from cache
+    const { aggregateDuplicateEntries } = await import('./utils');
+    let aggregated = aggregateDuplicateEntries(cached);
     // Filter by year if specified
     if (year) {
-      return cached.filter(item => parseInt(item.Årstall, 10) === year);
+      aggregated = aggregated.filter(item => parseInt(item.Årstall, 10) === year);
     }
-    return cached;
+    return aggregated;
   }
 
   // Fall back to API if cache miss
   const payload = createSearchPayload(institutionCode, courseCode, year, departmentFilter);
-  const data = await fetchWithProxy(payload);
+  let data = await fetchWithProxy(payload);
   
-  // Cache the fetched data
+  // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
+  if (data.length > 0) {
+    const { aggregateDuplicateEntries } = await import('./utils');
+    data = aggregateDuplicateEntries(data);
+  }
+  
+  // Cache the fetched data (after aggregation)
   if (institution && data.length > 0) {
     const { storeGradeDataInCache } = await import('./grade-data-cache');
     storeGradeDataInCache(institutionCode, courseCode, institution, data);
@@ -443,7 +472,9 @@ export async function fetchAllYearsData(
     const { getGradeDataFromCache } = await import('./grade-data-cache');
     const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
     if (cached && cached.length > 0) {
-      return cached;
+      // Aggregate duplicates from cache
+      const { aggregateDuplicateEntries } = await import('./utils');
+      return aggregateDuplicateEntries(cached);
     }
   }
   
@@ -457,14 +488,22 @@ export async function fetchAllYearsData(
   }
   
   if (cached && cached.length > 0) {
-    return cached;
+    // Aggregate duplicates from cache
+    const { aggregateDuplicateEntries } = await import('./utils');
+    return aggregateDuplicateEntries(cached);
   }
   
   // Fetch without year filter to get all years
   const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
-  const data = await fetchWithProxy(payload);
+  let data = await fetchWithProxy(payload);
   
-  // Cache the fetched data
+  // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
+  if (data.length > 0) {
+    const { aggregateDuplicateEntries } = await import('./utils');
+    data = aggregateDuplicateEntries(data);
+  }
+  
+  // Cache the fetched data (after aggregation)
   if (institution && data.length > 0) {
     const { storeGradeDataInCache } = await import('./grade-data-cache');
     storeGradeDataInCache(institutionCode, courseCode, institution, data);

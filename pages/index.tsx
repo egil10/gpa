@@ -11,6 +11,7 @@ import { CourseStats } from '@/types';
 import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
 import { loadHomepageTopCourses, HomepageTopDataset } from '@/lib/homepage-data';
+import { loadHomepageGradeData, HomepageGradeDataPayload } from '@/lib/homepage-grade-data';
 import styles from '@/styles/Home.module.css';
 
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
@@ -28,6 +29,7 @@ export default function Home() {
   const router = useRouter();
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
   const [topDataset, setTopDataset] = useState<HomepageTopDataset | null>(null);
+  const [preRenderedData, setPreRenderedData] = useState<HomepageGradeDataPayload | null>(null);
   const [coursesData, setCoursesData] = useState<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState<Set<string>>(new Set());
@@ -125,6 +127,34 @@ export default function Home() {
     };
   }, []);
 
+  // Load pre-rendered grade data immediately (no API calls needed)
+  useEffect(() => {
+    let cancelled = false;
+    loadHomepageGradeData()
+      .then((data) => {
+        if (!data || cancelled) return;
+
+        setPreRenderedData(data);
+        // Populate coursesData immediately with pre-rendered data
+        const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
+        data.courses.forEach((course) => {
+          const key = `${course.institution}-${course.courseCode}`;
+          dataMap.set(key, course);
+        });
+        setCoursesData(dataMap);
+        // Mark as complete immediately
+        setInitialLoadComplete(true);
+        setDisplayCount(Math.min(data.courses.length, INITIAL_COURSES_COUNT));
+      })
+      .catch((error) => {
+        console.warn('Pre-rendered grade data unavailable:', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Reset initial load when institution changes
   useEffect(() => {
     if (allCourses.length > 0) {
@@ -194,8 +224,22 @@ export default function Home() {
   }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, coursesData, loadingCourses]);
 
   // Helper function to load course data
+  // Skip API calls if we have pre-rendered data or are on GitHub Pages
   const loadCoursesData = useCallback((coursesToLoad: CourseInfo[]) => {
     if (coursesToLoad.length === 0) return;
+    
+    // Check if we're on GitHub Pages (skip API calls)
+    const isGitHubPages = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
+    
+    // Skip API calls if we have pre-rendered data (already loaded)
+    if (preRenderedData && preRenderedData.courses.length > 0) {
+      return;
+    }
+    // Skip API calls on GitHub Pages (they will fail due to CORS)
+    if (isGitHubPages) {
+      return;
+    }
 
     // Mark as loading
     setLoadingCourses(prev => {
@@ -270,8 +314,21 @@ export default function Home() {
   }, []);
 
   // Load initial popular courses (12 courses with most candidates, distributed across institutions)
+  // Skip API calls if we have pre-rendered data or are on GitHub Pages
   useEffect(() => {
+    // Check if we're on GitHub Pages (skip API calls)
+    const isGitHubPages = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
     if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
+    // Skip API calls if we have pre-rendered data
+    if (preRenderedData && preRenderedData.courses.length > 0) {
+      return;
+    }
+    // Skip API calls on GitHub Pages (they will fail anyway)
+    if (isGitHubPages) {
+      setInitialLoadComplete(true);
+      return;
+    }
     
     // If institution filter is 'all', use popular courses in round-robin fashion
     if (selectedInstitution === 'all') {
@@ -339,7 +396,7 @@ export default function Home() {
     }
 
     loadCoursesData(coursesToLoad);
-  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadCoursesData, topInstitutionCourses]);
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadCoursesData, topInstitutionCourses, preRenderedData]);
   useEffect(() => {
     if (loadingCourses.size === 0) {
       setLoadingDots('');
@@ -541,6 +598,10 @@ export default function Home() {
 
   // Load more courses when user clicks "load more"
   const handleLoadMore = useCallback(() => {
+    // Check if we're on GitHub Pages (skip API calls)
+    const isGitHubPages = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
+    
     const isTopDefaultView =
       selectedInstitution === 'all' &&
       !searchQuery.trim() &&
@@ -558,6 +619,11 @@ export default function Home() {
     if (!isTopDefaultView && displayCount < filteredAndSortedCourses.length) {
       // Just increment display count to show more already-loaded courses
       setDisplayCount(prev => prev + COURSES_PER_PAGE);
+      return;
+    }
+    
+    // Skip API calls on GitHub Pages (they will fail due to CORS)
+    if (isGitHubPages) {
       return;
     }
 
@@ -703,6 +769,15 @@ export default function Home() {
       if (!searchQuery.trim()) {
         setDisplayCount(COURSES_PER_PAGE);
       }
+      return;
+    }
+    
+    // Check if we're on GitHub Pages (skip API calls)
+    const isGitHubPages = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
+    
+    // Skip API calls on GitHub Pages (they will fail due to CORS)
+    if (isGitHubPages) {
       return;
     }
     

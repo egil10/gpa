@@ -50,6 +50,7 @@
     "discover-nla": "tsx scripts/discover-nla-courses.ts",
     "discover-steiner": "tsx scripts/discover-steiner-courses.ts",
     "build-home-data": "tsx scripts/build-homepage-data.ts",
+    "build-homepage-grade-data": "tsx scripts/build-homepage-grade-data.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {

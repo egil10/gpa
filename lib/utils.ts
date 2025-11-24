@@ -44,12 +44,55 @@ export function normalizeGradeDistribution(
   return distributions;
 }
 
+/**
+ * Aggregates duplicate entries in grade data
+ * Merges entries with the same institution, course code, year, and grade
+ * This handles cases where the API returns multiple rows for the same course instance
+ */
+export function aggregateDuplicateEntries(data: GradeData[]): GradeData[] {
+  if (!data || data.length === 0) {
+    return data;
+  }
+
+  // Create a map to aggregate duplicates
+  const aggregatedMap = new Map<string, GradeData>();
+
+  data.forEach((item) => {
+    // Create a unique key: institution + course + year + grade
+    const key = `${item.Institusjonskode}|${item.Emnekode}|${item.Årstall}|${item.Karakter}`;
+    
+    const existing = aggregatedMap.get(key);
+    if (existing) {
+      // Merge: add student counts together
+      const existingCount = parseInt(existing['Antall kandidater totalt'] || '0', 10);
+      const newCount = parseInt(item['Antall kandidater totalt'] || '0', 10);
+      const existingWomen = parseInt(existing['Antall kandidater kvinner'] || '0', 10);
+      const newWomen = parseInt(item['Antall kandidater kvinner'] || '0', 10);
+      const existingMen = parseInt(existing['Antall kandidater menn'] || '0', 10);
+      const newMen = parseInt(item['Antall kandidater menn'] || '0', 10);
+
+      // Update counts
+      existing['Antall kandidater totalt'] = String(existingCount + newCount);
+      existing['Antall kandidater kvinner'] = String(existingWomen + newWomen);
+      existing['Antall kandidater menn'] = String(existingMen + newMen);
+    } else {
+      // First occurrence - clone the object
+      aggregatedMap.set(key, { ...item });
+    }
+  });
+
+  return Array.from(aggregatedMap.values());
+}
+
 export function processGradeData(data: GradeData[]): CourseStats | null {
   if (!data || data.length === 0) {
     return null;
   }
 
-  const totalStudents = data.reduce((sum, item) => {
+  // First, aggregate any duplicate entries
+  const aggregatedData = aggregateDuplicateEntries(data);
+
+  const totalStudents = aggregatedData.reduce((sum, item) => {
     return sum + parseInt(item['Antall kandidater totalt'] || '0', 10);
   }, 0);
 
@@ -60,7 +103,7 @@ export function processGradeData(data: GradeData[]): CourseStats | null {
   // Build grade map
   const gradeMap: Record<string, { count: number; percentage: number }> = {};
   
-  data.forEach((item) => {
+  aggregatedData.forEach((item) => {
     const count = parseInt(item['Antall kandidater totalt'] || '0', 10);
     let grade = item.Karakter;
     if (grade === 'G') grade = 'Bestått';
@@ -116,9 +159,12 @@ export function processMultiYearData(data: GradeData[]): Record<number, CourseSt
     return {};
   }
 
+  // First aggregate duplicates across all years
+  const aggregatedData = aggregateDuplicateEntries(data);
+
   // Group by year
   const byYear: Record<number, GradeData[]> = {};
-  data.forEach((item) => {
+  aggregatedData.forEach((item) => {
     const year = parseInt(item.Årstall, 10);
     if (!byYear[year]) {
       byYear[year] = [];
@@ -145,11 +191,14 @@ export function combineAllYears(data: GradeData[]): CourseStats | null {
     return null;
   }
 
+  // First aggregate duplicates across all years
+  const aggregatedData = aggregateDuplicateEntries(data);
+
   // Group by grade across all years
   const gradeMap: Record<string, { count: number; percentage: number }> = {};
   let totalStudents = 0;
 
-  data.forEach((item) => {
+  aggregatedData.forEach((item) => {
     let grade = item.Karakter;
     if (grade === 'G') grade = 'Bestått';
     if (grade === 'H') grade = 'Ikke bestått';

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { BookOpen, X } from 'lucide-react';
+import { BookOpen, X, RotateCw } from 'lucide-react';
 import { Course, GradeSystem, calculateGPA, UNIVERSITY_GRADES, HIGHSCHOOL_GRADES, GRADE_VALUES } from '@/types/gpa';
 import CourseNameAutocomplete from './CourseNameAutocomplete';
 import VGSCourseAutocomplete from './VGSCourseAutocomplete';
@@ -80,6 +80,21 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
   const handleReset = () => {
     setHasCalculated(false);
+  };
+
+  const handleHardReset = () => {
+    // Clear all courses
+    setCourses([]);
+    // Reset calculation state
+    setHasCalculated(false);
+    // Reset bonus points
+    setBonusPoints({ realfag: 0, other: 0 });
+    // Reset system to initial
+    setSystem(initialSystem);
+    // Clear localStorage flag so examples can be shown again if needed
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('gpa-has-seen-examples');
+    }
   };
 
   const addCourse = useCallback(() => {
@@ -210,6 +225,15 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               Videregående (1-6)
             </button>
           </div>
+          <button
+            onClick={handleHardReset}
+            className={styles.hardResetButton}
+            aria-label="Tilbakestill alt"
+            title="Tilbakestill alt og start på nytt"
+          >
+            <RotateCw size={18} />
+            <span>Nullstill alt</span>
+          </button>
         </div>
       </div>
 

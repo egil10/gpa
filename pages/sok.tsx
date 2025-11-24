@@ -19,6 +19,10 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [allYearsStats, setAllYearsStats] = useState<Record<number, CourseStats>>({});
 
+  // Check if we're on GitHub Pages (where API calls will fail)
+  const isGitHubPages = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
+
   // Handle URL query parameters
   useEffect(() => {
     if (router.isReady) {
@@ -66,6 +70,13 @@ export default function SearchPage() {
         const normalizedCode = stripCourseCodeSuffix(courseCode);
         const formattedCode = formatCourseCode(normalizedCode, institution);
         
+        // Check if we're on GitHub Pages - API calls will fail due to CORS
+        if (isGitHubPages) {
+          setError('Søkefunksjonen er ikke tilgjengelig på GitHub Pages på grunn av CORS-begrensninger. Vurder å deploye til Vercel eller sette opp en Cloudflare Worker-proxy.');
+          setLoading(false);
+          return;
+        }
+
         setLoading(true);
         setError(null);
         setAllYearsStats({});
@@ -85,8 +96,8 @@ export default function SearchPage() {
           })
           .catch(err => {
               // Check if error is CORS-related or actual "no data"
-              if (err.message && err.message.includes('CORS')) {
-                setError(err.message);
+              if (err.message && (err.message.includes('CORS') || err.message.includes('blocked'))) {
+                setError('Kunne ikke laste data på grunn av CORS-begrensninger. Søkefunksjonen krever en proxy for å fungere på GitHub Pages.');
               } else {
                 setError('Ingen data funnet for dette emnet');
                 markCourseAsUnavailable(normalizedCode, institution);
@@ -137,14 +148,15 @@ export default function SearchPage() {
           {error && (
             <div className={styles.error}>
               <p><strong>Feil:</strong> {error}</p>
-              {error.includes('CORS') && !error.includes('ikke funnet') && (
-                <p className={styles.errorHint}>
-                  <small>
-                    💡 Dette er et kjent problem med offentlige CORS-proxyer. 
-                    For å løse dette permanent, deploy <code>api/proxy.js</code> til Vercel (gratis). 
-                    Se <a href="https://github.com/egil10/gpa/blob/main/docs/CORS_SOLUTION.md" target="_blank" rel="noopener noreferrer">dokumentasjonen</a>.
-                  </small>
-                </p>
+              {(error.includes('CORS') || error.includes('GitHub Pages') || error.includes('proxy')) && !error.includes('ikke funnet') && (
+                <div className={styles.errorHint}>
+                  <p><strong>Løsning:</strong></p>
+                  <ol>
+                    <li><strong>Rask løsning:</strong> Deploy til <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">Vercel</a> (gratis) - proxy vil fungere automatisk</li>
+                    <li><strong>Behold GitHub Pages:</strong> Sett opp en Cloudflare Worker proxy og legg URL i <code>public/proxy-config.json</code></li>
+                    <li>Se <a href="https://github.com/egil10/gpa/blob/main/docs/GITHUB_PAGES_PROXY_SETUP.md" target="_blank" rel="noopener noreferrer">dokumentasjonen</a> for detaljer</li>
+                  </ol>
+                </div>
               )}
             </div>
           )}

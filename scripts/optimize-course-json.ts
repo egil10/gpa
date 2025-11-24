@@ -41,9 +41,13 @@ interface FullCourseData {
  * Optimize a single course object
  */
 function optimizeCourse(course: CourseExport): OptimizedCourse {
+  // Ensure years is an array before sorting
+  const years = Array.isArray(course.years) ? course.years : [];
+  const sortedYears = years.sort((a, b) => b - a); // Most recent first
+  
   const optimized: OptimizedCourse = {
     c: course.courseCode,
-    y: course.years.sort((a, b) => b - a), // Most recent first
+    y: sortedYears,
   };
   
   // Only include name if it exists and is different from code
@@ -54,9 +58,45 @@ function optimizeCourse(course: CourseExport): OptimizedCourse {
   // Include student count for last year (useful for sorting/popular courses)
   if (course.lastYearStudents && course.lastYearStudents > 0) {
     optimized.s = course.lastYearStudents;
+  } else if (course.totalStudents && course.totalStudents > 0 && sortedYears.length > 0) {
+    // Fall back to totalStudents if lastYearStudents is not available
+    optimized.s = course.totalStudents;
   }
   
   return optimized;
+}
+
+/**
+ * Check if a file is already in optimized format
+ */
+function isAlreadyOptimized(data: any): boolean {
+  // Optimized format has structure: { i: string, courses: OptimizedCourse[] }
+  // Legacy format has structure: { institution: string, courses: CourseExport[] }
+  return data && typeof data.i === 'string' && Array.isArray(data.courses) && 
+    (data.courses.length === 0 || (data.courses[0] && typeof data.courses[0].c === 'string'));
+}
+
+/**
+ * Convert optimized format back to legacy format (for re-optimization if needed)
+ */
+function convertOptimizedToLegacy(optimizedData: any): FullCourseData {
+  const courses: CourseExport[] = optimizedData.courses.map((course: any) => ({
+    courseCode: course.c,
+    courseName: course.n || course.c,
+    years: Array.isArray(course.y) ? course.y : [],
+    totalStudents: course.s || 0,
+    lastYear: Array.isArray(course.y) && course.y.length > 0 ? Math.max(...course.y) : 0,
+    lastYearStudents: course.s || 0,
+  }));
+
+  return {
+    institution: '',
+    institutionCode: optimizedData.i,
+    lastUpdated: new Date().toISOString(),
+    totalCourses: courses.length,
+    yearsCovered: [],
+    courses,
+  };
 }
 
 /**
@@ -72,11 +112,40 @@ async function optimizeCourseFile(filePath: string): Promise<void> {
   
   // Read original file
   const originalContent = fs.readFileSync(filePath, 'utf-8');
-  const originalData: FullCourseData = JSON.parse(originalContent);
+  const parsedData = JSON.parse(originalContent);
   const originalSize = Buffer.byteLength(originalContent, 'utf8');
   
-  // Optimize courses
-  const optimizedCourses = originalData.courses.map(optimizeCourse);
+  // Check if already optimized
+  if (isAlreadyOptimized(parsedData)) {
+    console.log(`   ℹ️  File is already in optimized format, skipping`);
+    return;
+  }
+  
+  // Parse as legacy format
+  const originalData: FullCourseData = parsedData;
+  
+  // Validate that we have courses array
+  if (!originalData.courses || !Array.isArray(originalData.courses)) {
+    console.log(`   ⚠️  Invalid file format (missing courses array), skipping`);
+    return;
+  }
+  
+  // Optimize courses - handle missing years property
+  const optimizedCourses = originalData.courses
+    .filter(course => course && course.courseCode) // Filter out invalid courses
+    .map(course => {
+      // Ensure years is an array
+      if (!course.years || !Array.isArray(course.years)) {
+        return {
+          c: course.courseCode,
+          n: course.courseName && course.courseName !== course.courseCode ? course.courseName : undefined,
+          y: [],
+          s: course.lastYearStudents || course.totalStudents || undefined,
+        };
+      }
+      return optimizeCourse(course);
+    })
+    .filter(course => course.y && course.y.length > 0); // Filter out courses with no years
   
   // Create minimal export structure
   const optimizedData = {
