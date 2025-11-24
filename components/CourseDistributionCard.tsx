@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { CourseStats } from '@/types';
-import { UNIVERSITIES, formatCourseCode, formatInstitutionLabel } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { stripCourseCodeSuffix } from '@/lib/all-courses';
 import styles from './CourseDistributionCard.module.css';
 

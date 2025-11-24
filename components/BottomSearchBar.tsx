@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
 import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions } from '@/lib/all-courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
-import { formatCourseCode } from '@/lib/api';
 import { isCourseUnavailable } from '@/lib/course-availability';
 import styles from './BottomSearchBar.module.css';
 

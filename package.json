@@ -55,6 +55,7 @@
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
     "lucide-react": "^0.300.0",
     "next": "^14.0.0",
     "react": "^18.2.0",
