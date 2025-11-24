@@ -133,12 +133,6 @@ export default function SearchPage() {
               }
             setLoading(false);
           });
-        } catch (err) {
-          // Error validating course - show error
-          setError(`Emnekode "${courseCode}" ikke funnet`);
-          setLoading(false);
-          setAllYearsStats({});
-        }
       }, 100);
       return () => clearTimeout(timer);
     }
