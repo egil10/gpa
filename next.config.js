@@ -1,15 +1,16 @@
 /** @type {import('next').NextConfig} */
 const isProduction = process.env.NODE_ENV === 'production';
-const useExport = isProduction && process.env.SKIP_EXPORT !== 'true';
+const isVercel = !!process.env.VERCEL;
+const isGitHubPages = !isVercel && isProduction && process.env.SKIP_EXPORT !== 'true';
 
 const nextConfig = {
-  // Only use static export for production builds (not in dev mode)
-  ...(useExport ? {
+  // Only use static export for GitHub Pages (not for Vercel, which supports SSR/API routes)
+  ...(isGitHubPages ? {
     output: 'export',
   } : {}),
-  // Only use basePath in production (for GitHub Pages deployment)
-  // In development, run without basePath for easier local testing
-  ...(isProduction ? {
+  // Only use basePath for GitHub Pages deployment
+  // Vercel doesn't need basePath, development doesn't need it
+  ...(isGitHubPages ? {
     basePath: '/gpa', // Required for GitHub Pages (repo name)
   } : {}),
   images: {

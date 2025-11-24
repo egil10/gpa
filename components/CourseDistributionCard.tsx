@@ -32,17 +32,20 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     router.push(`/sok?code=${encodeURIComponent(displayCode)}&uni=${institution}&year=${course.year}`);
   };
 
-  // Filter data: only include pass/fail grades if BOTH are present
-  const hasBestatt = course.distributions.some((dist) => dist.grade === 'Bestått');
-  const hasIkkeBestatt = course.distributions.some((dist) => dist.grade === 'Ikke bestått');
-  const showPassFail = hasBestatt && hasIkkeBestatt;
+  // Filter data: show pass/fail grades if they exist (even if only one)
+  // Also filter out A-F grades that have 0 count (to avoid cluttering the chart)
+  const hasBestatt = course.distributions.some((dist) => dist.grade === 'Bestått' && dist.count > 0);
+  const hasIkkeBestatt = course.distributions.some((dist) => dist.grade === 'Ikke bestått' && dist.count > 0);
+  const hasPassFail = hasBestatt || hasIkkeBestatt;
   
   const chartData = course.distributions
     .filter((dist) => {
+      // Always show pass/fail grades if they exist
       if (dist.grade === 'Bestått' || dist.grade === 'Ikke bestått') {
-        return showPassFail;
+        return dist.count > 0;
       }
-      return true;
+      // For A-F grades, only show if they have count > 0
+      return dist.count > 0;
     })
     .map(dist => ({
       grade: dist.grade,

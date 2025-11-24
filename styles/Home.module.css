@@ -62,7 +62,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  background-image: url('/dist.svg');
+  /* BasePath is handled dynamically in the component */
   margin-right: var(--space-xs);
   pointer-events: none;
   -webkit-user-drag: none;

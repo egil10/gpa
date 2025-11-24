@@ -1,11 +1,11 @@
 // Serverless function to proxy NSD API requests
-// Deploy this to Vercel, Netlify, or Cloudflare Workers
-// 
-// Vercel: Just deploy this file, it will work automatically
-// Netlify: Put in netlify/functions/proxy.js
-// Cloudflare: Use Workers
+// For Vercel: This Next.js API route works automatically
+// For Netlify: Would need to be in netlify/functions/
+// For Cloudflare: Would need to use Workers
 
-export default async function handler(req, res) {
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Enable CORS for all origins
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -47,3 +47,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to fetch data from NSD API' });
   }
 }
+

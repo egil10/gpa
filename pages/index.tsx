@@ -702,11 +702,32 @@ export default function Home() {
       topInstitutionCourses.length > 0;
 
     if (isTopDefaultView) {
-      const remaining = topInstitutionCourses.length - displayCount;
-      if (remaining > 0) {
-        setDisplayCount(prev => prev + remaining);
+      // First, check if we have more courses with data that we can show
+      const coursesWithData = topInstitutionCourses.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return coursesDataRef.current.has(key);
+      });
+      
+      if (displayCount < coursesWithData.length) {
+        // Show more courses that already have data
+        setDisplayCount(prev => Math.min(prev + COURSES_PER_PAGE, coursesWithData.length));
         return;
       }
+      
+      // If no more courses with data, try to load data for courses without data
+      const coursesToLoad = topInstitutionCourses
+        .filter(course => {
+          const key = `${course.institution}-${course.code}`;
+          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+        })
+        .slice(0, COURSES_PER_PAGE);
+      
+      if (coursesToLoad.length > 0) {
+        loadCoursesData(coursesToLoad);
+        // Increase display count to show courses once data is loaded
+        setDisplayCount(prev => prev + COURSES_PER_PAGE);
+      }
+      return;
     }
 
     // First, check if we have more courses already loaded that we can show
@@ -1105,7 +1126,21 @@ useEffect(() => {
     if (loading) return false;
 
     if (isTopDefaultView) {
-      return displayCount < topInstitutionCourses.length;
+      // Check if we have more courses to display (either with data or that need loading)
+      // First check if we have more courses with data than we're displaying
+      const coursesWithData = topInstitutionCourses.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return coursesDataRef.current.has(key);
+      });
+      if (displayCount < coursesWithData.length) {
+        return true;
+      }
+      // Also check if there are courses without data that we could load
+      const coursesWithoutData = topInstitutionCourses.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+      });
+      return coursesWithoutData.length > 0;
     }
     
     // Check if we have more courses already loaded that we haven't displayed
@@ -1189,7 +1224,13 @@ useEffect(() => {
         <div className="container">
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              <span className={styles.heroLogo} aria-hidden="true" />
+              <span 
+                className={styles.heroLogo} 
+                aria-hidden="true"
+                style={{
+                  backgroundImage: `url('${BASEPATH}/dist.svg')`
+                }}
+              />
               <span className={styles.heroTitleText}>Karakterfordeling</span>
             </h1>
             <BottomSearchBar initialPlaceholderCode={heroPlaceholderCode || undefined} />
