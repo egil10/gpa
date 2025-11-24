@@ -62,21 +62,26 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   });
   
-  // Check if either Bestått or Ikke bestått exists (even if count is 0)
-  const bestatt = course.distributions.find(d => d.grade === 'Bestått');
-  const ikkeBestatt = course.distributions.find(d => d.grade === 'Ikke bestått');
-  // If either exists, we want to show both labels (even if one has 0 count)
-  const hasAnyPassFailData = !!(bestatt || ikkeBestatt);
+  // Check if either Bestått or Ikke bestått exists in the distributions array
+  // We check for the grade string explicitly to be thorough
+  const hasBestatt = course.distributions.some(d => d.grade === 'Bestått');
+  const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått');
+  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
   
-  // If either Bestått or Ikke bestått exists (even with 0 count), include both in the chart
-  // This ensures both x-axis labels are shown even if one has zero count
+  // If either Bestått or Ikke bestått exists, we always include BOTH in the chart
+  // This ensures both x-axis labels are shown even if one has zero count or is missing
   if (hasAnyPassFailData) {
-    // Ensure we always have valid numbers, defaulting to 0
+    // Find the actual distribution entries (might be undefined if not present)
+    const bestatt = course.distributions.find(d => d.grade === 'Bestått');
+    const ikkeBestatt = course.distributions.find(d => d.grade === 'Ikke bestått');
+    
+    // Ensure we always have valid numbers, defaulting to 0 if missing or invalid
     const bestattPercentage = (bestatt?.percentage != null && !isNaN(bestatt.percentage)) ? bestatt.percentage : 0;
     const bestattCount = (bestatt?.count != null && !isNaN(bestatt.count)) ? bestatt.count : 0;
     const ikkeBestattPercentage = (ikkeBestatt?.percentage != null && !isNaN(ikkeBestatt.percentage)) ? ikkeBestatt.percentage : 0;
     const ikkeBestattCount = (ikkeBestatt?.count != null && !isNaN(ikkeBestatt.count)) ? ikkeBestatt.count : 0;
     
+    // Always set both entries in the map, even if one has all zeros
     distributionMap.set('Bestått', {
       grade: 'Bestått',
       percentage: bestattPercentage,
@@ -141,12 +146,14 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
             {course.distributions.find(d => d.grade === 'A')?.percentage || 0}%
           </span>
         </div>
-        {course.averageGrade && (
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>Snitt</span>
-            <span className={styles.statValue}>{course.averageGrade.toFixed(1)}</span>
-          </div>
-        )}
+        <div className={styles.stat}>
+          <span className={styles.statLabel}>Snitt</span>
+          <span className={styles.statValue}>
+            {course.averageGrade != null && !isNaN(course.averageGrade)
+              ? course.averageGrade.toFixed(1)
+              : '0'}
+          </span>
+        </div>
         <div className={styles.stat}>
           <span className={styles.statLabel}>Kandidater</span>
           <span className={styles.statValue}>{course.totalStudents}</span>

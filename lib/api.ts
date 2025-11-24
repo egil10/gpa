@@ -467,6 +467,80 @@ export async function fetchGradeData(
   }
 
   // Fall back to API if cache miss
+  // For UiB, try multiple formats since course codes can have different formats
+  if (institution === 'UiB') {
+    const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    const formatsToTry = [
+      `${cleaned}-1`,           // Standard format with -1
+      cleaned,                  // Without any suffix
+      formatCourseCode(cleaned, institution), // formatCourseCode result
+    ];
+    
+    // Remove duplicates
+    const uniqueFormats = Array.from(new Set(formatsToTry));
+    
+    // Try each format
+    for (const formattedCode of uniqueFormats) {
+      try {
+        const payload = createSearchPayload(institutionCode, formattedCode, year, departmentFilter);
+        const data = await fetchWithProxy(payload);
+        
+        if (data && data.length > 0) {
+          // Found data with this format - aggregate and return
+          const { aggregateDuplicateEntries } = await import('./utils');
+          let aggregated = aggregateDuplicateEntries(data);
+          
+          // Cache the fetched data (after aggregation)
+          if (institution && aggregated.length > 0) {
+            const { storeGradeDataInCache } = await import('./grade-data-cache');
+            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+          }
+          
+          return aggregated;
+        }
+      } catch (error) {
+        // Continue to next format
+        continue;
+      }
+    }
+    
+    // If all direct queries failed, try querying all courses for the institution and filtering
+    try {
+      const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
+      const allData = await fetchWithProxy(payloadAllCourses);
+      
+      if (allData && allData.length > 0) {
+        // Find courses that match the base code (first part before any dash)
+        const normalizedBase = cleaned;
+        const matchingData = allData.filter(item => {
+          const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+          const itemBaseCode = itemCode.includes('-') ? itemCode.split('-')[0] : itemCode;
+          return itemBaseCode === normalizedBase || itemCode === normalizedBase;
+        });
+        
+        if (matchingData.length > 0) {
+          // Aggregate and return matching data
+          const { aggregateDuplicateEntries } = await import('./utils');
+          let aggregated = aggregateDuplicateEntries(matchingData);
+          
+          // Cache the fetched data (after aggregation)
+          if (institution && aggregated.length > 0) {
+            const { storeGradeDataInCache } = await import('./grade-data-cache');
+            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+          }
+          
+          return aggregated;
+        }
+      }
+    } catch (error) {
+      // If this fallback also fails, continue to return empty array below
+    }
+    
+    // All attempts failed - return empty array
+    return [];
+  }
+  
+  // For non-UiB institutions, use standard format
   const payload = createSearchPayload(institutionCode, courseCode, year, departmentFilter);
   let data = await fetchWithProxy(payload);
   
@@ -524,7 +598,82 @@ export async function fetchAllYearsData(
     return aggregateDuplicateEntries(cached);
   }
   
-  // Fetch without year filter to get all years
+  // For UiB, try multiple formats since course codes can have different formats
+  // Some courses use "INF100" (no suffix), others use "EXPHIL-HFEKS-0" (with suffix)
+  if (institution === 'UiB') {
+    const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    const formatsToTry = [
+      `${cleaned}-1`,           // Standard format with -1
+      cleaned,                  // Without any suffix
+      formatCourseCode(cleaned, institution), // formatCourseCode result
+    ];
+    
+    // Remove duplicates
+    const uniqueFormats = Array.from(new Set(formatsToTry));
+    
+    // Try each format
+    for (const formattedCode of uniqueFormats) {
+      try {
+        const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
+        const data = await fetchWithProxy(payload);
+        
+        if (data && data.length > 0) {
+          // Found data with this format - aggregate and return
+          const { aggregateDuplicateEntries } = await import('./utils');
+          let aggregated = aggregateDuplicateEntries(data);
+          
+          // Cache the fetched data (after aggregation)
+          if (institution && aggregated.length > 0) {
+            const { storeGradeDataInCache } = await import('./grade-data-cache');
+            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+          }
+          
+          return aggregated;
+        }
+      } catch (error) {
+        // Continue to next format
+        continue;
+      }
+    }
+    
+    // If all direct queries failed, try querying all courses for the institution and filtering
+    // This handles cases where the exact API format is unknown (e.g., "EXPHIL-HFEKS-0")
+    try {
+      const payloadAllCourses = createSearchPayload(institutionCode, undefined, undefined, departmentFilter);
+      const allData = await fetchWithProxy(payloadAllCourses);
+      
+      if (allData && allData.length > 0) {
+        // Find courses that match the base code (first part before any dash)
+        const normalizedBase = cleaned;
+        const matchingData = allData.filter(item => {
+          const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+          const itemBaseCode = itemCode.includes('-') ? itemCode.split('-')[0] : itemCode;
+          return itemBaseCode === normalizedBase || itemCode === normalizedBase;
+        });
+        
+        if (matchingData.length > 0) {
+          // Aggregate and return matching data
+          const { aggregateDuplicateEntries } = await import('./utils');
+          let aggregated = aggregateDuplicateEntries(matchingData);
+          
+          // Cache the fetched data (after aggregation)
+          if (institution && aggregated.length > 0) {
+            const { storeGradeDataInCache } = await import('./grade-data-cache');
+            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+          }
+          
+          return aggregated;
+        }
+      }
+    } catch (error) {
+      // If this fallback also fails, continue to return empty array below
+    }
+    
+    // All attempts failed - return empty array
+    return [];
+  }
+  
+  // For non-UiB institutions, use standard format
   const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
   let data = await fetchWithProxy(payload);
   
