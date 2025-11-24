@@ -3,16 +3,24 @@ const isProduction = process.env.NODE_ENV === 'production';
 const isVercel = !!process.env.VERCEL;
 const isGitHubPages = !isVercel && isProduction && process.env.SKIP_EXPORT !== 'true';
 
+// Explicitly ensure basePath is NEVER set on Vercel
+// This prevents static asset paths from being prefixed with /gpa on Vercel
+console.log('[next.config.js] Build config:', {
+  isProduction,
+  isVercel,
+  isGitHubPages,
+  VERCEL: process.env.VERCEL,
+  NODE_ENV: process.env.NODE_ENV,
+});
+
 const nextConfig = {
   // Only use static export for GitHub Pages (not for Vercel, which supports SSR/API routes)
   ...(isGitHubPages ? {
     output: 'export',
   } : {}),
+  // CRITICAL: Explicitly set basePath to empty string on Vercel to prevent /gpa prefix
   // Only use basePath for GitHub Pages deployment
-  // Vercel doesn't need basePath, development doesn't need it
-  ...(isGitHubPages ? {
-    basePath: '/gpa', // Required for GitHub Pages (repo name)
-  } : {}),
+  basePath: isVercel ? '' : (isGitHubPages ? '/gpa' : ''),
   images: {
     unoptimized: true,
   },

@@ -1,17 +1,15 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 
-// BasePath constant - matches next.config.js
-// In production, this is '/gpa' for GitHub Pages deployment
-const isProduction = process.env.NODE_ENV === 'production';
-const BASEPATH = isProduction ? '/gpa' : '';
-
 export default function Document() {
+  // Next.js automatically applies basePath from next.config.js to all paths
+  // On Vercel: basePath is NOT set in config, so paths are NOT prefixed
+  // On GitHub Pages: basePath is '/gpa' in config, so Next.js auto-prefixes paths
+  // Just use the path normally - Next.js will handle basePath automatically
   return (
     <Html lang="no">
       <Head>
-        {/* Favicon with correct basePath for GitHub Pages */}
-        {/* Next.js static export with basePath requires explicit path */}
-        <link rel="icon" href={`${BASEPATH}/favicon.svg`} type="image/svg+xml" />
+        {/* Favicon - Next.js automatically applies basePath from config */}
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
       <body>
         <Main />

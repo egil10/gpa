@@ -12,17 +12,59 @@ import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-cours
 import { CourseInfo } from '@/lib/courses';
 import { loadHomepageTopCourses, HomepageTopDataset } from '@/lib/homepage-data';
 import { loadHomepageGradeData, HomepageGradeDataPayload } from '@/lib/homepage-grade-data';
+import { loadHardcoded28Data, Hardcoded28Payload } from '@/lib/hardcoded-28-data';
 import styles from '@/styles/Home.module.css';
 
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
 
 const COURSES_PER_PAGE = 9;
 
-// BasePath constant - matches next.config.js and _document.tsx
-// In production (GitHub Pages), this is '/gpa'
-const isProduction = process.env.NODE_ENV === 'production';
-const BASEPATH = isProduction ? '/gpa' : '';
-const INITIAL_COURSES_COUNT = 15; // Show 15 popular courses (5 full rows) on initial load
+// BasePath helper - get basePath from router or detect at runtime
+// IMPORTANT: On Vercel, basePath should ALWAYS be empty
+// This function explicitly returns empty string on Vercel to prevent /gpa prefix
+function getBasePath(routerBasePath?: string): string {
+  // Runtime detection (client-side): ALWAYS check hostname first to override router basePath
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // Explicitly check for Vercel domains FIRST - force empty basePath
+    // This overrides router.basePath which might be incorrectly set
+    if (hostname.includes('.vercel.app') || hostname.includes('vercel.com')) {
+      console.log('[getBasePath] Vercel detected - forcing empty basePath, ignoring router.basePath:', routerBasePath);
+      return ''; // Force empty on Vercel, ignore router.basePath completely
+    }
+    // Check for GitHub Pages
+    if (hostname.includes('github.io') || hostname.includes('github.com')) {
+      return '/gpa';
+    }
+  }
+  
+  // Server-side: check environment variables (for SSR)
+  if (typeof process !== 'undefined') {
+    const isVercel = !!process.env.VERCEL;
+    if (isVercel) {
+      return ''; // Force empty on Vercel
+    }
+    
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isGitHubPages = isProduction && !isVercel;
+    return isGitHubPages ? '/gpa' : '';
+  }
+  
+  // Fallback: use router basePath (should only be used if runtime detection fails)
+  // But we've already checked runtime above, so this is just a safety net
+  if (routerBasePath !== undefined && typeof window !== 'undefined') {
+    // Final check: if we're on Vercel, ignore router basePath
+    const hostname = window.location.hostname;
+    if (hostname.includes('.vercel.app') || hostname.includes('vercel.com')) {
+      return ''; // Force empty on Vercel, ignore router basePath
+    }
+    return routerBasePath;
+  }
+  
+  return '';
+}
+const INITIAL_COURSES_COUNT = 15; // Show 15 hardcoded courses on initial load
+const HARDCODED_28_TOTAL = 28; // Total hardcoded courses (show all 28 when "Load more" is clicked)
 const TOP_INITIAL_DISPLAY_COUNT = 12;
 
 export default function Home() {
@@ -30,6 +72,7 @@ export default function Home() {
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
   const [topDataset, setTopDataset] = useState<HomepageTopDataset | null>(null);
   const [preRenderedData, setPreRenderedData] = useState<HomepageGradeDataPayload | null>(null);
+  const [hardcoded28Data, setHardcoded28Data] = useState<Hardcoded28Payload | null>(null);
   const [coursesData, setCoursesData] = useState<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState<Set<string>>(new Set());
@@ -127,43 +170,82 @@ export default function Home() {
     };
   }, []);
 
-  // Load pre-rendered grade data immediately (no API calls needed)
+  // Load hardcoded 28-course data FIRST for instant display (no API calls needed)
   useEffect(() => {
+    let cancelled = false;
+    loadHardcoded28Data()
+      .then((data) => {
+        if (!data || cancelled) return;
+
+        setHardcoded28Data(data);
+        // Populate coursesData immediately with hardcoded data for instant display
+        const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
+        data.courses.forEach((course) => {
+          const key = `${course.institution}-${course.normalizedCode}`;
+          dataMap.set(key, {
+            ...course,
+            courseCode: course.normalizedCode,
+          });
+        });
+        setCoursesData(dataMap);
+        // Mark as complete immediately - we have instant data!
+        setInitialLoadComplete(true);
+        // Show first 15 courses initially
+        setDisplayCount(INITIAL_COURSES_COUNT);
+        console.log(`[Hardcoded28] Loaded ${data.courses.length} courses instantly`);
+      })
+      .catch((error) => {
+        console.warn('Hardcoded 28-course data unavailable:', error);
+        // Fallback to regular pre-rendered data
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load pre-rendered grade data as fallback (if hardcoded 28 not available)
+  useEffect(() => {
+    // Only load if hardcoded 28 data is not available
+    if (hardcoded28Data) return;
+    
     let cancelled = false;
     loadHomepageGradeData()
       .then((data) => {
         if (!data || cancelled) return;
 
         setPreRenderedData(data);
-        // Populate coursesData immediately with pre-rendered data
-        const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
-        data.courses.forEach((course) => {
-          // Normalize course code: remove API formatting suffixes for key matching
-          // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI) or "EXPHIL-HFEKS-0" (UiB)
-          // Course lists use base codes like "TDT4110" or "BØK110" or "EXPHIL"
-          let normalizedCode = course.courseCode;
-          // For UiB, use first part before any dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
-          if (course.institution === 'UiB') {
-            normalizedCode = normalizedCode.split('-')[0];
-          } else {
-            // Remove "-1" suffix (standard format for most universities)
-            normalizedCode = normalizedCode.replace(/-1$/, '');
-            // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
-            if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-              normalizedCode = normalizedCode.slice(0, -1);
+        // Only populate if we don't already have hardcoded data
+        if (!hardcoded28Data) {
+          const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
+          data.courses.forEach((course) => {
+            // Normalize course code: remove API formatting suffixes for key matching
+            // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI) or "EXPHIL-HFEKS-0" (UiB)
+            // Course lists use base codes like "TDT4110" or "BØK110" or "EXPHIL"
+            let normalizedCode = course.courseCode;
+            // For UiB, use first part before any dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
+            if (course.institution === 'UiB') {
+              normalizedCode = normalizedCode.split('-')[0];
+            } else {
+              // Remove "-1" suffix (standard format for most universities)
+              normalizedCode = normalizedCode.replace(/-1$/, '');
+              // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
+              if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+                normalizedCode = normalizedCode.slice(0, -1);
+              }
             }
-          }
-          const key = `${course.institution}-${normalizedCode}`;
-          // Store with normalized course code to match course list format
-          dataMap.set(key, {
-            ...course,
-            courseCode: normalizedCode,
+            const key = `${course.institution}-${normalizedCode}`;
+            // Store with normalized course code to match course list format
+            dataMap.set(key, {
+              ...course,
+              courseCode: normalizedCode,
+            });
           });
-        });
-        setCoursesData(dataMap);
-        // Mark as complete immediately
-        setInitialLoadComplete(true);
-        setDisplayCount(Math.min(data.courses.length, INITIAL_COURSES_COUNT));
+          setCoursesData(dataMap);
+          // Mark as complete immediately
+          setInitialLoadComplete(true);
+          setDisplayCount(Math.min(data.courses.length, INITIAL_COURSES_COUNT));
+        }
       })
       .catch((error) => {
         console.warn('Pre-rendered grade data unavailable:', error);
@@ -172,7 +254,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hardcoded28Data]);
 
   // Reset initial load when institution changes
   useEffect(() => {
@@ -462,51 +544,99 @@ export default function Home() {
 
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
-    // In default view (all institutions, no search), only show top course per institution
-    if (isTopDefaultView && topInstitutionCourses.length > 0) {
-      // Only use courses from topInstitutionCourses (one per institution)
-      const coursesWithData = topInstitutionCourses
-        .map(course => {
-          const key = `${course.institution}-${course.code}`;
-          const data = coursesData.get(key);
-          if (data && data.institution === course.institution) {
-            return data;
+    // In default view (all institutions, no search), prioritize hardcoded 28 courses
+    if (isTopDefaultView) {
+      // If we have hardcoded 28-course data, use it exclusively (instant, no API calls needed)
+      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
+        const coursesWithData = hardcoded28Data.courses
+          .map(course => {
+            const key = `${course.institution}-${course.normalizedCode}`;
+            const data = coursesData.get(key);
+            if (data && data.institution === course.institution) {
+              return data;
+            }
+            return null;
+          })
+          .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+        
+        // Sort by selected sort option
+        coursesWithData.sort((a, b) => {
+          switch (sortBy) {
+            case 'most-a': {
+              const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              return bPercent - aPercent;
+            }
+            case 'least-a': {
+              const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              return aPercent - bPercent;
+            }
+            case 'highest-avg':
+              return (b.averageGrade || 0) - (a.averageGrade || 0);
+            case 'lowest-avg':
+              return (a.averageGrade || 0) - (b.averageGrade || 0);
+            case 'most-students':
+              return b.totalStudents - a.totalStudents;
+            case 'least-students':
+              return a.totalStudents - b.totalStudents;
+            case 'alphabetical-az':
+              return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
+            case 'alphabetical-za':
+              return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
+            default:
+              return 0;
           }
-          return null;
-        })
-        .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+        });
+        
+        return coursesWithData;
+      }
       
-      // Sort by selected sort option
-      coursesWithData.sort((a, b) => {
-        switch (sortBy) {
-          case 'most-a': {
-            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            return bPercent - aPercent;
+      // Fallback: use topInstitutionCourses (one per institution)
+      if (topInstitutionCourses.length > 0) {
+        const coursesWithData = topInstitutionCourses
+          .map(course => {
+            const key = `${course.institution}-${course.code}`;
+            const data = coursesData.get(key);
+            if (data && data.institution === course.institution) {
+              return data;
+            }
+            return null;
+          })
+          .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+        
+        // Sort by selected sort option
+        coursesWithData.sort((a, b) => {
+          switch (sortBy) {
+            case 'most-a': {
+              const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              return bPercent - aPercent;
+            }
+            case 'least-a': {
+              const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+              return aPercent - bPercent;
+            }
+            case 'highest-avg':
+              return (b.averageGrade || 0) - (a.averageGrade || 0);
+            case 'lowest-avg':
+              return (a.averageGrade || 0) - (b.averageGrade || 0);
+            case 'most-students':
+              return b.totalStudents - a.totalStudents;
+            case 'least-students':
+              return a.totalStudents - b.totalStudents;
+            case 'alphabetical-az':
+              return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
+            case 'alphabetical-za':
+              return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
+            default:
+              return 0;
           }
-          case 'least-a': {
-            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
-            return aPercent - bPercent;
-          }
-          case 'highest-avg':
-            return (b.averageGrade || 0) - (a.averageGrade || 0);
-          case 'lowest-avg':
-            return (a.averageGrade || 0) - (b.averageGrade || 0);
-          case 'most-students':
-            return b.totalStudents - a.totalStudents;
-          case 'least-students':
-            return a.totalStudents - b.totalStudents;
-          case 'alphabetical-az':
-            return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
-          case 'alphabetical-za':
-            return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
-          default:
-            return 0;
-        }
-      });
-      
-      return coursesWithData;
+        });
+        
+        return coursesWithData;
+      }
     }
     
     // Filter courses by institution and search query
@@ -702,7 +832,22 @@ export default function Home() {
       topInstitutionCourses.length > 0;
 
     if (isTopDefaultView) {
-      // First, check if we have more courses with data that we can show
+      // If we have hardcoded 28-course data, show all 28 when "Load more" is clicked
+      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
+        const coursesWithData = hardcoded28Data.courses.filter(course => {
+          const key = `${course.institution}-${course.normalizedCode}`;
+          return coursesDataRef.current.has(key);
+        });
+        
+        if (displayCount < coursesWithData.length && displayCount < HARDCODED_28_TOTAL) {
+          // Show all 28 hardcoded courses instantly
+          setDisplayCount(HARDCODED_28_TOTAL);
+          return;
+        }
+        return;
+      }
+      
+      // Fallback: First, check if we have more courses with data that we can show
       const coursesWithData = topInstitutionCourses.filter(course => {
         const key = `${course.institution}-${course.code}`;
         return coursesDataRef.current.has(key);
@@ -866,6 +1011,8 @@ export default function Home() {
     loadCoursesData,
     isTopDefaultView,
     topInstitutionCourses.length,
+    hardcoded28Data,
+    HARDCODED_28_TOTAL,
   ]);
 
   // Sync refs with state
@@ -1126,7 +1273,17 @@ useEffect(() => {
     if (loading) return false;
 
     if (isTopDefaultView) {
-      // Check if we have more courses to display (either with data or that need loading)
+      // If we have hardcoded 28-course data, check if we have more than 15 displayed
+      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
+        const coursesWithData = hardcoded28Data.courses.filter(course => {
+          const key = `${course.institution}-${course.normalizedCode}`;
+          return coursesDataRef.current.has(key);
+        });
+        // Show "Load more" if we're showing less than all 28
+        return displayCount < coursesWithData.length && displayCount < HARDCODED_28_TOTAL;
+      }
+      
+      // Fallback: Check if we have more courses to display (either with data or that need loading)
       // First check if we have more courses with data than we're displaying
       const coursesWithData = topInstitutionCourses.filter(course => {
         const key = `${course.institution}-${course.code}`;
@@ -1216,6 +1373,7 @@ useEffect(() => {
     initialLoadComplete,
     isTopDefaultView,
     topInstitutionCourses.length,
+    hardcoded28Data,
   ]);
 
   return (
@@ -1228,7 +1386,10 @@ useEffect(() => {
                 className={styles.heroLogo} 
                 aria-hidden="true"
                 style={{
-                  backgroundImage: `url('${BASEPATH}/dist.svg')`
+                  // Use absolute path - Next.js will handle basePath automatically based on next.config.js
+                  // On Vercel: basePath is empty, so this becomes /dist.svg
+                  // On GitHub Pages: basePath is /gpa, so Next.js rewrites this to /gpa/dist.svg
+                  backgroundImage: `url('/dist.svg')`
                 }}
               />
               <span className={styles.heroTitleText}>Karakterfordeling</span>

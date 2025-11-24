@@ -63,13 +63,19 @@ const isDevelopment =
 const isGitHubPages = isBrowser &&
   (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
 
+// Check if we're on Vercel (where the API route proxy exists)
+// Also check server-side via environment variable
+const isVercel = isBrowser
+  ? (window.location.hostname.includes('.vercel.app') || window.location.hostname.includes('vercel.com'))
+  : !!process.env.VERCEL;
+
 // Get the Vercel proxy URL (relative path - works when deployed on Vercel)
 const getVercelProxyUrl = () => {
   if (!isBrowser) return null;
   // Skip Vercel proxy on GitHub Pages - it doesn't exist there
   if (isGitHubPages) return null;
-  // Use relative path - Vercel will route /api/proxy to the serverless function
-  // Works with basePath in next.config.js (e.g., /gpa/api/proxy)
+  // On Vercel, use relative path - Vercel will route /api/proxy to the serverless function
+  // On other platforms, also try it (it might work if they support Next.js API routes)
   return '/api/proxy';
 };
 
@@ -260,24 +266,33 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
   }
 
   const tryProxyUrl = async (url: string, label: string) => {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (response.status === 204) {
-      throw new Error('No data found');
+      if (response.status === 204) {
+        throw new Error('No data found');
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`${label} returned ${response.status}: ${errorText}`);
+      }
+
+      const data: GradeData[] = await response.json();
+      return data;
+    } catch (error) {
+      // Re-throw with more context
+      if (error instanceof Error) {
+        throw new Error(`${label} error: ${error.message}`);
+      }
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(`${label} returned ${response.status}`);
-    }
-
-    const data: GradeData[] = await response.json();
-    return data;
   };
 
   // Try custom proxy first if defined (works on GitHub Pages and other static hosts)
@@ -289,18 +304,34 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     }
   }
 
-  // In production, try Vercel proxy next (if available and not on GitHub Pages)
+  // In production, try Vercel/Next.js API proxy first (if available and not on GitHub Pages)
+  // This works on Vercel, Netlify, and other Next.js deployments with API routes
+  // Always try it on non-GitHub Pages deployments - if it doesn't exist, it will fail gracefully
+  // Priority: Vercel proxy > Custom proxy > Public proxies
   if (useVercelProxy && !isGitHubPages) {
     const vercelProxyUrl = getVercelProxyUrl();
     if (vercelProxyUrl) {
       try {
-        return await tryProxyUrl(vercelProxyUrl, 'Vercel proxy');
+        console.log('[Proxy] Attempting Vercel/Next.js API proxy at:', vercelProxyUrl);
+        console.log('[Proxy] Hostname:', isBrowser ? window.location.hostname : 'server-side');
+        console.log('[Proxy] Is GitHub Pages:', isGitHubPages);
+        console.log('[Proxy] Is Vercel:', isVercel);
+        console.log('[Proxy] Full URL will be:', isBrowser ? `${window.location.origin}${vercelProxyUrl}` : vercelProxyUrl);
+        const result = await tryProxyUrl(vercelProxyUrl, 'Vercel proxy');
+        console.log('[Proxy] ✅ Vercel proxy succeeded!');
+        return result;
       } catch (error) {
-        // If Vercel proxy fails, silently fall back to public proxies
-        // No logging needed - expected when proxy doesn't exist or fails
+        // Log the error for debugging, then fall back to public proxies
+        console.error('[Proxy] ❌ Vercel proxy failed:', error);
+        console.log('[Proxy] Falling back to public proxies...');
+        // If Vercel proxy fails, fall back to public proxies (don't retry Vercel proxy)
         return fetchWithProxy(payload, 0, false);
       }
+    } else {
+      console.warn('[Proxy] Vercel proxy URL is null - isBrowser:', isBrowser, 'isGitHubPages:', isGitHubPages, 'isVercel:', isVercel);
     }
+  } else {
+    console.warn('[Proxy] Skipping Vercel proxy - useVercelProxy:', useVercelProxy, 'isGitHubPages:', isGitHubPages);
   }
 
   // Fall back to public CORS proxies

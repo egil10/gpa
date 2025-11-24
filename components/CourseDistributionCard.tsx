@@ -32,26 +32,47 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     router.push(`/sok?code=${encodeURIComponent(displayCode)}&uni=${institution}&year=${course.year}`);
   };
 
-  // Filter data: show pass/fail grades if they exist (even if only one)
-  // Also filter out A-F grades that have 0 count (to avoid cluttering the chart)
-  const hasBestatt = course.distributions.some((dist) => dist.grade === 'Bestått' && dist.count > 0);
-  const hasIkkeBestatt = course.distributions.some((dist) => dist.grade === 'Ikke bestått' && dist.count > 0);
-  const hasPassFail = hasBestatt || hasIkkeBestatt;
+  // Always show all A-F grades (even if count is 0), plus Bestått/Ikke bestått if they exist
+  // This ensures we can see the full distribution
+  const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
   
-  const chartData = course.distributions
-    .filter((dist) => {
-      // Always show pass/fail grades if they exist
-      if (dist.grade === 'Bestått' || dist.grade === 'Ikke bestått') {
-        return dist.count > 0;
-      }
-      // For A-F grades, only show if they have count > 0
-      return dist.count > 0;
-    })
-    .map(dist => ({
-      grade: dist.grade,
-      percentage: dist.percentage,
-      count: dist.count,
-    }));
+  // First, populate all A-F grades with 0 if not present
+  letterGrades.forEach(grade => {
+    const existing = course.distributions.find(d => d.grade === grade);
+    distributionMap.set(grade, {
+      grade,
+      percentage: existing?.percentage || 0,
+      count: existing?.count || 0,
+    });
+  });
+  
+  // Then add Bestått and Ikke bestått if they exist (even if count is 0)
+  const bestatt = course.distributions.find(d => d.grade === 'Bestått');
+  const ikkeBestatt = course.distributions.find(d => d.grade === 'Ikke bestått');
+  
+  if (bestatt) {
+    distributionMap.set('Bestått', {
+      grade: 'Bestått',
+      percentage: bestatt.percentage,
+      count: bestatt.count,
+    });
+  }
+  
+  if (ikkeBestatt) {
+    distributionMap.set('Ikke bestått', {
+      grade: 'Ikke bestått',
+      percentage: ikkeBestatt.percentage,
+      count: ikkeBestatt.count,
+    });
+  }
+  
+  // Convert to array, keeping A-F order first, then Bestått/Ikke bestått
+  const chartData = [
+    ...letterGrades.map(g => distributionMap.get(g)!),
+    ...(bestatt ? [distributionMap.get('Bestått')!] : []),
+    ...(ikkeBestatt ? [distributionMap.get('Ikke bestått')!] : []),
+  ].filter(Boolean); // Remove any undefined entries
 
   const topGrade = course.distributions.reduce((max, dist) => 
     dist.percentage > max.percentage ? dist : max

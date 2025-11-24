@@ -51,6 +51,7 @@
     "discover-steiner": "tsx scripts/discover-steiner-courses.ts",
     "build-home-data": "tsx scripts/build-homepage-data.ts",
     "build-homepage-grade-data": "tsx scripts/build-homepage-grade-data.ts",
+    "build-hardcoded-28": "tsx scripts/build-hardcoded-28.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {
