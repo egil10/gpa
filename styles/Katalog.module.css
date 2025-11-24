@@ -60,6 +60,9 @@
   transition: all 0.2s ease;
   min-height: 44px;
   font-family: var(--font-inter);
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
 }
 
 .searchInput:focus {
@@ -93,10 +96,13 @@
   min-height: 44px;
   font-family: var(--font-inter);
   appearance: none;
+  -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2.5rem;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
 }
 
 .select:focus {
@@ -179,6 +185,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-inter);
+  min-height: 44px;
+  min-width: 44px;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
+  -webkit-appearance: none;
 }
 
 .loadMoreButton:hover:not(:disabled) {
@@ -223,6 +234,13 @@
     padding: var(--space-lg) var(--space-md);
     padding-top: calc(var(--space-lg) + env(safe-area-inset-top));
     padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-md), env(safe-area-inset-left));
+    padding-right: max(var(--space-md), env(safe-area-inset-right));
+  }
+
+  .header {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   .title {
@@ -235,6 +253,7 @@
 
   .filters {
     flex-direction: column;
+    gap: var(--space-sm);
   }
 
   .searchContainer,
@@ -243,13 +262,25 @@
     min-width: 100%;
   }
 
+  .searchInput,
+  .select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
   .coursesList {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-xs);
+    -webkit-overflow-scrolling: touch;
   }
 
   .courseItem {
     padding: var(--space-xs) var(--space-sm);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+    touch-action: manipulation;
+  }
+
+  .courseItem:active {
+    opacity: 0.7;
   }
 
   .courseCode {
@@ -263,11 +294,29 @@
   .courseName {
     font-size: 0.8125rem;
   }
+
+  .loadMoreContainer {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .loadMoreButton {
+    width: 100%;
+    max-width: 300px;
+  }
 }
 
 @media (max-width: 480px) {
+  .katalogPage {
+    padding: var(--space-md) var(--space-sm);
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top));
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+  }
+
   .header {
     margin-bottom: var(--space-lg);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   .filters {
@@ -277,9 +326,31 @@
 
   .coursesList {
     grid-template-columns: 1fr;
+    gap: var(--space-xs);
   }
 
   .courseItem {
-    padding: var(--space-xs);
+    padding: var(--space-sm) var(--space-xs);
+  }
+
+  .resultsInfo {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .katalogPage {
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top));
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+  }
+
+  .header {
+    margin-bottom: var(--space-md);
+  }
+
+  .coursesList {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
