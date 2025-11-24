@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-24T20:50:28.313Z",
+  "generatedAt": "2025-11-24T22:29:52.862Z",
   "courses": [
     {
       "institution": "NTNU",
@@ -8,30 +8,6 @@
       "courseName": "TDT4110",
       "studentCount": 2977,
       "latestYear": 2024
-    },
-    {
-      "institution": "BI",
-      "institutionCode": "8241",
-      "courseCode": "BØK3561",
-      "courseName": "BØK3561",
-      "studentCount": 2393,
-      "latestYear": 2025
-    },
-    {
-      "institution": "BI",
-      "institutionCode": "8241",
-      "courseCode": "MET0431",
-      "courseName": "MET0431",
-      "studentCount": 1821,
-      "latestYear": 2020
-    },
-    {
-      "institution": "BI",
-      "institutionCode": "8241",
-      "courseCode": "MET3431",
-      "courseName": "MET3431",
-      "studentCount": 1543,
-      "latestYear": 2025
     },
     {
       "institution": "UiO",
@@ -143,6 +119,22 @@
       "courseCode": "EXPHIL-SVSEM",
       "courseName": "EXPHIL-SVSEM",
       "studentCount": 591,
+      "latestYear": 2024
+    },
+    {
+      "institution": "UiB",
+      "institutionCode": "1120",
+      "courseCode": "JUS242",
+      "courseName": "JUS242",
+      "studentCount": 527,
+      "latestYear": 2024
+    },
+    {
+      "institution": "UiB",
+      "institutionCode": "1120",
+      "courseCode": "JUS243",
+      "courseName": "JUS243",
+      "studentCount": 519,
       "latestYear": 2024
     },
     {
@@ -306,27 +298,11 @@
       "latestYear": 2025
     },
     {
-      "institution": "UiB",
-      "institutionCode": "1120",
-      "courseCode": "EXPHIL-HFSEM",
-      "courseName": "EXPHIL-HFSEM",
-      "studentCount": 348,
-      "latestYear": 2024
-    },
-    {
       "institution": "HVL",
       "institutionCode": "0238",
       "courseCode": "BØA118",
       "courseName": "BØA118",
       "studentCount": 340,
-      "latestYear": 2025
-    },
-    {
-      "institution": "UiB",
-      "institutionCode": "1120",
-      "courseCode": "EXPHIL-MNSEM",
-      "courseName": "EXPHIL-MNSEM",
-      "studentCount": 336,
       "latestYear": 2025
     },
     {
@@ -642,14 +618,6 @@
       "latestYear": 2025
     },
     {
-      "institution": "AHO",
-      "institutionCode": "1220",
-      "courseCode": "80 121",
-      "courseName": "80 121",
-      "studentCount": 29,
-      "latestYear": 2025
-    },
-    {
       "institution": "SH",
       "institutionCode": "0217",
       "courseCode": "DSALB",
@@ -684,9 +652,6 @@
   ],
   "topCourseCodes": [
     "TDT4110",
-    "BØK3561",
-    "MET0431",
-    "MET3431",
     "EXPHIL03",
     "TMA4100",
     "TMA4105",
@@ -701,6 +666,8 @@
     "IN1010",
     "BED-2043NETT",
     "EXPHIL-SVSEM",
+    "JUS242",
+    "JUS243",
     "SYBA3000",
     "BED-2061NETT",
     "SAM3",
@@ -721,9 +688,7 @@
     "HSM122",
     "SPU225",
     "LOG505",
-    "EXPHIL-HFSEM",
     "BØA118",
-    "EXPHIL-MNSEM",
     "BSY260",
     "HSM121",
     "ORG209",
@@ -762,7 +727,6 @@
     "RLE1003",
     "RLE1004",
     "RLE1004N",
-    "80 121",
     "DSALB",
     "DID2",
     "HIST2100",

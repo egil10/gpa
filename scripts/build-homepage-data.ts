@@ -28,6 +28,7 @@ interface TopCourseEntry {
   courseCode: string;
   courseName: string;
   studentCount: number;
+  letterGradeCount: number; // Number of students with A-F grades
   latestYear: number;
 }
 
@@ -57,13 +58,13 @@ function loadOptimizedCourses(filePath: string): OptimizedCourse[] {
     
     if (fileSizeMB > 10) {
       console.log(`   ⚠️  Large file detected: ${filePath} (${fileSizeMB.toFixed(2)} MB)`);
-    }
-    
-    const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as OptimizedPayload;
-    if (!raw || !Array.isArray(raw.courses)) {
-      console.warn(`⚠️  Invalid course payload in ${filePath}`);
-      return [];
-    }
+  }
+
+  const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as OptimizedPayload;
+  if (!raw || !Array.isArray(raw.courses)) {
+    console.warn(`⚠️  Invalid course payload in ${filePath}`);
+    return [];
+  }
 
     const courses = raw.courses.filter((course): course is OptimizedCourse => Boolean(course?.c));
     
@@ -90,7 +91,7 @@ async function fetchAndValidateCourse(
   courseCode: string,
   institution: string,
   latestYear: number
-): Promise<{ hasLetterGrades: boolean; studentCount: number } | null> {
+): Promise<{ hasLetterGrades: boolean; studentCount: number; letterGradeCount: number } | null> {
   // Skip DIGI courses from UiB (they're slow and often don't have A-F grades)
   if (institution === 'UiB' && courseCode.toUpperCase().startsWith('DIGI')) {
     return null;
@@ -155,7 +156,7 @@ async function fetchAndValidateCourse(
   const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
   
   // Helper function to quickly check if data has A-F grades
-  const quickCheck = (data: GradeData[], yearQueried: number, formatTried?: string, yearTried?: number): { hasLetterGrades: true; studentCount: number } | { foundData: true } | null => {
+  const quickCheck = (data: GradeData[], yearQueried: number, formatTried?: string, yearTried?: number): { hasLetterGrades: true; studentCount: number; letterGradeCount: number } | { foundData: true } | null => {
     if (!data || data.length === 0) return null;
     
     // More flexible match check - match if normalized codes match OR if item code starts with our code
@@ -263,8 +264,10 @@ async function fetchAndValidateCourse(
       .reduce((sum, dist) => sum + dist.count, 0);
     
     if (hasLetterGrades && totalLetterGradeStudents > 0) {
-      return { hasLetterGrades: true, studentCount: stats.totalStudents };
+      return { hasLetterGrades: true, studentCount: stats.totalStudents, letterGradeCount: totalLetterGradeStudents };
     }
+    
+    return { foundData: true }; // Found data but no A-F
     
     return { foundData: true }; // Found data but no A-F
   };
@@ -510,6 +513,7 @@ async function fetchAndValidateCourse(
                     return {
                       hasLetterGrades: true,
                       studentCount: stats.totalStudents,
+                      letterGradeCount: totalLetterGradeStudents,
                     };
                   } else {
                     console.log(`      ⚠️  [FALLBACK] Found ${courseCode} but NO A-F grades (only pass/fail or other grades)`);
@@ -616,15 +620,16 @@ async function main() {
     }
 
     console.log(`\n📊 Processing ${institution} (${uni.name})...`);
+    // Check a larger batch of courses to find the best ones by A-F grade count
     // For UiB, check more courses since many only have pass/fail data
-    const checkLimit = institution === 'UiB' ? Math.max(MAX_CANDIDATES_TO_CHECK * 2, 50) : MAX_CANDIDATES_TO_CHECK;
-    console.log(`   Checking top ${Math.min(checkLimit, allCourses.length)} courses for A-F grade data...`);
+    const checkLimit = institution === 'UiB' ? Math.max(MAX_CANDIDATES_TO_CHECK * 3, 75) : MAX_CANDIDATES_TO_CHECK * 2;
+    const coursesToCheck = allCourses.slice(0, Math.min(checkLimit, allCourses.length));
+    console.log(`   Checking ${coursesToCheck.length} courses for A-F grade data (will sort by A-F grade count)...`);
 
-    // Check top courses to find ones with A-F grade data
+    // Check all courses in the batch and collect those with A-F grades
     const coursesWithData: TopCourseEntry[] = [];
-    const coursesToCheck = allCourses.slice(0, checkLimit);
     
-    for (let i = 0; i < coursesToCheck.length && coursesWithData.length < MAX_PER_INSTITUTION; i++) {
+    for (let i = 0; i < coursesToCheck.length; i++) {
       const course = coursesToCheck[i];
       console.log(`   [${i + 1}/${coursesToCheck.length}] Checking ${course.courseCode}...`);
       
@@ -644,34 +649,44 @@ async function main() {
       
       if (validation && validation.hasLetterGrades) {
         coursesWithData.push({
-        institution,
-        institutionCode: uni.code,
-        courseCode: course.courseCode,
-        courseName: course.courseName,
+          institution,
+          institutionCode: uni.code,
+          courseCode: course.courseCode,
+          courseName: course.courseName,
           studentCount: validation.studentCount || course.studentCount,
-        latestYear: course.latestYear,
-      });
-        console.log(`      ✅ ${course.courseCode} has A-F grade data (${validation.studentCount} students)`);
+          letterGradeCount: validation.letterGradeCount || 0,
+          latestYear: course.latestYear,
+        });
+        console.log(`      ✅ ${course.courseCode} has A-F grade data (${validation.letterGradeCount} students with A-F grades, ${validation.studentCount} total)`);
       } else {
         console.log(`      ⚠️  ${course.courseCode} skipped (no A-F grades or no data)`);
       }
       
-      // Small delay to avoid overwhelming the API (middle ground)
+      // Small delay to avoid overwhelming the API
       if (i < coursesToCheck.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
       }
     }
 
-    topCourses.push(...coursesWithData);
+    // Sort by A-F grade count (letterGradeCount) descending, then take top N
+    coursesWithData.sort((a, b) => b.letterGradeCount - a.letterGradeCount);
+    const topCoursesForInstitution = coursesWithData.slice(0, MAX_PER_INSTITUTION);
+    
+    topCourses.push(...topCoursesForInstitution);
     
     if (coursesWithData.length === 0) {
       console.warn(`   ⚠️  No courses with A-F grade data found for ${institution}`);
     } else {
-      console.log(`   ✅ Found ${coursesWithData.length} courses with A-F grade data for ${institution}`);
+      console.log(`   ✅ Found ${coursesWithData.length} courses with A-F grade data`);
+      console.log(`   📊 Top ${topCoursesForInstitution.length} by A-F grade count:`);
+      topCoursesForInstitution.forEach((course, idx) => {
+        console.log(`      ${idx + 1}. ${course.courseCode}: ${course.letterGradeCount} students with A-F grades`);
+      });
     }
   }
 
-  topCourses.sort((a, b) => b.studentCount - a.studentCount);
+  // Sort by A-F grade count (most meaningful metric)
+  topCourses.sort((a, b) => b.letterGradeCount - a.letterGradeCount);
   const topCourseCodes = unique(topCourses.map((course) => course.courseCode));
 
   const payload: HomepageTopPayload = {

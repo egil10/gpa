@@ -9,7 +9,7 @@
  * This ensures everything is ready after discovery
  */
 
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -22,6 +22,7 @@ const colors = {
   green: '\x1b[32m',
   yellow: '\x1b[33m',
   cyan: '\x1b[36m',
+  dim: '\x1b[2m',
 };
 
 interface BuildStep {
@@ -62,12 +63,79 @@ function formatTime(ms: number): string {
   return `${seconds}s`;
 }
 
+async function runStepWithSpawn(step: BuildStep): Promise<{ success: boolean; duration: number; error?: string }> {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    const isWindows = process.platform === 'win32';
+    
+    // For Windows, use cmd.exe /c to run the full command
+    // For Unix, split the command properly
+    const command = isWindows ? 'cmd.exe' : '/bin/sh';
+    const args = isWindows ? ['/c', step.command] : ['-c', step.command];
+    
+    const child = spawn(command, args, {
+      cwd: process.cwd(),
+      stdio: 'inherit',
+      shell: false, // We're handling shell ourselves
+    });
+    
+    child.on('error', (error) => {
+      const duration = Date.now() - startTime;
+      resolve({
+        success: false,
+        duration,
+        error: error.message || String(error),
+      });
+    });
+    
+    child.on('exit', (code) => {
+      const duration = Date.now() - startTime;
+      if (code === 0) {
+        resolve({ success: true, duration });
+      } else {
+        resolve({
+          success: false,
+          duration,
+          error: `Process exited with code ${code}`,
+        });
+      }
+    });
+  });
+}
+
 async function runStep(step: BuildStep, index: number, total: number): Promise<{ success: boolean; duration: number; error?: string }> {
   const startTime = Date.now();
   
   console.log(`\n${colors.cyan}${colors.bright}[${index + 1}/${total}]${colors.reset} ${colors.bright}${step.name}${colors.reset}`);
   console.log(`${colors.dim}   ${step.description}${colors.reset}`);
   
+  // For verbose steps, use spawn to show output in real-time
+  const isVerboseStep = step.name === 'Homepage Data' || step.name === 'Homepage Grades';
+  
+  if (isVerboseStep) {
+    // Use spawn for real-time output
+    try {
+      const result = await runStepWithSpawn(step);
+      const duration = Date.now() - startTime;
+      if (result.success) {
+        console.log(`\n${colors.green}   ✅ Completed in ${formatTime(duration)}${colors.reset}`);
+      } else {
+        console.log(`\n${colors.yellow}   ❌ Failed: ${result.error || 'Unknown error'}${colors.reset}`);
+      }
+      return result;
+    } catch (error: any) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error.message || String(error);
+      console.log(`${colors.yellow}   ❌ Failed: ${errorMessage.substring(0, 100)}${colors.reset}`);
+      return { 
+        success: false, 
+        duration, 
+        error: errorMessage.substring(0, 150)
+      };
+    }
+  }
+  
+  // For non-verbose steps, use exec (captures output)
   try {
     const { stdout, stderr } = await execAsync(step.command, {
       cwd: process.cwd(),
