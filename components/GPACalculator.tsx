@@ -83,7 +83,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   };
 
   const handleHardReset = () => {
-    // Clear all courses
+    // Clear all courses - completely blank slate
     setCourses([]);
     // Reset calculation state
     setHasCalculated(false);
@@ -91,9 +91,10 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     setBonusPoints({ realfag: 0, other: 0 });
     // Reset system to initial
     setSystem(initialSystem);
-    // Clear localStorage flag so examples can be shown again if needed
+    // Keep localStorage flag set so examples DON'T auto-load after reset
+    // This ensures a truly blank slate - user can manually click "Last inn eksempel-emner" if needed
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('gpa-has-seen-examples');
+      localStorage.setItem('gpa-has-seen-examples', 'true');
     }
   };
 
@@ -476,13 +477,6 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
               <div key={course.id} className={styles.courseCard}>
                 <div className={styles.courseHeader}>
                   <span className={styles.courseNumber}>#{index + 1}</span>
-                  <button
-                    onClick={() => removeCourse(course.id)}
-                    className={styles.removeButton}
-                    aria-label="Fjern emne"
-                  >
-                    ×
-                  </button>
                 </div>
 
                 <div className={styles.courseFields}>
@@ -583,9 +577,18 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
                   <div className={styles.field}>
                     <label style={{ visibility: 'hidden' }}>Poeng</label>
-                    <span className={styles.coursePoints}>
-                      {GRADE_VALUES[course.grade] * course.credits} poeng
-                    </span>
+                    <div className={styles.pointsContainer}>
+                      <span className={styles.coursePoints}>
+                        {GRADE_VALUES[course.grade] * course.credits} poeng
+                      </span>
+                      <button
+                        onClick={() => removeCourse(course.id)}
+                        className={styles.removeButton}
+                        aria-label="Fjern emne"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

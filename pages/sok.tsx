@@ -84,11 +84,21 @@ export default function SearchPage() {
         fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
           .then(data => {
             if (data && data.length > 0) {
+              console.log(`[Search] Fetched ${data.length} data entries for ${courseCode}`);
               const multiYearData = processMultiYearData(data);
-              setAllYearsStats(multiYearData);
-              setLoading(false);
-              setError(null);
+              console.log(`[Search] Processed ${Object.keys(multiYearData).length} years:`, Object.keys(multiYearData));
+              if (Object.keys(multiYearData).length > 0) {
+                setAllYearsStats(multiYearData);
+                setLoading(false);
+                setError(null);
+              } else {
+                console.warn(`[Search] processMultiYearData returned empty object for ${courseCode}`);
+                setError('Ingen data funnet for dette emnet');
+                markCourseAsUnavailable(normalizedCode, institution);
+                setLoading(false);
+              }
             } else {
+              console.warn(`[Search] No data returned from API for ${courseCode}`);
               setError('Ingen data funnet for dette emnet');
               markCourseAsUnavailable(normalizedCode, institution);
               setLoading(false);

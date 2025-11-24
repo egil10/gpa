@@ -125,21 +125,9 @@ export async function loadInstitutionCourses(institution: string): Promise<Cours
   const loadPromise = (async () => {
     try {
       // Load from public folder - files should be copied there during build
-      // Try multiple paths to handle different deployment scenarios
-      let fileName = `data/institutions/${institutionData.file}`;
-      let courseData = await loadCourseData(fileName, institutionData.code);
-      
-      // If that fails, try public folder directly
-      if (courseData.length === 0) {
-        fileName = institutionData.file;
-        courseData = await loadCourseData(fileName, institutionData.code);
-      }
-      
-      // If still empty, try with /gpa prefix (for production)
-      if (courseData.length === 0 && typeof window !== 'undefined') {
-        fileName = `/gpa/data/institutions/${institutionData.file}`;
-        courseData = await loadCourseData(fileName, institutionData.code);
-      }
+      // The loadCourseData function will try multiple paths automatically
+      const fileName = `data/institutions/${institutionData.file}`;
+      const courseData = await loadCourseData(fileName, institutionData.code);
       
       // Convert to CourseInfo format and filter out courses without data
       const courses = courseData

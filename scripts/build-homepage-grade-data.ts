@@ -32,21 +32,50 @@ async function fetchCourseGradeData(
   institution: string,
   latestYear: number
 ): Promise<CourseStats | null> {
-  const formattedCode = formatCourseCode(courseCode, institution);
+  // For UiB, try multiple formats since they might use different formats
+  const formatsToTry: string[] = [];
   
-  try {
-    // Fetch data for the latest year
-    const payload = createSearchPayload(institutionCode, formattedCode, latestYear);
-    const response = await fetch(DIRECT_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+  if (institution === 'UiB') {
+    // Try with -1 suffix first (standard format)
+    formatsToTry.push(formatCourseCode(courseCode, institution));
+    // Also try without any suffix (some UiB courses might not use -1)
+    formatsToTry.push(courseCode.toUpperCase().replace(/\s/g, ''));
+    // Try with -1 suffix removed if it was added
+    const formatted = formatCourseCode(courseCode, institution);
+    if (formatted.endsWith('-1')) {
+      formatsToTry.push(formatted.replace(/-1$/, ''));
+    }
+  } else {
+    formatsToTry.push(formatCourseCode(courseCode, institution));
+  }
+  
+  // Remove duplicates
+  const uniqueFormats = Array.from(new Set(formatsToTry));
+  
+  for (const formattedCode of uniqueFormats) {
+    try {
+      // Try fetching for the latest year first
+      const payload = createSearchPayload(institutionCode, formattedCode, latestYear);
+      const response = await fetch(DIRECT_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (response.status === 204 || !response.ok) {
-      // Try fetching without year filter
+      if (response.ok && response.status === 200) {
+        const data: GradeData[] = await response.json();
+        if (data && data.length > 0) {
+          const aggregated = aggregateDuplicateEntries(data);
+          if (aggregated.length > 0) {
+            const stats = processGradeData(aggregated);
+            if (stats) return stats;
+          }
+        }
+      }
+
+      // If year-specific fetch failed, try without year filter
       const payloadNoYear = createSearchPayload(institutionCode, formattedCode);
       const responseNoYear = await fetch(DIRECT_API, {
         method: 'POST',
@@ -56,68 +85,34 @@ async function fetchCourseGradeData(
         body: JSON.stringify(payloadNoYear),
       });
 
-      if (responseNoYear.status === 204 || !responseNoYear.ok) {
-        // Try without the -1 suffix for UiB courses (they might use different format)
-        if (institution === 'UiB' && formattedCode.endsWith('-1')) {
-          const codeWithoutSuffix = formattedCode.replace(/-1$/, '');
-          const payloadAlt = createSearchPayload(institutionCode, codeWithoutSuffix);
-          const responseAlt = await fetch(DIRECT_API, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payloadAlt),
-          });
-          
-          if (responseAlt.status === 200 && responseAlt.ok) {
-            const altData: GradeData[] = await responseAlt.json();
-            if (altData && altData.length > 0) {
-              const aggregated = aggregateDuplicateEntries(altData);
-              const years = aggregated.map(d => parseInt(d.Årstall, 10));
-              const actualLatestYear = Math.max(...years);
-              const yearData = aggregated.filter(d => parseInt(d.Årstall, 10) === actualLatestYear);
+      if (responseNoYear.ok && responseNoYear.status === 200) {
+        const allData: GradeData[] = await responseNoYear.json();
+        if (allData && allData.length > 0) {
+          const aggregated = aggregateDuplicateEntries(allData);
+          if (aggregated.length > 0) {
+            // Get latest year from data
+            const years = aggregated.map(d => parseInt(d.Årstall, 10));
+            const actualLatestYear = Math.max(...years);
+            const yearData = aggregated.filter(d => parseInt(d.Årstall, 10) === actualLatestYear);
+            
+            if (yearData.length > 0) {
               const stats = processGradeData(yearData);
-              return stats;
+              if (stats) return stats;
             }
           }
         }
-        return null;
       }
-
-      const allData: GradeData[] = await responseNoYear.json();
-      if (!allData || allData.length === 0) {
-        return null;
-      }
-
-      // Aggregate duplicates first
-      const aggregated = aggregateDuplicateEntries(allData);
-      
-      // Get latest year from data
-      const years = aggregated.map(d => parseInt(d.Årstall, 10));
-      const actualLatestYear = Math.max(...years);
-      const yearData = aggregated.filter(d => parseInt(d.Årstall, 10) === actualLatestYear);
-      
-      const stats = processGradeData(yearData);
-      return stats;
+    } catch (error) {
+      // Continue to next format
+      continue;
     }
-
-    const data: GradeData[] = await response.json();
-    if (!data || data.length === 0) {
-      return null;
-    }
-
-    // Aggregate duplicates before processing
-    const aggregated = aggregateDuplicateEntries(data);
-    if (aggregated.length === 0) {
-      return null;
-    }
-
-    const stats = processGradeData(aggregated);
-    return stats;
-  } catch (error) {
-    console.error(`  ❌ Error fetching ${courseCode}:`, error);
-    return null;
   }
+  
+  // All formats failed
+  if (institution === 'UiB') {
+    console.log(`  ⚠️  All format attempts failed for UiB course ${courseCode} (tried: ${uniqueFormats.join(', ')})`);
+  }
+  return null;
 }
 
 async function main() {
@@ -165,13 +160,29 @@ async function main() {
     );
 
     if (stats) {
-      results.push({
-        ...stats,
-        institution: course.institution,
-        courseName: course.courseName,
-      });
-      successCount++;
-      console.log(`  ✅ Found data for ${course.courseCode}`);
+      // Filter out courses that only have pass/fail data or no meaningful grade distributions
+      const hasLetterGrades = stats.distributions.some(dist => 
+        ['A', 'B', 'C', 'D', 'E', 'F'].includes(dist.grade) && dist.count > 0
+      );
+      const totalLetterGradeStudents = stats.distributions
+        .filter(dist => ['A', 'B', 'C', 'D', 'E', 'F'].includes(dist.grade))
+        .reduce((sum, dist) => sum + dist.count, 0);
+      const hasPassFailOnly = !hasLetterGrades || totalLetterGradeStudents === 0;
+      const hasMeaningfulData = stats.averageGrade !== undefined && stats.averageGrade > 0;
+      const hasRecentData = stats.year >= 2020;
+      
+      // Skip if: only pass/fail, no letter grades, no average, or very old data
+      if (hasPassFailOnly || !hasMeaningfulData || !hasRecentData) {
+        console.log(`  ⚠️  Skipping ${course.courseCode} (pass/fail only: ${hasPassFailOnly}, no avg: ${!hasMeaningfulData}, old year: ${stats.year})`);
+      } else {
+        results.push({
+          ...stats,
+          institution: course.institution,
+          courseName: course.courseName,
+        });
+        successCount++;
+        console.log(`  ✅ Found data for ${course.courseCode} (avg: ${stats.averageGrade?.toFixed(1)}, year: ${stats.year}, students: ${stats.totalStudents})`);
+      }
     } else {
       console.log(`  ⚠️  No data found for ${course.courseCode}`);
     }
@@ -199,4 +210,5 @@ main().catch((error) => {
   console.error('❌ Fatal error:', error);
   process.exit(1);
 });
+
 

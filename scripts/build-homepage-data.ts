@@ -37,7 +37,8 @@ interface HomepageTopPayload {
 
 const DATA_DIR = path.join(process.cwd(), 'data', 'institutions');
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', 'homepage-top-courses.json');
-const MAX_PER_INSTITUTION = 3;
+const MAX_PER_INSTITUTION = 1; // Only one course per institution
+const MIN_YEAR = 2020; // Exclude courses with data older than this year
 
 function loadOptimizedCourses(filePath: string): OptimizedCourse[] {
   if (!fs.existsSync(filePath)) {
@@ -86,10 +87,12 @@ function main() {
           ? [...course.y].sort((a, b) => b - a)[0]
           : 0,
       }))
+      // Filter out courses with old data
+      .filter((course) => course.latestYear >= MIN_YEAR)
       .sort((a, b) => b.studentCount - a.studentCount);
 
     if (courses.length === 0) {
-      console.warn(`⚠️  No optimized courses for ${institution}`);
+      console.warn(`⚠️  No optimized courses for ${institution} (after filtering for year >= ${MIN_YEAR})`);
       continue;
     }
 

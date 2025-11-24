@@ -72,17 +72,22 @@ export async function loadCourseData(
     // Files are in public/data/institutions/ or public/ depending on setup
     const basePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
     
+    // Normalize fileName - remove leading slash if present to avoid double slashes
+    const cleanFileName = fileName.startsWith('/') ? fileName.slice(1) : fileName;
+    
     // Try multiple paths
     const pathsToTry = [
-      `${basePath}/${fileName}`,  // e.g., /data/institutions/uio-all-courses.json
-      `${basePath}/data/institutions/${fileName.split('/').pop()}`,  // if fileName is just the filename
-      fileName,  // absolute path if already includes basePath
+      `${basePath}/${cleanFileName}`,  // e.g., /gpa/data/institutions/uio-all-courses.json or /data/institutions/uio-all-courses.json
+      `${basePath}/data/institutions/${cleanFileName.split('/').pop()}`,  // if fileName is just the filename
+      `/${cleanFileName}`,  // absolute path without basePath
+      cleanFileName,  // relative path
     ];
     
     let response: Response | null = null;
     let lastError: Error | null = null;
     
     for (const filePath of pathsToTry) {
+      // Ensure path starts with / for absolute paths
       const normalizedPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
       try {
         response = await fetch(normalizedPath, {
@@ -100,11 +105,10 @@ export async function loadCourseData(
     }
     
     if (!response || !response.ok) {
-      throw lastError || new Error(`Failed to fetch ${fileName}: ${response?.status || 'unknown'}`);
-    }
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${fileName}: ${response.status}`);
+      const status = response?.status || 'unknown';
+      const statusText = response?.statusText || 'unknown error';
+      console.warn(`Failed to fetch ${fileName} (tried ${pathsToTry.length} paths, last status: ${status} ${statusText})`);
+      throw lastError || new Error(`Failed to fetch ${fileName}: ${status}`);
     }
     
     const contentType = response.headers.get('content-type') || '';

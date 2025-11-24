@@ -159,12 +159,12 @@ export function processMultiYearData(data: GradeData[]): Record<number, CourseSt
     return {};
   }
 
-  // First aggregate duplicates across all years
-  const aggregatedData = aggregateDuplicateEntries(data);
+  // Note: Data is already aggregated by fetchAllYearsData, but processGradeData
+  // also aggregates as a safety measure, so we don't need to aggregate here again
 
   // Group by year
   const byYear: Record<number, GradeData[]> = {};
-  aggregatedData.forEach((item) => {
+  data.forEach((item) => {
     const year = parseInt(item.Årstall, 10);
     if (!byYear[year]) {
       byYear[year] = [];
@@ -172,7 +172,7 @@ export function processMultiYearData(data: GradeData[]): Record<number, CourseSt
     byYear[year].push(item);
   });
 
-  // Process each year
+  // Process each year (processGradeData will aggregate duplicates within each year)
   const result: Record<number, CourseStats> = {};
   Object.entries(byYear).forEach(([yearStr, yearData]) => {
     const year = parseInt(yearStr, 10);
