@@ -1,224 +1,125 @@
 /**
- * Build static data for homepage hero cards and search suggestions.
- * Run this once per year (or when new data arrives) to refresh the
- * most popular course snapshots per institution.
+ * Build static homepage data showing the three largest courses (by candidates)
+ * per institution. The script only touches the optimized JSON exports under
+ * data/institutions, so it can run offline and be re-used once per year.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { INSTITUTION_DATA_FILES } from '../lib/all-courses';
-import { UNIVERSITIES, formatCourseCode, createSearchPayload, DIRECT_API } from '../lib/api';
-import { processGradeData } from '../lib/utils';
-import type { CourseStats, GradeData } from '../types';
+import { UNIVERSITIES } from '../lib/api';
 
-interface CourseRecord {
-  code: string;
-  name?: string;
-  years: number[];
-  lastYearStudents: number;
+interface OptimizedCourse {
+  c: string;
+  n?: string;
+  y?: number[];
+  s?: number;
 }
 
-interface StaticCourseEntry extends CourseStats {
-  institution: string;
-  courseName: string;
-  displayCode: string;
-  studentCount: number;
+interface OptimizedPayload {
+  courses?: OptimizedCourse[];
 }
 
-interface SuggestionEntry {
+interface TopCourseEntry {
   institution: string;
+  institutionCode: string;
   courseCode: string;
-  courseName?: string;
+  courseName: string;
+  studentCount: number;
+  latestYear: number;
 }
 
-interface InitialHomePayload {
+interface HomepageTopPayload {
   generatedAt: string;
-  courses: StaticCourseEntry[];
-  suggestions: SuggestionEntry[];
+  courses: TopCourseEntry[];
+  topCourseCodes: string[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data', 'institutions');
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', 'homepage-top-courses.json');
-const REQUEST_DELAY_MS = 150;
+const MAX_PER_INSTITUTION = 3;
 
-function loadInstitutionCourses(filePath: string): CourseRecord[] {
+function loadOptimizedCourses(filePath: string): OptimizedCourse[] {
   if (!fs.existsSync(filePath)) {
     console.warn(`⚠️  Missing data file: ${filePath}`);
     return [];
   }
 
-  const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-  const courses: CourseRecord[] = [];
-  const sourceCourses: any[] = Array.isArray(raw?.courses) ? raw.courses : [];
+  const raw = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as OptimizedPayload;
+  if (!raw || !Array.isArray(raw.courses)) {
+    console.warn(`⚠️  Invalid course payload in ${filePath}`);
+    return [];
+  }
 
-  sourceCourses.forEach((course) => {
-    if (!course) return;
-    if (typeof course.c === 'string') {
-      // Optimized format
-      const years = Array.isArray(course.y) ? course.y : [];
-      courses.push({
-        code: course.c,
-        name: course.n,
-        years,
-        lastYearStudents: typeof course.s === 'number' ? course.s : 0,
-      });
-    } else if (typeof course.courseCode === 'string') {
-      // Legacy format
-      const years = Array.isArray(course.years) ? course.years : [];
-      courses.push({
-        code: course.courseCode,
-        name: course.courseName,
-        years,
-        lastYearStudents: typeof course.lastYearStudents === 'number'
-          ? course.lastYearStudents
-          : 0,
-      });
-    }
-  });
-
-  return courses;
+  return raw.courses.filter((course): course is OptimizedCourse => Boolean(course?.c));
 }
 
-async function fetchLatestStats(
-  institution: string,
-  course: CourseRecord
-): Promise<StaticCourseEntry | null> {
-  const uni = UNIVERSITIES[institution];
-  if (!uni) {
-    console.warn(`⚠️  Unknown institution mapping for ${institution}`);
-    return null;
-  }
-
-  const years = [...course.years].sort((a, b) => b - a);
-  const latestYear = years[0];
-  if (!latestYear) {
-    console.warn(`⚠️  No year data for ${institution} ${course.code}`);
-    return null;
-  }
-
-  const formattedCode = formatCourseCode(course.code, institution);
-  const payload = createSearchPayload(uni.code, formattedCode, latestYear);
-
-  const response = await fetch(DIRECT_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    console.warn(`⚠️  Grade fetch failed for ${institution} ${course.code}: ${response.status}`);
-    return null;
-  }
-
-  const rawBody = await response.text();
-  if (!rawBody) {
-    console.warn(`⚠️  Empty response for ${institution} ${course.code}`);
-    return null;
-  }
-
-  let gradeData: GradeData[];
-  try {
-    gradeData = JSON.parse(rawBody) as GradeData[];
-  } catch (error) {
-    console.warn(`⚠️  Failed to parse grade data for ${institution} ${course.code}:`, error);
-    return null;
-  }
-  if (!Array.isArray(gradeData) || gradeData.length === 0) {
-    console.warn(`⚠️  No grade data returned for ${institution} ${course.code}`);
-    return null;
-  }
-
-  const latestData = gradeData.filter(
-    (item) => parseInt(item.Årstall, 10) === latestYear
-  );
-  const stats = processGradeData(latestData);
-  if (!stats) {
-    console.warn(`⚠️  Unable to process grade data for ${institution} ${course.code}`);
-    return null;
-  }
-
-  const normalizedStats: CourseStats = {
-    ...stats,
-    year: latestYear,
-    institution,
-  };
-
-  return {
-    ...normalizedStats,
-    courseName: course.name || course.code,
-    displayCode: course.code,
-    studentCount: course.lastYearStudents || normalizedStats.totalStudents,
-  };
+function unique<T>(items: T[]): T[] {
+  return Array.from(new Set(items));
 }
 
-async function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function main() {
+function main() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║   Building static homepage dataset                         ║
 ╚════════════════════════════════════════════════════════════╝
 `);
 
-  const staticCourses: StaticCourseEntry[] = [];
-  const suggestions: SuggestionEntry[] = [];
+  const topCourses: TopCourseEntry[] = [];
   let processedInstitutions = 0;
 
   for (const [institution, mapping] of Object.entries(INSTITUTION_DATA_FILES)) {
     processedInstitutions += 1;
-    const dataPath = path.join(DATA_DIR, mapping.file);
-    const courses = loadInstitutionCourses(dataPath);
-    if (courses.length === 0) {
-      console.warn(`⚠️  No courses found for ${institution}`);
+    const uni = UNIVERSITIES[institution];
+    if (!uni) {
+      console.warn(`⚠️  No university mapping for ${institution}, skipping`);
       continue;
     }
 
-    courses.sort((a, b) => (b.lastYearStudents || 0) - (a.lastYearStudents || 0));
+    const dataPath = path.join(DATA_DIR, mapping.file);
+    const courses = loadOptimizedCourses(dataPath)
+      .map((course) => ({
+        courseCode: course.c,
+        courseName: course.n || course.c,
+        studentCount: typeof course.s === 'number' ? course.s : 0,
+        latestYear: Array.isArray(course.y) && course.y.length > 0
+          ? [...course.y].sort((a, b) => b - a)[0]
+          : 0,
+      }))
+      .sort((a, b) => b.studentCount - a.studentCount);
 
-    const suggestionEntries = courses.slice(0, 3).map((course) => ({
-      institution,
-      courseCode: course.code,
-      courseName: course.name,
-    }));
-    suggestions.push(...suggestionEntries);
-
-    const institutionTopCourses: StaticCourseEntry[] = [];
-    for (const candidate of courses) {
-      if (institutionTopCourses.length >= 3) break;
-      const entry = await fetchLatestStats(institution, candidate);
-      if (entry) {
-        institutionTopCourses.push(entry);
-        await delay(REQUEST_DELAY_MS);
-        continue;
-      }
-      await delay(REQUEST_DELAY_MS);
+    if (courses.length === 0) {
+      console.warn(`⚠️  No optimized courses for ${institution}`);
+      continue;
     }
 
-    if (institutionTopCourses.length > 0) {
-      staticCourses.push(...institutionTopCourses);
-    }
+    courses.slice(0, MAX_PER_INSTITUTION).forEach((course) => {
+      topCourses.push({
+        institution,
+        institutionCode: uni.code,
+        courseCode: course.courseCode,
+        courseName: course.courseName,
+        studentCount: course.studentCount,
+        latestYear: course.latestYear,
+      });
+    });
   }
 
-  staticCourses.sort((a, b) => (b.studentCount || 0) - (a.studentCount || 0));
+  topCourses.sort((a, b) => b.studentCount - a.studentCount);
+  const topCourseCodes = unique(topCourses.map((course) => course.courseCode));
 
-  const payload: InitialHomePayload = {
+  const payload: HomepageTopPayload = {
     generatedAt: new Date().toISOString(),
-    courses: staticCourses,
-    suggestions,
+    courses: topCourses,
+    topCourseCodes,
   };
 
   fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(payload, null, 2));
 
-  console.log(`✅ Generated ${staticCourses.length} homepage courses from ${processedInstitutions} institutions.`);
-  console.log(`✅ Collected ${suggestions.length} search suggestions.`);
+  console.log(`✅ Captured ${topCourses.length} top courses from ${processedInstitutions} institutions.`);
+  console.log(`✅ Saved ${topCourseCodes.length} unique course codes for suggestions.`);
   console.log(`📄 Saved to ${OUTPUT_FILE}`);
 }
 
-main().catch((error) => {
-  console.error('❌ Failed to build homepage data:', error);
-  process.exitCode = 1;
-});
-
+main();

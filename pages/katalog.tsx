@@ -87,7 +87,7 @@ export default function KatalogPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Søk etter emnekode eller navn..."
+                placeholder="Emnekode"
                 className={styles.searchInput}
                 autoFocus
               />

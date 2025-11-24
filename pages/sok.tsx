@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import MultiYearChart from '@/components/MultiYearChart';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
+import { markCourseAsUnavailable } from '@/lib/course-availability';
 import { processMultiYearData } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { getInstitutionForCourse } from '@/lib/courses';
@@ -62,7 +63,8 @@ export default function SearchPage() {
           }
 
           // Course exists, proceed to fetch data
-        const formattedCode = formatCourseCode(courseCode, institution);
+        const normalizedCode = stripCourseCodeSuffix(courseCode);
+        const formattedCode = formatCourseCode(normalizedCode, institution);
         
         setLoading(true);
         setError(null);
@@ -77,6 +79,7 @@ export default function SearchPage() {
               setError(null);
             } else {
               setError('Ingen data funnet for dette emnet');
+              markCourseAsUnavailable(normalizedCode, institution);
               setLoading(false);
             }
           })
@@ -86,6 +89,7 @@ export default function SearchPage() {
                 setError(err.message);
               } else {
                 setError('Ingen data funnet for dette emnet');
+                markCourseAsUnavailable(normalizedCode, institution);
               }
             setLoading(false);
           });

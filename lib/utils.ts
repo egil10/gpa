@@ -24,15 +24,20 @@ export function normalizeGradeDistribution(
     });
   }
   
-  // Conditionally include Pass/Fail grades if they exist
-  for (const grade of PASS_FAIL_GRADES) {
-    const data = gradeMap[grade];
-    if (data && data.count > 0) {
-      distributions.push({
-        grade,
-        count: data.count,
-        percentage: data.percentage,
-      });
+  // Conditionally include Pass/Fail grades only if BOTH exist
+  const hasBestatt = gradeMap['Bestått'] && gradeMap['Bestått'].count > 0;
+  const hasIkkeBestatt = gradeMap['Ikke bestått'] && gradeMap['Ikke bestått'].count > 0;
+  
+  if (hasBestatt && hasIkkeBestatt) {
+    for (const grade of PASS_FAIL_GRADES) {
+      const data = gradeMap[grade];
+      if (data && data.count > 0) {
+        distributions.push({
+          grade,
+          count: data.count,
+          percentage: data.percentage,
+        });
+      }
     }
   }
   

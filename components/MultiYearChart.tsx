@@ -41,11 +41,32 @@ export default function MultiYearChart({ allYearsData, courseCode, institution }
     // Normalize to always include A-F
     const distributions = normalizeGradeDistribution(allDistributions, totalStudents);
 
+    // Calculate average grade (A=5, B=4, C=3, D=2, E=1, F=0, Bestått=3, Ikke bestått=0)
+    const gradeValues: Record<string, number> = {
+      'A': 5,
+      'B': 4,
+      'C': 3,
+      'D': 2,
+      'E': 1,
+      'F': 0,
+      'Bestått': 3,
+      'Ikke bestått': 0,
+    };
+
+    let weightedSum = 0;
+    distributions.forEach((dist) => {
+      const value = gradeValues[dist.grade] ?? 0;
+      weightedSum += value * dist.count;
+    });
+
+    const averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+
     return {
       courseCode,
       year: 0,
       totalStudents,
       distributions,
+      averageGrade: Math.round(averageGrade * 100) / 100,
     };
   }, [allYearsData, courseCode]);
 
@@ -76,6 +97,18 @@ export default function MultiYearChart({ allYearsData, courseCode, institution }
 
       {viewMode === 'combined' && combinedData && (
         <div className={styles.combinedView}>
+          <div className={styles.combinedHeader}>
+            <h3 className={styles.combinedTitle}>Kombinert</h3>
+            <div className={styles.yearStats}>
+              <span className={styles.statBadge}>{combinedData.totalStudents} kandidater</span>
+              {combinedData.averageGrade && (
+                <>
+                  <span>•</span>
+                  <span className={styles.statBadge}>Snitt: {combinedData.averageGrade.toFixed(2)}</span>
+                </>
+              )}
+            </div>
+          </div>
           <GradeChart
             data={combinedData.distributions}
             totalStudents={combinedData.totalStudents}

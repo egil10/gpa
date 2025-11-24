@@ -10,6 +10,7 @@ import { processGradeData } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
+import { loadHomepageTopCourses, HomepageTopDataset } from '@/lib/homepage-data';
 import styles from '@/styles/Home.module.css';
 
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
@@ -21,26 +22,57 @@ const COURSES_PER_PAGE = 9;
 const isProduction = process.env.NODE_ENV === 'production';
 const BASEPATH = isProduction ? '/gpa' : '';
 const INITIAL_COURSES_COUNT = 15; // Show 15 popular courses (5 full rows) on initial load
+const TOP_INITIAL_DISPLAY_COUNT = 12;
 
 export default function Home() {
   const router = useRouter();
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
+  const [topDataset, setTopDataset] = useState<HomepageTopDataset | null>(null);
   const [coursesData, setCoursesData] = useState<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<SortOption>('most-a');
+  const [loadingDots, setLoadingDots] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('most-students');
   const [selectedInstitution, setSelectedInstitution] = useState<string>('all');
   const [searchInput, setSearchInput] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pendingSortBy, setPendingSortBy] = useState<SortOption>('most-a');
+  const [pendingSortBy, setPendingSortBy] = useState<SortOption>('most-students');
   const [pendingInstitution, setPendingInstitution] = useState<string>('all');
   const [displayCount, setDisplayCount] = useState(INITIAL_COURSES_COUNT); // How many courses to show
   const [initialLoadComplete, setInitialLoadComplete] = useState(false); // Track if initial 12 courses are loaded
   const [lastSortBy, setLastSortBy] = useState<SortOption | null>(null); // Track last sort option to detect changes
   const [courseOrder, setCourseOrder] = useState<string[]>([]); // Maintain stable order of courses
   const [searchHint, setSearchHint] = useState<string>(''); // Hint message to show in search field
+  const [heroPlaceholderCode, setHeroPlaceholderCode] = useState<string | null>(null);
   const coursesDataRef = useRef<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const loadingCoursesRef = useRef<Set<string>>(new Set());
+  const topInitialDisplaySet = useRef(false);
+  const topInstitutionCourses = useMemo(() => {
+    if (!topDataset) return [];
+    const seen = new Set<string>();
+    const list: CourseInfo[] = [];
+    for (const entry of topDataset.courses) {
+      if (seen.has(entry.institution)) {
+        continue;
+      }
+      seen.add(entry.institution);
+      list.push({
+        code: entry.courseCode,
+        name: entry.courseName,
+        institution: entry.institution,
+        institutionCode: entry.institutionCode,
+      });
+    }
+    return list;
+  }, [topDataset]);
+
+  const isTopDefaultView = useMemo(
+    () =>
+      selectedInstitution === 'all' &&
+      !searchQuery.trim() &&
+      topInstitutionCourses.length > 0,
+    [selectedInstitution, searchQuery, topInstitutionCourses.length]
+  );
 
   // Sync refs with state - do this early so refs are always up to date
   useEffect(() => {
@@ -50,6 +82,7 @@ export default function Home() {
   useEffect(() => {
     loadingCoursesRef.current = loadingCourses;
   }, [loadingCourses]);
+
 
   // Load course list metadata
   useEffect(() => {
@@ -67,6 +100,31 @@ export default function Home() {
     loadCourseList();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    loadHomepageTopCourses()
+      .then((data) => {
+        if (!data || cancelled) return;
+
+        setTopDataset(data);
+        const hintCodes = (
+          data.topCourseCodes && data.topCourseCodes.length > 0
+            ? data.topCourseCodes
+            : data.courses.map((course) => course.courseCode)
+        );
+        if (hintCodes.length > 0) {
+          setHeroPlaceholderCode(hintCodes[Math.floor(Math.random() * hintCodes.length)]);
+        }
+      })
+      .catch((error) => {
+        console.warn('Top course dataset unavailable:', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Reset initial load when institution changes
   useEffect(() => {
     if (allCourses.length > 0) {
@@ -75,6 +133,24 @@ export default function Home() {
       setDisplayCount(COURSES_PER_PAGE);
     }
   }, [selectedInstitution]);
+
+  useEffect(() => {
+    if (selectedInstitution !== 'all' || searchQuery.trim()) {
+      topInitialDisplaySet.current = false;
+      return;
+    }
+
+    if (topInstitutionCourses.length === 0) {
+      topInitialDisplaySet.current = false;
+      return;
+    }
+
+    if (!topInitialDisplaySet.current) {
+      const desired = Math.min(TOP_INITIAL_DISPLAY_COUNT, topInstitutionCourses.length);
+      setDisplayCount(desired);
+      topInitialDisplaySet.current = true;
+    }
+  }, [selectedInstitution, searchQuery, topInstitutionCourses.length]);
 
   // Sync refs with state
   useEffect(() => {
@@ -199,33 +275,45 @@ export default function Home() {
     
     // If institution filter is 'all', use popular courses in round-robin fashion
     if (selectedInstitution === 'all') {
-      // Load most popular courses across all institutions (round-robin)
-      getMostPopularCoursesRoundRobin(INITIAL_COURSES_COUNT).then(popularCourses => {
-        // Filter out courses that are already loaded or loading
-        const toLoad = popularCourses.filter(course => {
-          const key = `${course.institution}-${course.code}`;
-          return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-        });
-        
+      if (topInstitutionCourses.length > 0) {
+        const batchSize = Math.max(topInstitutionCourses.length, INITIAL_COURSES_COUNT);
+        const toLoad = topInstitutionCourses
+          .filter(course => {
+            const key = `${course.institution}-${course.code}`;
+            return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+          })
+          .slice(0, batchSize);
+
         if (toLoad.length > 0) {
           loadCoursesData(toLoad);
-        } else if (popularCourses.length > 0) {
-          // All popular courses are already loaded or loading
+        } else {
           setInitialLoadComplete(true);
         }
-      }).catch(error => {
-        console.warn('Failed to load popular courses, falling back to regular selection:', error);
-        // Fall back to regular selection
+      } else {
+        getMostPopularCoursesRoundRobin(INITIAL_COURSES_COUNT).then(popularCourses => {
+          const toLoad = popularCourses.filter(course => {
+            const key = `${course.institution}-${course.code}`;
+            return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+          });
+          
+          if (toLoad.length > 0) {
+            loadCoursesData(toLoad);
+          } else if (popularCourses.length > 0) {
+            setInitialLoadComplete(true);
+          }
+        }).catch(error => {
+          console.warn('Failed to load popular courses, falling back to regular selection:', error);
         const fallbackCourses = allCourses
           .filter(course => {
             const key = `${course.institution}-${course.code}`;
             return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
           })
           .slice(0, INITIAL_COURSES_COUNT);
-        if (fallbackCourses.length > 0) {
-          loadCoursesData(fallbackCourses);
-        }
-      });
+          if (fallbackCourses.length > 0) {
+            loadCoursesData(fallbackCourses);
+          }
+        });
+      }
       return; // Exit early - loading popular courses asynchronously
     }
     
@@ -251,7 +339,20 @@ export default function Home() {
     }
 
     loadCoursesData(coursesToLoad);
-  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadCoursesData]);
+  }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, loadCoursesData, topInstitutionCourses]);
+  useEffect(() => {
+    if (loadingCourses.size === 0) {
+      setLoadingDots('');
+      return;
+    }
+    const phases = ['.', '..', '...'];
+    let idx = 0;
+    const interval = setInterval(() => {
+      setLoadingDots(phases[idx]);
+      idx = (idx + 1) % phases.length;
+    }, 400);
+    return () => clearInterval(interval);
+  }, [loadingCourses.size]);
 
   // Reset course order when sort option, institution, or search changes
   useEffect(() => {
@@ -440,8 +541,21 @@ export default function Home() {
 
   // Load more courses when user clicks "load more"
   const handleLoadMore = useCallback(() => {
+    const isTopDefaultView =
+      selectedInstitution === 'all' &&
+      !searchQuery.trim() &&
+      topInstitutionCourses.length > 0;
+
+    if (isTopDefaultView) {
+      const remaining = topInstitutionCourses.length - displayCount;
+      if (remaining > 0) {
+        setDisplayCount(prev => prev + remaining);
+        return;
+      }
+    }
+
     // First, check if we have more courses already loaded that we can show
-    if (displayCount < filteredAndSortedCourses.length) {
+    if (!isTopDefaultView && displayCount < filteredAndSortedCourses.length) {
       // Just increment display count to show more already-loaded courses
       setDisplayCount(prev => prev + COURSES_PER_PAGE);
       return;
@@ -562,7 +676,16 @@ export default function Home() {
 
       setDisplayCount(prev => prev + COURSES_PER_PAGE);
     });
-  }, [allCourses, selectedInstitution, displayCount, filteredAndSortedCourses.length, searchQuery]);
+  }, [
+    allCourses,
+    selectedInstitution,
+    displayCount,
+    filteredAndSortedCourses.length,
+    searchQuery,
+    loadCoursesData,
+    isTopDefaultView,
+    topInstitutionCourses.length,
+  ]);
 
   // Sync refs with state
   useEffect(() => {
@@ -771,8 +894,8 @@ export default function Home() {
     setSearchInput('');
     setSearchQuery('');
     setSearchHint('');
-    setPendingSortBy('most-a');
-    setSortBy('most-a');
+    setPendingSortBy('most-students');
+    setSortBy('most-students');
     setPendingInstitution('all');
     setSelectedInstitution('all');
     setDisplayCount(INITIAL_COURSES_COUNT);
@@ -811,6 +934,10 @@ useEffect(() => {
   const hasMoreCourses = useMemo(() => {
     // Don't show "Load More" while still loading initial courses
     if (loading) return false;
+
+    if (isTopDefaultView) {
+      return displayCount < topInstitutionCourses.length;
+    }
     
     // Check if we have more courses already loaded that we haven't displayed
     if (displayCount < filteredAndSortedCourses.length) {
@@ -875,7 +1002,17 @@ useEffect(() => {
     
     // After initial load is complete, show button if there are more courses to load
     return coursesWithData.length < filtered.length;
-  }, [allCourses, selectedInstitution, searchQuery, displayCount, filteredAndSortedCourses.length, loading, initialLoadComplete]);
+  }, [
+    allCourses,
+    selectedInstitution,
+    searchQuery,
+    displayCount,
+    filteredAndSortedCourses.length,
+    loading,
+    initialLoadComplete,
+    isTopDefaultView,
+    topInstitutionCourses.length,
+  ]);
 
   return (
     <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">
@@ -883,19 +1020,10 @@ useEffect(() => {
         <div className="container">
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              <span className={styles.heroLogo}>
-                <Image 
-                  src={`${BASEPATH}/dist.svg`}
-                  alt="Logo" 
-                  width={120} 
-                  height={68}
-                  priority
-                  style={{ width: 'auto', height: '4rem' }}
-                />
-              </span>
-              Karakterfordeling
+              <span className={styles.heroLogo} aria-hidden="true" />
+              <span className={styles.heroTitleText}>Karakterfordeling</span>
             </h1>
-            <BottomSearchBar />
+            <BottomSearchBar initialPlaceholderCode={heroPlaceholderCode || undefined} />
           </div>
         </div>
       </div>
@@ -918,9 +1046,10 @@ useEffect(() => {
                   type="text"
                   value={searchInput}
                   onChange={(e) => {
-                    setSearchInput(e.target.value);
+                    const newValue = e.target.value.toUpperCase();
+                    setSearchInput(newValue);
                     // Clear hint when user starts typing
-                    if (e.target.value.trim()) {
+                    if (newValue.trim()) {
                       setSearchHint('');
                     }
                   }}
@@ -930,7 +1059,7 @@ useEffect(() => {
                       handleApply(e as any);
                     }
                   }}
-                  placeholder={searchHint || "Søk etter emnekode eller navn..."}
+                  placeholder={searchHint || 'Emnekode'}
                   className={styles.searchInput}
                 />
                 {searchInput.trim() && (
@@ -955,9 +1084,9 @@ useEffect(() => {
                 onChange={(e) => setPendingSortBy(e.target.value as SortOption)}
                 className={styles.select}
               >
+                <option value="most-students">Flest kandidater</option>
                 <option value="most-a">Mest A-er</option>
                 <option value="highest-avg">Høyest snitt</option>
-                <option value="most-students">Flest kandidater</option>
                 <option value="alphabetical-az">A-Z (emnekode)</option>
                 <option value="alphabetical-za">Z-A (emnekode)</option>
                 <option value="least-students">Færrest kandidater</option>
@@ -1056,8 +1185,9 @@ useEffect(() => {
                   className={`${styles.loadMoreButtonInline} ${!hasMoreCourses ? styles.loadMoreButtonDimmed : ''}`}
                   disabled={loadingCourses.size > 0 || !hasMoreCourses}
                   aria-label="Last flere emner"
+                  data-loading-dots={loadingCourses.size > 0 ? loadingDots : ''}
                 >
-                  {loadingCourses.size > 0 ? 'Laster...' : !hasMoreCourses ? 'Alle emner lastet' : 'Last inn flere'}
+                  {loadingCourses.size > 0 ? 'Laster' : !hasMoreCourses ? 'Alle emner lastet' : 'Last inn flere'}
                 </button>
               </div>
             </>

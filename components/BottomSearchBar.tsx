@@ -2,17 +2,25 @@ import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'reac
 import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
-import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { formatCourseCode } from '@/lib/api';
+import { isCourseUnavailable } from '@/lib/course-availability';
 import styles from './BottomSearchBar.module.css';
 
 interface BottomSearchBarProps {
   variant?: 'floating' | 'inline';
   className?: string;
+  initialPlaceholderCode?: string;
+  variantType?: 'search' | 'discover';
 }
 
-export default function BottomSearchBar({ variant = 'floating', className = '' }: BottomSearchBarProps) {
+export default function BottomSearchBar({
+  variant = 'floating',
+  className = '',
+  initialPlaceholderCode,
+  variantType = 'search',
+}: BottomSearchBarProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<CourseInfo[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -20,6 +28,17 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [searchBarOpacity, setSearchBarOpacity] = useState(1);
   const [notFoundMessage, setNotFoundMessage] = useState<string | null>(null);
+  const uppercasePlaceholderCode = initialPlaceholderCode?.toUpperCase();
+  const initialPlaceholder = uppercasePlaceholderCode
+    ? `Prøv å søke etter ${uppercasePlaceholderCode}...`
+    : 'Prøv å søke etter en emnekode...';
+  const [placeholderBase, setPlaceholderBase] = useState(initialPlaceholder);
+  const [animatedPlaceholder, setAnimatedPlaceholder] = useState(initialPlaceholder);
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const [animationCycle, setAnimationCycle] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const CURSOR_CHAR = '|';
   const router = useRouter();
 
   const isFloating = variant === 'floating';
@@ -35,6 +54,54 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
     preloadInstitutionCourses('UiB');
     preloadInstitutionCourses('NHH');
   }, []);
+
+  useEffect(() => {
+    if (uppercasePlaceholderCode) {
+      setPlaceholderBase(`Prøv å søke etter ${uppercasePlaceholderCode}...`);
+    }
+  }, [uppercasePlaceholderCode]);
+
+  useEffect(() => {
+    let typingTimeout: NodeJS.Timeout | null = null;
+    let restartTimeout: NodeJS.Timeout | null = null;
+    const target = placeholderBase;
+    let idx = 0;
+
+    const animate = () => {
+      idx += 1;
+      setAnimatedPlaceholder(target.slice(0, idx));
+      if (idx < target.length) {
+        typingTimeout = setTimeout(animate, 80);
+      } else {
+        setTypingComplete(true);
+        restartTimeout = setTimeout(() => {
+          setAnimationCycle((cycle) => cycle + 1);
+        }, 60000);
+      }
+    };
+
+    setTypingComplete(false);
+    setAnimatedPlaceholder('');
+    animate();
+
+    return () => {
+      if (typingTimeout) clearTimeout(typingTimeout);
+      if (restartTimeout) clearTimeout(restartTimeout);
+    };
+  }, [placeholderBase, animationCycle]);
+
+  useEffect(() => {
+    if (!typingComplete) {
+      setCursorVisible(true);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCursorVisible(prev => !prev);
+    }, 600);
+
+    return () => clearInterval(interval);
+  }, [typingComplete]);
 
   // Fade search bar near footer
   useEffect(() => {
@@ -73,7 +140,6 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
 
     debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
-        // Don't show suggestions when input is empty
         setSuggestions([]);
         setShowSuggestions(false);
         setSelectedCourse(null);
@@ -81,8 +147,11 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
         try {
           // Limit to 3 suggestions
           const results = await searchAllCourses(searchQuery, undefined, 3);
-          setSuggestions(results.slice(0, 3));
-          setShowSuggestions(results.length > 0);
+          const filteredResults = results.filter(
+            course => !isCourseUnavailable(course.code, course.institution)
+          );
+          setSuggestions(filteredResults.slice(0, 3));
+          setShowSuggestions(filteredResults.length > 0);
           
           // Check if query matches a course (only if we have results)
           if (results.length > 0) {
@@ -147,6 +216,16 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
     } else if (query.trim()) {
       // Strip suffix from query before searching/navigating
       const cleanQuery = stripCourseCodeSuffix(query.trim());
+      const matchingSuggestion =
+        suggestions.find(course => course.code.toUpperCase() === cleanQuery.toUpperCase()) ||
+        (suggestions.length > 0 && suggestions[0]);
+
+      if (matchingSuggestion) {
+        setNotFoundMessage(null);
+        handleSelectCourse(matchingSuggestion);
+        return;
+      }
+
       getCourseByCode(cleanQuery, undefined).then(course => {
         if (course) {
           setNotFoundMessage(null);
@@ -166,7 +245,7 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
         setNotFoundMessage(`Kunne ikke søke etter "${cleanQuery}"`);
         setShowSuggestions(false);
         
-        // Clear message after 3 seconds
+        // Clear message after 3 sekunder
         setTimeout(() => {
           setNotFoundMessage(null);
         }, 3000);
@@ -176,8 +255,8 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
 
   const handleClear = () => {
     setQuery('');
-    setShowSuggestions(false);
     setSuggestions([]);
+    setShowSuggestions(false);
     setNotFoundMessage(null);
     inputRef.current?.focus();
   };
@@ -223,7 +302,6 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
   };
 
   const handleFocus = () => {
-    // Only show suggestions if there's a query
     if (query.trim().length > 0 && suggestions.length > 0) {
       setShowSuggestions(true);
     }
@@ -236,6 +314,16 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
         setShowSuggestions(false);
       }
     }, 200);
+  };
+
+  const handleInputFocus = () => {
+    setIsFocused(true);
+    handleFocus();
+  };
+
+  const handleInputBlur = (e: React.FocusEvent) => {
+    setIsFocused(false);
+    handleBlur(e);
   };
 
 
@@ -270,9 +358,13 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
                     value={query}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                    placeholder="Søk etter emnekode eller navn..."
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                    placeholder={
+                      query || isFocused
+                        ? ''
+                        : `${animatedPlaceholder || placeholderBase}${typingComplete && cursorVisible ? CURSOR_CHAR : ''}`
+                    }
                     className={styles.input}
                     autoComplete="off"
                     autoCapitalize="off"
@@ -314,7 +406,7 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
                 <div ref={suggestionsRef} className={styles.suggestions}>
                   {query.trim().length === 0 && (
                     <div className={styles.suggestionsHeader}>
-                      <span>Populære emner</span>
+                      <span>Flest kandidater akkurat nå</span>
                     </div>
                   )}
                   {suggestions.map((course, index) => (

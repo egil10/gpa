@@ -113,8 +113,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
           c.id === courseId
             ? {
                 ...c,
-                name: courseInfo.name,
-                // Optionally set default credits based on institution
+                name: courseInfo.code.toUpperCase(),
                 credits: c.credits || (system === 'university' ? 7.5 : 1),
               }
             : c
@@ -464,13 +463,13 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
 
                 <div className={styles.courseFields}>
                   <div className={styles.field}>
-                    <label>Emnenavn</label>
+                    <label>{system === 'university' ? 'Emnekode' : 'Fagnavn'}</label>
                     {system === 'university' ? (
                       <CourseNameAutocomplete
                         value={course.name}
                         onChange={(name) => updateCourse(course.id, 'name', name)}
                         onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}
-                        placeholder="Søk eller skriv..."
+                        placeholder="Emnekode"
                         disabled={false}
                       />
                     ) : (

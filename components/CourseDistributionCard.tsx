@@ -32,11 +32,23 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     router.push(`/sok?code=${encodeURIComponent(displayCode)}&uni=${institution}&year=${course.year}`);
   };
 
-  const chartData = course.distributions.map(dist => ({
-    grade: dist.grade,
-    percentage: dist.percentage,
-    count: dist.count,
-  }));
+  // Filter data: only include pass/fail grades if BOTH are present
+  const hasBestatt = course.distributions.some((dist) => dist.grade === 'Bestått');
+  const hasIkkeBestatt = course.distributions.some((dist) => dist.grade === 'Ikke bestått');
+  const showPassFail = hasBestatt && hasIkkeBestatt;
+  
+  const chartData = course.distributions
+    .filter((dist) => {
+      if (dist.grade === 'Bestått' || dist.grade === 'Ikke bestått') {
+        return showPassFail;
+      }
+      return true;
+    })
+    .map(dist => ({
+      grade: dist.grade,
+      percentage: dist.percentage,
+      count: dist.count,
+    }));
 
   const topGrade = course.distributions.reduce((max, dist) => 
     dist.percentage > max.percentage ? dist : max

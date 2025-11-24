@@ -50,11 +50,18 @@
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(6, minmax(90px, 1fr));
   gap: var(--space-md);
   margin-top: var(--space-xl);
   padding-top: var(--space-lg);
   border-top: 1px solid var(--border);
+}
+
+.passFailStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
 }
 
 .statItem {
@@ -63,6 +70,11 @@
   align-items: center;
   gap: var(--space-xs);
   padding: var(--space-sm);
+}
+
+.passFailItem {
+  background-color: var(--bg-secondary);
+  border-radius: 0.75rem;
 }
 
 .grade {
@@ -93,6 +105,10 @@
   
   .stats {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .passFailStats {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

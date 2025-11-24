@@ -39,6 +39,15 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
     );
   }
 
+  // Filter data: only include pass/fail grades if BOTH are present
+  const hasBestatt = data.some((dist) => dist.grade === 'Bestått');
+  const hasIkkeBestatt = data.some((dist) => dist.grade === 'Ikke bestått');
+  const showPassFail = hasBestatt && hasIkkeBestatt;
+  
+  const chartData = showPassFail
+    ? data
+    : data.filter((dist) => dist.grade !== 'Bestått' && dist.grade !== 'Ikke bestått');
+
   return (
     <div className={styles.chartContainer}>
       {courseCode && !year && (
@@ -48,7 +57,7 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
       )}
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
-          data={data}
+          data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -76,21 +85,37 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
             labelFormatter={(label) => `Karakter: ${label}`}
           />
           <Bar dataKey="percentage" name="Prosent">
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={GRADE_COLORS[entry.grade] || '#666'} />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
       <div className={styles.stats}>
-        {data.map((dist) => (
-          <div key={dist.grade} className={styles.statItem}>
-            <span className={styles.grade}>{dist.grade}</span>
-            <span className={styles.count}>{dist.count}</span>
-            <span className={styles.percentage}>{dist.percentage}%</span>
-          </div>
-        ))}
+        {chartData
+          .filter((dist) => dist.grade !== 'Bestått' && dist.grade !== 'Ikke bestått')
+          .map((dist) => (
+            <div key={dist.grade} className={styles.statItem}>
+              <span className={styles.grade}>{dist.grade}</span>
+              <span className={styles.count}>{dist.count}</span>
+              <span className={styles.percentage}>{dist.percentage}%</span>
+            </div>
+          ))}
       </div>
+
+      {showPassFail && (
+        <div className={styles.passFailStats}>
+          {chartData
+            .filter((dist) => dist.grade === 'Bestått' || dist.grade === 'Ikke bestått')
+            .map((dist) => (
+              <div key={dist.grade} className={`${styles.statItem} ${styles.passFailItem}`}>
+                <span className={styles.grade}>{dist.grade}</span>
+                <span className={styles.count}>{dist.count}</span>
+                <span className={styles.percentage}>{dist.percentage}%</span>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 }

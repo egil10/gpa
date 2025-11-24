@@ -8,6 +8,15 @@
   display: flex;
   align-items: center;
   width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
 }
 
 .icon {
@@ -15,28 +24,26 @@
   left: var(--space-md);
   color: var(--text-secondary);
   pointer-events: none;
-  z-index: 1;
 }
 
 .input {
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border);
+  padding: 0.65rem 2.5rem 0.65rem calc(var(--space-lg) + 12px);
+  border: none;
+  background: transparent;
   font-family: var(--font-inter);
-  font-size: var(--text-base);
-  background-color: var(--surface);
-  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: border-color;
-  border-radius: 0.375rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.inputWrapper .input {
-  padding-left: calc(var(--space-md) + 24px); /* Space for icon when wrapper exists */
+.input::placeholder {
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--accent);
 }
 
 .input:disabled {
@@ -49,14 +56,13 @@
   right: var(--space-sm);
   background: none;
   border: none;
-  padding: var(--space-xs);
+  padding: var(--space-2xs);
   cursor: pointer;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s;
-  z-index: 1;
+  transition: color 0.15s ease;
 }
 
 .clearButton:hover {
@@ -65,47 +71,31 @@
 
 .suggestions {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
-  z-index: 9999;
-  background-color: #ffffff !important;
+  background-color: #fff;
   border: 1px solid var(--border);
-  border-top: none;
-  max-height: 300px;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.15s ease-out;
-  margin-top: 2px;
-  border-radius: 0 0 0.375rem 0.375rem;
-  isolation: isolate;
-}
-
-.suggestionsHeader {
-  padding: var(--space-xs) var(--space-sm);
-  background-color: var(--bg-secondary) !important;
-  border-bottom: 1px solid var(--border);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--text-secondary);
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  border-radius: 0.5rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  overflow: hidden;
+  z-index: 50;
+  animation: fadeIn 0.15s ease;
 }
 
 .suggestionItem {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  text-align: left;
-  background-color: #ffffff !important;
+  background: #fff;
   border: none;
   border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background-color 0.1s ease;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .suggestionItem:last-child {
@@ -114,72 +104,43 @@
 
 .suggestionItem:hover,
 .suggestionItem.selected {
-  background-color: var(--surface-hover) !important;
+  background-color: var(--surface-hover);
 }
 
-.suggestionContent {
-  flex: 1;
+.suggestionMeta {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-xs);
-}
-
-.suggestionName {
-  font-size: var(--text-xs);
-  color: var(--text-primary);
-  font-weight: 400;
-}
-
-.courseName {
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.courseCategory {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
 }
 
 .suggestionCode {
   font-family: var(--font-inter);
-  letter-spacing: -0.01em;
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-}
-
-/* Highlight duplicate names by making codes more prominent */
-.suggestionItem.duplicate .suggestionCode {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.duplicateBadge {
-  font-family: var(--font-inter);
-  letter-spacing: -0.01em;
-  font-size: var(--text-xs);
-  color: var(--accent);
-  font-weight: 600;
-  margin-left: var(--space-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--text-primary);
 }
 
 .suggestionInstitution {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
-  min-width: 50px;
-  text-align: right;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
-/* Scrollbar styling */
+.suggestionName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
 .suggestions::-webkit-scrollbar {
   width: 8px;
 }
 
 .suggestions::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 
 .suggestions::-webkit-scrollbar-thumb {
@@ -201,4 +162,5 @@
     transform: translateY(0);
   }
 }
+
 

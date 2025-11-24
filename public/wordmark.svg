@@ -1,0 +1,107 @@
+<svg width="520" height="64" viewBox="0 0 520 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <g fill="currentColor" transform="translate(0 16)">
+    <!-- K -->
+    <g transform="translate(0 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <path d="M6 0H12L22 12V20L12 32H6L16 16L6 0Z" />
+    </g>
+    <!-- A -->
+    <g transform="translate(30 0)">
+      <path d="M0 32L8 0H18L26 32H20L18.8 27H7.2L6 32H0Z" />
+      <rect x="7" y="14" width="12" height="4" />
+    </g>
+    <!-- R -->
+    <g transform="translate(60 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="14" height="4" />
+      <rect x="18" y="4" width="4" height="10" />
+      <rect x="4" y="14" width="18" height="4" />
+      <rect x="4" y="4" width="14" height="10" />
+      <path d="M10 18H18L26 32H18.5L10 21Z" />
+    </g>
+    <!-- A -->
+    <g transform="translate(90 0)">
+      <path d="M0 32L8 0H18L26 32H20L18.8 27H7.2L6 32H0Z" />
+      <rect x="7" y="14" width="12" height="4" />
+    </g>
+    <!-- K -->
+    <g transform="translate(120 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <path d="M6 0H12L22 12V20L12 32H6L16 16L6 0Z" />
+    </g>
+    <!-- T -->
+    <g transform="translate(150 0)">
+      <rect x="0" y="0" width="22" height="4" />
+      <rect x="9" y="4" width="4" height="28" />
+    </g>
+    <!-- E -->
+    <g transform="translate(180 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="18" height="4" />
+      <rect x="4" y="14" width="14" height="4" />
+      <rect x="4" y="28" width="18" height="4" />
+    </g>
+    <!-- R -->
+    <g transform="translate(210 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="14" height="4" />
+      <rect x="18" y="4" width="4" height="10" />
+      <rect x="4" y="14" width="18" height="4" />
+      <rect x="4" y="4" width="14" height="10" />
+      <path d="M10 18H18L26 32H18.5L10 21Z" />
+    </g>
+    <!-- F -->
+    <g transform="translate(240 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="18" height="4" />
+      <rect x="4" y="14" width="14" height="4" />
+    </g>
+    <!-- O -->
+    <g transform="translate(270 0)">
+      <path fill-rule="evenodd" d="M0 6C0 2.68629 2.68629 0 6 0H18C21.3137 0 24 2.68629 24 6V26C24 29.3137 21.3137 32 18 32H6C2.68629 32 0 29.3137 0 26V6ZM6 6V26H18V6H6Z" />
+    </g>
+    <!-- R -->
+    <g transform="translate(300 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="14" height="4" />
+      <rect x="18" y="4" width="4" height="10" />
+      <rect x="4" y="14" width="18" height="4" />
+      <rect x="4" y="4" width="14" height="10" />
+      <path d="M10 18H18L26 32H18.5L10 21Z" />
+    </g>
+    <!-- D -->
+    <g transform="translate(330 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <path fill-rule="evenodd" d="M4 0H16C20.4183 0 24 3.58172 24 8V24C24 28.4183 20.4183 32 16 32H4V0ZM8 4V28H15C16.6569 28 18 26.6569 18 25V7C18 5.34315 16.6569 4 15 4H8Z" />
+    </g>
+    <!-- E -->
+    <g transform="translate(360 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="0" width="18" height="4" />
+      <rect x="4" y="14" width="14" height="4" />
+      <rect x="4" y="28" width="18" height="4" />
+    </g>
+    <!-- L -->
+    <g transform="translate(390 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="4" y="28" width="18" height="4" />
+    </g>
+    <!-- I -->
+    <g transform="translate(420 0)">
+      <rect x="0" y="0" width="18" height="4" />
+      <rect x="7" y="4" width="4" height="24" />
+      <rect x="0" y="28" width="18" height="4" />
+    </g>
+    <!-- N -->
+    <g transform="translate(450 0)">
+      <rect x="0" y="0" width="4" height="32" />
+      <rect x="20" y="0" width="4" height="32" />
+      <path d="M4 0H10L16 14V32H10V18L4 4V0Z" />
+    </g>
+    <!-- G -->
+    <g transform="translate(480 0)">
+      <path fill-rule="evenodd" d="M0 6C0 2.68629 2.68629 0 6 0H18C21.3137 0 24 2.68629 24 6V20H14V16H20V6H6V26H18V22H24V26C24 29.3137 21.3137 32 18 32H6C2.68629 32 0 29.3137 0 26V6Z" />
+    </g>
+  </g>
+</svg>
+
