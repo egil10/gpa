@@ -81,7 +81,9 @@ export default function SearchPage() {
           console.log(`[Search] Course found: ${course.code} (${course.institution})`);
 
           // Course exists, proceed to fetch data
-        const normalizedCode = stripCourseCodeSuffix(courseCode, institution);
+          // Use the actual course code from the found course, not the search query
+          // This handles cases where search query (e.g., "INF110") differs from actual code (e.g., "INFO110")
+        const normalizedCode = stripCourseCodeSuffix(course.code, institution);
         const formattedCode = formatCourseCode(normalizedCode, institution);
         
         // Note: We allow API calls to attempt even on GitHub Pages

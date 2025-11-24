@@ -105,12 +105,29 @@ async function fetchCourseGradeData(
         const allData: GradeData[] = await responseNoYear.json();
         if (allData && allData.length > 0) {
           // Filter to only courses that match our course code (normalized)
-          // Use consistent normalization: remove "-1" suffix only
-          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
+          // Use consistent normalization: remove numeric suffixes (e.g., "-0", "-1") but preserve meaningful variants
+          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
           const matchingData = allData.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
             const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
-            return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
+            
+            // Exact match after normalization
+            if (normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '')) {
+              return true;
+            }
+            
+            // Allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+            // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+            if (itemCode.startsWith(normalizedOriginal)) {
+              const nextChar = itemCode[normalizedOriginal.length];
+              // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+              // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
+              if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+                return true;
+              }
+            }
+            
+            return false;
           });
           
           if (matchingData.length > 0) {
@@ -155,6 +172,7 @@ async function fetchCourseGradeData(
         const allData: GradeData[] = await responseAll.json();
         // Find courses that match (using consistent normalization)
         // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
         const matchingData = allData.filter(item => {
           const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
           const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
@@ -171,8 +189,17 @@ async function fetchCourseGradeData(
             return normalizedItemCode.startsWith(normalizedOriginal + '-') || normalizedItemCode === normalizedOriginal;
           }
           
-          // If search code has no dash, only match exact codes (not variants with dashes)
-          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+          // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+          if (itemCode.startsWith(normalizedOriginal)) {
+            const nextChar = itemCode[normalizedOriginal.length];
+            // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+            // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
+            if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+              return true;
+            }
+          }
+          
           return false;
         });
         

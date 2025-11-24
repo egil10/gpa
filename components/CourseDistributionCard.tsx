@@ -42,9 +42,9 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
   
   const displayCourseCode = getDisplayCode(course.courseCode, institution);
 
-  // Check if either Bestått or Ikke bestått exists in the distributions array
-  const hasBestatt = course.distributions.some(d => d.grade === 'Bestått');
-  const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått');
+  // Check if either Bestått or Ikke bestått exists with actual data (count > 0)
+  const hasBestatt = course.distributions.some(d => d.grade === 'Bestått' && d.count > 0);
+  const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått' && d.count > 0);
   const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
   
   // Check if there are any A-F grades with actual data (count > 0)
@@ -68,7 +68,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   }
   
-  // If either Bestått or Ikke bestått exists, we always include BOTH in the chart
+  // If either Bestått or Ikke bestått has data, we always include BOTH in the chart
   // This ensures both x-axis labels are shown even if one has zero count or is missing
   if (hasAnyPassFailData) {
     // Find the actual distribution entries (might be undefined if not present)

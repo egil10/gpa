@@ -538,6 +538,7 @@ export async function fetchGradeData(
         if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
         // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
         // Only match if the codes are exactly equal after normalization
         // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
         const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
@@ -557,8 +558,17 @@ export async function fetchGradeData(
             return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
           }
           
-          // If search code has no dash, only match exact codes (not variants with dashes)
-          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+          // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+          if (itemCode.startsWith(normalizedBase)) {
+            const nextChar = itemCode[normalizedBase.length];
+            // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+            // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
+            if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+              return true;
+            }
+          }
+          
           return false;
         });
         
@@ -732,6 +742,7 @@ export async function fetchAllYearsData(
       if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
         // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
         // Only match if the codes are exactly equal after normalization, or if the search code
         // is a prefix of the item code (e.g., "EXPHIL-HFSEM" matches "EXPHIL-HFSEM")
         // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
@@ -752,8 +763,17 @@ export async function fetchAllYearsData(
             return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
           }
           
-          // If search code has no dash, only match exact codes (not variants with dashes)
-          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+          // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+          if (itemCode.startsWith(normalizedBase)) {
+            const nextChar = itemCode[normalizedBase.length];
+            // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+            // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
+            if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+              return true;
+            }
+          }
+          
           return false;
         });
         
