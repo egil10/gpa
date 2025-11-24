@@ -29,7 +29,7 @@ function getCachedDataSafe(
 }
 
 // NSD API URL - CORS issues in production require a proxy
-const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
+export const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 
 // Multiple CORS proxy options as fallback (only used if Vercel proxy unavailable)
 // These are unreliable and may fail - that's expected behavior
@@ -47,16 +47,18 @@ const CUSTOM_PROXY_URL = (process.env.NEXT_PUBLIC_PROXY_URL ||
   '').trim();
 
 // Use proxy in production, direct API in development
-const isDevelopment = typeof window !== 'undefined' &&
+const isBrowser = typeof window !== 'undefined';
+const isDevelopment =
+  !isBrowser ||
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 // Check if we're on GitHub Pages (where Vercel proxy doesn't exist)
-const isGitHubPages = typeof window !== 'undefined' &&
+const isGitHubPages = isBrowser &&
   (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
 
 // Get the Vercel proxy URL (relative path - works when deployed on Vercel)
 const getVercelProxyUrl = () => {
-  if (typeof window === 'undefined') return null;
+  if (!isBrowser) return null;
   // Skip Vercel proxy on GitHub Pages - it doesn't exist there
   if (isGitHubPages) return null;
   // Use relative path - Vercel will route /api/proxy to the serverless function

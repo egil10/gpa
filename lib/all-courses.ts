@@ -8,7 +8,7 @@ import { UNIVERSITIES } from './api';
 import { loadCourseData, CourseData, searchCourseData } from './course-loader';
 
 // Institution data file mappings - only institutions with actual data files
-const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
+export const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
   UiO: { file: 'uio-all-courses.json', code: '1110' },
   NTNU: { file: 'ntnu-all-courses.json', code: '1150' },
   UiB: { file: 'uib-all-courses.json', code: '1120' },

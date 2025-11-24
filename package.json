@@ -49,6 +49,7 @@
     "discover-ldh": "tsx scripts/discover-ldh-courses.ts",
     "discover-nla": "tsx scripts/discover-nla-courses.ts",
     "discover-steiner": "tsx scripts/discover-steiner-courses.ts",
+    "build-home-data": "tsx scripts/build-homepage-data.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {
