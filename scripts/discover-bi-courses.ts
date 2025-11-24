@@ -55,19 +55,28 @@ async function discoverBICourses() {
       // Merge into master map
       // BI uses format COURSECODE1 (no dash), so we need special handling
       courses.forEach(course => {
-        // Strip BI suffix: API returns codes like "FIN11011" (with suffix), we want "FIN1101"
+        // Strip BI suffix: API returns codes like "FIN11011" or "BIK10301" (with suffix), we want "FIN1101" or "BIK1030"
         // For BI, the suffix is just "1" appended directly (no dash)
-        // Pattern: if code ends with "11" (double one), remove one "1" (e.g., "FIN11011" -> "FIN1101")
-        // If code ends with just one "1", we keep it as it might be part of the actual course code
+        // Pattern: BI course codes are typically 7-8 characters (e.g., "BIK1030", "BOK1121")
+        // API returns codes with an extra "1" at the end (e.g., "BIK10301", "BOK11211")
+        // If code ends with "1" and is 8+ characters, remove the trailing "1"
         let baseCode = course.courseCode;
         
-        // Check if code ends with "11" pattern (API suffix)
-        // BI course codes stored as "FIN1101", API returns "FIN11011"
-        if (baseCode.endsWith('11')) {
-          // Remove last "1" (e.g., "FIN11011" -> "FIN1101")
+        // BI course codes from website are like "BIK 1030" -> "BIK1030" (7 chars) or "BOK 1121" -> "BOK1121" (7 chars)
+        // API might return "BIK10301" (8 chars) or "BOK11211" (8 chars)
+        // If the code is 8+ characters and ends with "1", remove the trailing "1"
+        // But be careful: some legitimate codes might end with "1" (like "FIN1101" is 7 chars, which is fine)
+        if (baseCode.length >= 8 && baseCode.endsWith('1')) {
+          // Check if removing the "1" gives us a more reasonable code length
+          // Most BI codes are 7 characters (3 letters + 4 digits)
+          const withoutSuffix = baseCode.slice(0, -1);
+          if (withoutSuffix.length >= 7) {
+            baseCode = withoutSuffix;
+          }
+        } else if (baseCode.endsWith('11') && baseCode.length >= 9) {
+          // Handle double "1" case (e.g., "FIN11011" -> "FIN1101")
           baseCode = baseCode.slice(0, -1);
         }
-        // If code ends with single "1", leave it - might be legitimate (like "FIN1101")
         
         const existing = allCoursesMap.get(baseCode);
         
