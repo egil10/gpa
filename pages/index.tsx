@@ -139,14 +139,19 @@ export default function Home() {
         const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
         data.courses.forEach((course) => {
           // Normalize course code: remove API formatting suffixes for key matching
-          // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI)
-          // Course lists use base codes like "TDT4110" or "BØK110"
+          // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI) or "EXPHIL-HFEKS-0" (UiB)
+          // Course lists use base codes like "TDT4110" or "BØK110" or "EXPHIL"
           let normalizedCode = course.courseCode;
-          // Remove "-1" suffix (standard format for most universities)
-          normalizedCode = normalizedCode.replace(/-1$/, '');
-          // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
-          if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-            normalizedCode = normalizedCode.slice(0, -1);
+          // For UiB, use first part before any dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
+          if (course.institution === 'UiB') {
+            normalizedCode = normalizedCode.split('-')[0];
+          } else {
+            // Remove "-1" suffix (standard format for most universities)
+            normalizedCode = normalizedCode.replace(/-1$/, '');
+            // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
+            if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+              normalizedCode = normalizedCode.slice(0, -1);
+            }
           }
           const key = `${course.institution}-${normalizedCode}`;
           dataMap.set(key, course);
@@ -510,9 +515,15 @@ export default function Home() {
       
       coursesWithData.forEach(course => {
         // Normalize course code for key matching (same as when creating keys)
-        let normalizedCode = course.courseCode.replace(/-1$/, '');
-        if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-          normalizedCode = normalizedCode.slice(0, -1);
+        // Normalize course code for key matching (same logic as pre-rendered data)
+        let normalizedCode = course.courseCode;
+        if (course.institution === 'UiB') {
+          normalizedCode = normalizedCode.split('-')[0];
+        } else {
+          normalizedCode = normalizedCode.replace(/-1$/, '');
+          if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+            normalizedCode = normalizedCode.slice(0, -1);
+          }
         }
         const key = `${course.institution}-${normalizedCode}`;
         if (courseOrder.includes(key)) {

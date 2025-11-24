@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-24T17:06:07.255Z",
+  "generatedAt": "2025-11-24T17:14:53.977Z",
   "courses": [
     {
       "courseCode": "TDT4110-1",
@@ -82,6 +82,46 @@
       "courseName": "EXPHIL03"
     },
     {
+      "courseCode": "EXPHIL-HFEKS-0",
+      "year": 2025,
+      "institution": "UiB",
+      "totalStudents": 983,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 138,
+          "percentage": 14
+        },
+        {
+          "grade": "B",
+          "count": 337,
+          "percentage": 34
+        },
+        {
+          "grade": "C",
+          "count": 343,
+          "percentage": 35
+        },
+        {
+          "grade": "D",
+          "count": 93,
+          "percentage": 9
+        },
+        {
+          "grade": "E",
+          "count": 29,
+          "percentage": 3
+        },
+        {
+          "grade": "F",
+          "count": 43,
+          "percentage": 4
+        }
+      ],
+      "averageGrade": 3.34,
+      "courseName": "EXPHIL"
+    },
+    {
       "courseCode": "SAM2000-1",
       "year": 2024,
       "institution": "USN",
@@ -120,46 +160,6 @@
       ],
       "averageGrade": 1.86,
       "courseName": "SAM2000"
-    },
-    {
-      "courseCode": "BED-2043NETT-1",
-      "year": 2025,
-      "institution": "UiT",
-      "totalStudents": 600,
-      "distributions": [
-        {
-          "grade": "A",
-          "count": 57,
-          "percentage": 10
-        },
-        {
-          "grade": "B",
-          "count": 166,
-          "percentage": 28
-        },
-        {
-          "grade": "C",
-          "count": 232,
-          "percentage": 39
-        },
-        {
-          "grade": "D",
-          "count": 96,
-          "percentage": 16
-        },
-        {
-          "grade": "E",
-          "count": 42,
-          "percentage": 7
-        },
-        {
-          "grade": "F",
-          "count": 7,
-          "percentage": 1
-        }
-      ],
-      "averageGrade": 3.13,
-      "courseName": "BED-2043NETT"
     },
     {
       "courseCode": "SYK1005-1",
@@ -280,46 +280,6 @@
       ],
       "averageGrade": 2.37,
       "courseName": "LOG505"
-    },
-    {
-      "courseCode": "BSY-221-1",
-      "year": 2025,
-      "institution": "LDH",
-      "totalStudents": 308,
-      "distributions": [
-        {
-          "grade": "A",
-          "count": 80,
-          "percentage": 26
-        },
-        {
-          "grade": "B",
-          "count": 120,
-          "percentage": 39
-        },
-        {
-          "grade": "C",
-          "count": 37,
-          "percentage": 12
-        },
-        {
-          "grade": "D",
-          "count": 8,
-          "percentage": 3
-        },
-        {
-          "grade": "E",
-          "count": 4,
-          "percentage": 1
-        },
-        {
-          "grade": "F",
-          "count": 59,
-          "percentage": 19
-        }
-      ],
-      "averageGrade": 3.28,
-      "courseName": "BSY-221"
     },
     {
       "courseCode": "SYK1002-1",

@@ -60,14 +60,25 @@ const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
  * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010")
- * Only removes "-1" suffix, preserving dashes and numbers that are part of the actual course code
+ * Handles different formats for different institutions:
+ * - Most unis: "IN2010-1" -> "IN2010" (removes "-1" suffix)
+ * - UiB: "EXPHIL-HFEKS-0" -> "EXPHIL" (takes first part before any dash)
+ * - Other courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't suffixes)
  * Examples:
  *   "IN2010-1" -> "IN2010" (removes API suffix)
+ *   "EXPHIL-HFEKS-0" -> "EXPHIL" (UiB format)
  *   "STK-MAT2011" -> "STK-MAT2011" (preserves - dash and trailing 1)
  *   "FYS-STK3155" -> "FYS-STK3155" (preserves - dash)
  */
-export function stripCourseCodeSuffix(code: string): string {
-  // Only remove "-1" suffix (dash followed by 1 at the end)
+export function stripCourseCodeSuffix(code: string, institution?: string): string {
+  // For UiB, course codes from API can have multiple dashes (e.g., "EXPHIL-HFEKS-0")
+  // We need to extract just the base code (first part before any dash)
+  // This matches how the discovery script stores them
+  if (institution === 'UiB') {
+    return code.split('-')[0].trim();
+  }
+  
+  // For other institutions, only remove "-1" suffix (dash followed by 1 at the end)
   // This is the API format suffix, not part of the actual course code
   // Don't remove standalone "1" as it might be part of the course code (e.g., "STK-MAT2011")
   return code.replace(/-1$/, '').trim();
@@ -92,7 +103,7 @@ function courseHasData(courseData: CourseData): boolean {
  */
 function courseDataToCourseInfo(courseData: CourseData, institution: string, institutionCode: string): CourseInfo {
   // Strip suffix for display
-  const displayCode = stripCourseCodeSuffix(courseData.courseCode);
+  const displayCode = stripCourseCodeSuffix(courseData.courseCode, institution);
   return {
     code: displayCode,
     name: courseData.courseName || displayCode,
@@ -258,11 +269,21 @@ export async function getCourseByCode(
   institution?: string
 ): Promise<CourseInfo | null> {
   // Strip suffix from code for matching (user might type "IN2010-1" but we store "IN2010")
-  const normalizedCode = stripCourseCodeSuffix(code.trim().toUpperCase());
+  const normalizedCode = stripCourseCodeSuffix(code.trim().toUpperCase(), institution);
+  console.log(`[getCourseByCode] Searching for code: "${code}" -> normalized: "${normalizedCode}" (institution: ${institution})`);
   
   if (institution) {
     const courses = await loadInstitutionCourses(institution);
-    return courses.find(c => c.code.toUpperCase() === normalizedCode) || null;
+    console.log(`[getCourseByCode] Loaded ${courses.length} courses for ${institution}`);
+    const found = courses.find(c => c.code.toUpperCase() === normalizedCode);
+    if (found) {
+      console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution})`);
+    } else {
+      // Log first few courses for debugging
+      const sampleCodes = courses.slice(0, 5).map(c => c.code);
+      console.log(`[getCourseByCode] Course not found. Sample course codes: ${sampleCodes.join(', ')}`);
+    }
+    return found || null;
   } else {
     const allCourses = await loadAllCourses();
     return allCourses.find(c => c.code.toUpperCase() === normalizedCode) || null;

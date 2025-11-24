@@ -36,14 +36,22 @@ async function fetchCourseGradeData(
   const formatsToTry: string[] = [];
   
   if (institution === 'UiB') {
-    // Try with -1 suffix first (standard format)
-    formatsToTry.push(formatCourseCode(courseCode, institution));
-    // Also try without any suffix (some UiB courses might not use -1)
-    formatsToTry.push(courseCode.toUpperCase().replace(/\s/g, ''));
-    // Try with -1 suffix removed if it was added
+    // UiB discovery stores codes without suffix (using .split('-')[0])
+    // But the API returns them with suffixes like "EXPHIL-HFEKS-0"
+    // Since we can't know the exact suffix, we'll try direct queries first,
+    // then fall back to querying all courses and filtering
+    const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    
+    // 1. Try standard format with -1 (most common)
+    formatsToTry.push(`${cleaned}-1`);
+    
+    // 2. Try without any suffix
+    formatsToTry.push(cleaned);
+    
+    // 3. Try formatCourseCode result (which adds -1)
     const formatted = formatCourseCode(courseCode, institution);
-    if (formatted.endsWith('-1')) {
-      formatsToTry.push(formatted.replace(/-1$/, ''));
+    if (!formatsToTry.includes(formatted)) {
+      formatsToTry.push(formatted);
     }
   } else {
     formatsToTry.push(formatCourseCode(courseCode, institution));
@@ -67,10 +75,19 @@ async function fetchCourseGradeData(
       if (response.ok && response.status === 200) {
         const data: GradeData[] = await response.json();
         if (data && data.length > 0) {
-          const aggregated = aggregateDuplicateEntries(data);
-          if (aggregated.length > 0) {
-            const stats = processGradeData(aggregated);
-            if (stats) return stats;
+          // Check if any returned course codes match our original course code (normalized)
+          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+          const matchingData = data.filter(item => {
+            const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+            return itemCode === normalizedOriginal || itemCode.split('-')[0] === normalizedOriginal;
+          });
+          
+          if (matchingData.length > 0) {
+            const aggregated = aggregateDuplicateEntries(matchingData);
+            if (aggregated.length > 0) {
+              const stats = processGradeData(aggregated);
+              if (stats) return stats;
+            }
           }
         }
       }
@@ -88,16 +105,25 @@ async function fetchCourseGradeData(
       if (responseNoYear.ok && responseNoYear.status === 200) {
         const allData: GradeData[] = await responseNoYear.json();
         if (allData && allData.length > 0) {
-          const aggregated = aggregateDuplicateEntries(allData);
-          if (aggregated.length > 0) {
-            // Get latest year from data
-            const years = aggregated.map(d => parseInt(d.Årstall, 10));
-            const actualLatestYear = Math.max(...years);
-            const yearData = aggregated.filter(d => parseInt(d.Årstall, 10) === actualLatestYear);
-            
-            if (yearData.length > 0) {
-              const stats = processGradeData(yearData);
-              if (stats) return stats;
+          // Filter to only courses that match our course code (normalized)
+          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+          const matchingData = allData.filter(item => {
+            const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+            return itemCode === normalizedOriginal || itemCode.split('-')[0] === normalizedOriginal;
+          });
+          
+          if (matchingData.length > 0) {
+            const aggregated = aggregateDuplicateEntries(matchingData);
+            if (aggregated.length > 0) {
+              // Get latest year from data
+              const years = aggregated.map(d => parseInt(d.Årstall, 10));
+              const actualLatestYear = Math.max(...years);
+              const yearData = aggregated.filter(d => parseInt(d.Årstall, 10) === actualLatestYear);
+              
+              if (yearData.length > 0) {
+                const stats = processGradeData(yearData);
+                if (stats) return stats;
+              }
             }
           }
         }
@@ -108,10 +134,48 @@ async function fetchCourseGradeData(
     }
   }
   
-  // All formats failed
+  // For UiB, try one more thing: query without course code filter and find the course in results
   if (institution === 'UiB') {
+    try {
+      const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+      
+      // Try querying just by institution and year to see all courses
+      const payloadAllCourses = createSearchPayload(institutionCode, undefined, latestYear);
+      const responseAll = await fetch(DIRECT_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payloadAllCourses),
+      });
+      
+      if (responseAll.ok && responseAll.status === 200) {
+        const allData: GradeData[] = await responseAll.json();
+        // Find courses that match (normalizing both sides)
+        const matchingData = allData.filter(item => {
+          const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+          const itemBaseCode = itemCode.split('-')[0];
+          return itemBaseCode === normalizedOriginal || itemCode === normalizedOriginal;
+        });
+        
+        if (matchingData.length > 0) {
+          const aggregated = aggregateDuplicateEntries(matchingData);
+          if (aggregated.length > 0) {
+            const stats = processGradeData(aggregated);
+            if (stats) {
+              console.log(`  ✅ Found ${courseCode} by querying all courses (actual API code: ${matchingData[0]?.Emnekode})`);
+              return stats;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // Ignore this fallback error
+    }
+    
     console.log(`  ⚠️  All format attempts failed for UiB course ${courseCode} (tried: ${uniqueFormats.join(', ')})`);
   }
+  
   return null;
 }
 

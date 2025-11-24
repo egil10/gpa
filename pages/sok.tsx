@@ -19,17 +19,14 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [allYearsStats, setAllYearsStats] = useState<Record<number, CourseStats>>({});
 
-  // Check if we're on GitHub Pages (where API calls will fail)
-  const isGitHubPages = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
-
   // Handle URL query parameters
   useEffect(() => {
     if (router.isReady) {
       const { code, uni } = router.query;
       if (code) {
         // Strip suffix from URL code for display (e.g., "IN2010-1" -> "IN2010")
-        const codeStr = stripCourseCodeSuffix(String(code));
+        const uniFromUrl = uni ? String(uni) : undefined;
+        const codeStr = stripCourseCodeSuffix(String(code), uniFromUrl);
         setCourseCode(codeStr);
         const courseInstitution = getInstitutionForCourse(codeStr);
         if (courseInstitution) {
@@ -57,25 +54,25 @@ export default function SearchPage() {
 
         // First, validate that the course code exists in our course list
         try {
+          console.log(`[Search] Validating course: ${courseCode} (${institution})`);
           const course = await getCourseByCode(courseCode, institution);
           if (!course) {
             // Course code doesn't exist - show not found message
+            console.warn(`[Search] Course not found: ${courseCode} (${institution})`);
             setError(`Emnekode "${courseCode}" ikke funnet`);
             setLoading(false);
             setAllYearsStats({});
             return;
           }
+          console.log(`[Search] Course found: ${course.code} (${course.institution})`);
 
           // Course exists, proceed to fetch data
-        const normalizedCode = stripCourseCodeSuffix(courseCode);
+        const normalizedCode = stripCourseCodeSuffix(courseCode, institution);
         const formattedCode = formatCourseCode(normalizedCode, institution);
         
-        // Check if we're on GitHub Pages - API calls will fail due to CORS
-        if (isGitHubPages) {
-          setError('Søkefunksjonen er ikke tilgjengelig på GitHub Pages på grunn av CORS-begrensninger. Vurder å deploye til Vercel eller sette opp en Cloudflare Worker-proxy.');
-          setLoading(false);
-          return;
-        }
+        // Note: We allow API calls to attempt even on GitHub Pages
+        // If they fail due to CORS, the error handler will display a helpful message
+        // This allows the page to work if a proxy is configured
 
         setLoading(true);
         setError(null);
@@ -105,10 +102,12 @@ export default function SearchPage() {
             }
           })
           .catch(err => {
+              console.error(`[Search] Error fetching data for ${courseCode}:`, err);
               // Check if error is CORS-related or actual "no data"
-              if (err.message && (err.message.includes('CORS') || err.message.includes('blocked'))) {
+              if (err.message && (err.message.includes('CORS') || err.message.includes('blocked') || err.message.includes('GitHub Pages'))) {
                 setError('Kunne ikke laste data på grunn av CORS-begrensninger. Søkefunksjonen krever en proxy for å fungere på GitHub Pages.');
               } else {
+                console.warn(`[Search] No data found for ${courseCode} (${institution}) - ${err.message || 'Unknown error'}`);
                 setError('Ingen data funnet for dette emnet');
                 markCourseAsUnavailable(normalizedCode, institution);
               }
