@@ -59,6 +59,16 @@ export const HIERARCHY_CONFIGS: Record<string, HierarchyConfig> = {
     drillingPath: ['institution', 'faculty', 'department', 'course'],
   },
 
+  // UiB - Uses simple structure (no hierarchy drilling needed)
+  '1120': {
+    hierarchyType: 'Institusjonstype-institusjon-emne',
+    variableNames: {
+      institution: 'Institusjonskode',
+      course: 'Emnekode',
+    },
+    drillingPath: ['institution', 'course'],
+  },
+
   // NHH - Uses studium/study program structure
   '1240': {
     hierarchyType: 'Studium-institusjon-studieprogram-emne',

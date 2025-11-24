@@ -69,6 +69,10 @@ async function discoverUiBCourses() {
             existing.years.push(year);
             existing.years.sort((a, b) => b - a); // Most recent first
           }
+          // Update course name if we found one and it wasn't set before
+          if (!existing.courseName && course.courseName) {
+            existing.courseName = course.courseName;
+          }
           // Update student counts
           if (!existing.studentCountByYear[year]) {
             existing.studentCountByYear[year] = 0;
@@ -81,6 +85,7 @@ async function discoverUiBCourses() {
           // Create new entry
           allCoursesMap.set(baseCode, {
             courseCode: baseCode,
+            courseName: course.courseName, // Store course name if available
             years: [year],
             totalStudents: course.totalStudents,
             lastYear: year,

@@ -66,7 +66,7 @@ export async function fetchWithFilters(
     api_versjon: 1,
     statuslinje: 'N',
     begrensning: '10000', // High limit for discovery
-    kodetekst: 'N', // Return codes and text
+    kodetekst: 'Y', // Return codes AND text (names) - changed from 'N' to 'Y'
     desimal_separator: '.',
     groupBy: ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall'],
     sortBy: ['Emnekode', 'Karakter'],
@@ -146,16 +146,30 @@ export async function discoverCoursesAtPath(
     const courseCode = item.Emnekode;
     const yearValue = parseInt(item.Årstall, 10);
     const studentCount = parseInt(item['Antall kandidater totalt'] || '0', 10);
+    
+    // Try to extract course name from various possible fields
+    // The API might return names in different fields depending on kodetekst setting
+    const courseName = (item as any).Emnenavn || 
+                      (item as any).Emnekode_tekst || 
+                      (item as any).Emnekode_navn ||
+                      (item as any).Emne_navn ||
+                      undefined;
 
     if (!courseMap.has(courseCode)) {
       courseMap.set(courseCode, {
         courseCode,
-        courseName: undefined, // May be available in kodetekst mode
+        courseName: courseName || undefined, // Extract from API if available
         years: [],
         totalStudents: 0,
         path: [institutionCode, ...Object.values(pathFilters).flat()],
         pathNames: [], // Would need name lookup
       });
+    } else {
+      // Update course name if we found one and it wasn't set before
+      const existing = courseMap.get(courseCode)!;
+      if (!existing.courseName && courseName) {
+        existing.courseName = courseName;
+      }
     }
 
     const course = courseMap.get(courseCode)!;

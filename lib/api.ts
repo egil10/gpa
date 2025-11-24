@@ -480,13 +480,24 @@ export async function fetchGradeData(
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
+    const isJUSCourse = courseCode.toUpperCase().startsWith('JUS');
     
-    // Try direct formats first (fast)
-    const formatsToTry = [
-      `${cleaned}-1`,           // Standard format with -1
-      cleaned,                  // Without any suffix
-      formatCourseCode(cleaned, institution), // formatCourseCode result
-    ];
+    // For JUS courses, try without -1 first (they're stored as JUS346, not JUS346-1)
+    // But also try -0 suffix (found in fallback for JUS242-0)
+    // For other courses, try with -1 first, then -0
+    const formatsToTry = isJUSCourse
+      ? [
+          cleaned,                  // JUS: without suffix first
+          `${cleaned}-0`,           // Then with -0 (found in fallback)
+          `${cleaned}-1`,           // Then with -1
+          formatCourseCode(cleaned, institution),
+        ]
+      : [
+          `${cleaned}-1`,           // Other courses: with -1 first
+          `${cleaned}-0`,           // Then with -0
+          cleaned,                  // Without any suffix
+          formatCourseCode(cleaned, institution), // formatCourseCode result
+        ];
     
     // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
     // This avoids the expensive "query all courses" fallback
@@ -504,6 +515,39 @@ export async function fetchGradeData(
     
     // Try each format
     for (const formattedCode of uniqueFormats) {
+      // For JUS courses, try with study program filter first
+      if (isJUSCourse) {
+        try {
+          const payload = createSearchPayload(
+            institutionCode, 
+            formattedCode, 
+            year, 
+            departmentFilter,
+            { studiumCode: 'jus' }
+          );
+          const data = await fetchWithProxy(payload);
+          
+          if (data && data.length > 0) {
+            // Check if we got matching data
+            const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
+            const matching = data.filter(item => {
+              const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+              const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+              return normalizedItemCode === normalizedBase || 
+                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                     (isJUSCourse && itemCode.startsWith(courseCode.toUpperCase().replace(/\s/g, '')));
+            });
+            
+            if (matching.length > 0) {
+              return matching;
+            }
+          }
+        } catch (error) {
+          // Continue to try without study program filter
+        }
+      }
+      
+      // Try without study program filter (or if JUS course with filter didn't work)
       try {
         const payload = createSearchPayload(institutionCode, formattedCode, year, departmentFilter);
         const data = await fetchWithProxy(payload);
@@ -684,13 +728,24 @@ export async function fetchAllYearsData(
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
+    const isJUSCourse = courseCode.toUpperCase().startsWith('JUS');
     
-    // Try direct formats first (fast)
-    const formatsToTry = [
-      `${cleaned}-1`,           // Standard format with -1
-      cleaned,                  // Without any suffix
-      formatCourseCode(cleaned, institution), // formatCourseCode result
-    ];
+    // For JUS courses, try without -1 first (they're stored as JUS346, not JUS346-1)
+    // But also try -0 suffix (found in fallback for JUS242-0)
+    // For other courses, try with -1 first, then -0
+    const formatsToTry = isJUSCourse
+      ? [
+          cleaned,                  // JUS: without suffix first
+          `${cleaned}-0`,           // Then with -0 (found in fallback)
+          `${cleaned}-1`,           // Then with -1
+          formatCourseCode(cleaned, institution),
+        ]
+      : [
+          `${cleaned}-1`,           // Other courses: with -1 first
+          `${cleaned}-0`,           // Then with -0
+          cleaned,                  // Without any suffix
+          formatCourseCode(cleaned, institution), // formatCourseCode result
+        ];
     
     // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
     // This avoids the expensive "query all courses" fallback
@@ -708,6 +763,40 @@ export async function fetchAllYearsData(
     
     // Try each format
     for (const formattedCode of uniqueFormats) {
+      // For JUS courses, try with study program filter first
+      if (isJUSCourse) {
+        try {
+          const payload = createSearchPayload(
+            institutionCode, 
+            formattedCode, 
+            undefined, 
+            departmentFilter,
+            { studiumCode: 'jus' }
+          );
+          const data = await fetchWithProxy(payload);
+          
+          if (data && data.length > 0) {
+            // Check if we got matching data
+            const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
+            const matching = data.filter(item => {
+              const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+              const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+              return normalizedItemCode === normalizedBase || 
+                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                     (isJUSCourse && itemCode.startsWith(courseCode.toUpperCase().replace(/\s/g, '')));
+            });
+            
+            if (matching.length > 0) {
+              const { aggregateDuplicateEntries } = await import('./utils');
+              return aggregateDuplicateEntries(matching);
+            }
+          }
+        } catch (error) {
+          // Continue to try without study program filter
+        }
+      }
+      
+      // Try without study program filter (or if JUS course with filter didn't work)
       try {
         const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
         const data = await fetchWithProxy(payload);
