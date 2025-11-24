@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
-import { UNIVERSITIES } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { searchAllCourses, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
 import styles from './CourseNameAutocomplete.module.css';
 
@@ -185,7 +185,10 @@ export default function CourseNameAutocomplete({
         <div ref={suggestionsRef} className={styles.suggestions}>
           {query.trim().length === 0 && (
             <div className={styles.suggestionsHeader}>
-              <span>Populære emner{institution ? ` (${UNIVERSITIES[institution]?.shortName})` : ''}</span>
+              <span>
+                Populære emner
+                {institution ? ` (${formatInstitutionLabel(institution, 'short-full')})` : ''}
+              </span>
             </div>
           )}
           {suggestions.map((course, index) => {
@@ -216,7 +219,7 @@ export default function CourseNameAutocomplete({
                   )}
                 </div>
                 <div className={styles.suggestionInstitution}>
-                  {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                  {formatInstitutionLabel(course.institution, 'short-full')}
                 </div>
               </button>
             );

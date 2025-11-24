@@ -123,6 +123,23 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
     }
   }, [system]);
 
+  const adjustCredits = useCallback(
+    (courseId: string, direction: 'up' | 'down', courseSystem: GradeSystem) => {
+      const step = courseSystem === 'university' ? 0.5 : 1;
+      setHasCalculated(false);
+      setCourses((prev) =>
+        prev.map((course) => {
+          if (course.id !== courseId) return course;
+          const current = Number.isFinite(course.credits) ? course.credits : 0;
+          const delta = direction === 'up' ? step : -step;
+          const nextValue = Math.max(0, parseFloat((current + delta).toFixed(2)));
+          return { ...course, credits: nextValue };
+        })
+      );
+    },
+    []
+  );
+
   const handleVGSCourseSelect = useCallback((courseId: string, vgsCourse: VGSCourse | null) => {
     if (vgsCourse) {
       setCourses((prev) =>
@@ -512,14 +529,33 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                     <label>
                       {system === 'university' ? 'ECTS' : 'Poeng'}
                     </label>
-                    <input
-                      type="number"
-                      value={course.credits}
-                      onChange={(e) => updateCourse(course.id, 'credits', parseFloat(e.target.value) || 0)}
-                      min="0"
-                      step={system === 'university' ? '0.5' : '1'}
-                      className={styles.input}
-                    />
+                    <div className={styles.creditControls}>
+                      <button
+                        type="button"
+                        className={styles.creditButton}
+                        onClick={() => adjustCredits(course.id, 'down', course.system)}
+                        aria-label="Reduser ECTS"
+                        disabled={(course.credits || 0) <= 0}
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        value={course.credits}
+                        onChange={(e) => updateCourse(course.id, 'credits', parseFloat(e.target.value) || 0)}
+                        min="0"
+                        step={system === 'university' ? '0.5' : '1'}
+                        className={styles.creditInput}
+                      />
+                      <button
+                        type="button"
+                        className={styles.creditButton}
+                        onClick={() => adjustCredits(course.id, 'up', course.system)}
+                        aria-label="Øk ECTS"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
 
                   <div className={styles.field}>

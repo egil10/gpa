@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
-import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
+import { fetchAllYearsData, UNIVERSITIES, formatCourseCode, formatInstitutionLabel } from '@/lib/api';
 import { processGradeData } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-courses';
@@ -280,10 +280,14 @@ export default function Home() {
       const codeContains: typeof filtered = [];
       const nameStartsWith: typeof filtered = [];
       const nameContains: typeof filtered = [];
+      const institutionStartsWith: typeof filtered = [];
+      const institutionContains: typeof filtered = [];
       
       filtered.forEach(c => {
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
+        const institutionNameUpper = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
+        const institutionShortUpper = UNIVERSITIES[c.institution]?.shortName?.toUpperCase() || '';
         
         if (codeUpper.startsWith(query)) {
           codeStartsWith.push(c);
@@ -293,11 +297,28 @@ export default function Home() {
           nameStartsWith.push(c);
         } else if (nameUpper.includes(query)) {
           nameContains.push(c);
+        } else if (
+          (institutionShortUpper && institutionShortUpper.startsWith(query)) ||
+          (institutionNameUpper && institutionNameUpper.startsWith(query))
+        ) {
+          institutionStartsWith.push(c);
+        } else if (
+          (institutionShortUpper && institutionShortUpper.includes(query)) ||
+          (institutionNameUpper && institutionNameUpper.includes(query))
+        ) {
+          institutionContains.push(c);
         }
       });
       
       // Combine with priority order
-      filtered = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
+      filtered = [
+        ...codeStartsWith,
+        ...codeContains,
+        ...nameStartsWith,
+        ...nameContains,
+        ...institutionStartsWith,
+        ...institutionContains,
+      ];
     }
 
     // Get courses with loaded data, ensuring institution matches filter
@@ -702,7 +723,7 @@ export default function Home() {
     const newSearchQuery = searchInput.trim();
     if (!newSearchQuery) {
       const institutionName = pendingInstitution !== 'all' 
-        ? UNIVERSITIES[pendingInstitution]?.shortName || pendingInstitution
+        ? formatInstitutionLabel(pendingInstitution, 'full-short')
         : '';
       if (institutionName || pendingSortBy !== 'most-a') {
         setSearchHint('Legg til emnekode eller navn for å søke');
@@ -956,10 +977,10 @@ useEffect(() => {
               >
                 <option value="all">Alle</option>
                 {Object.entries(UNIVERSITIES)
-                  .sort(([, a], [, b]) => a.shortName.localeCompare(b.shortName, 'no'))
+                  .sort(([, a], [, b]) => a.name.localeCompare(b.name, 'no'))
                   .map(([key, uni]) => (
                     <option key={key} value={key}>
-                      {uni.shortName}
+                      {formatInstitutionLabel(key, 'full-short')}
                     </option>
                   ))}
               </select>

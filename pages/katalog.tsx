@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/components/Layout';
 import { loadAllCourses } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
-import { UNIVERSITIES } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { Search, Filter } from 'lucide-react';
 import styles from '@/styles/Katalog.module.css';
 
@@ -43,7 +43,11 @@ export default function KatalogPage() {
       filtered = filtered.filter(c => {
         const codeMatch = c.code.toUpperCase().includes(query);
         const nameMatch = c.name && c.name.toUpperCase().includes(query);
-        return codeMatch || nameMatch;
+        const institutionName = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
+        const institutionShort = UNIVERSITIES[c.institution]?.shortName?.toUpperCase() || '';
+        const institutionMatch =
+          institutionName.includes(query) || institutionShort.includes(query);
+        return codeMatch || nameMatch || institutionMatch;
       });
     }
 
@@ -97,10 +101,10 @@ export default function KatalogPage() {
               >
                 <option value="all">Alle institusjoner</option>
                 {Object.entries(UNIVERSITIES)
-                  .sort(([, a], [, b]) => a.shortName.localeCompare(b.shortName, 'no'))
+                  .sort(([, a], [, b]) => a.name.localeCompare(b.name, 'no'))
                   .map(([key, uni]) => (
                     <option key={key} value={key}>
-                      {uni.shortName}
+                      {formatInstitutionLabel(key, 'full-short')}
                     </option>
                   ))}
               </select>
@@ -123,7 +127,7 @@ export default function KatalogPage() {
 
               <div className={styles.coursesList}>
                 {displayedCourses.map((course) => {
-                  const institutionName = UNIVERSITIES[course.institution]?.shortName || course.institution;
+                  const institutionName = formatInstitutionLabel(course.institution, 'short-full');
                   
                   return (
                     <div key={`${course.institution}-${course.code}`} className={styles.courseItem}>

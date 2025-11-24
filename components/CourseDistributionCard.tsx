@@ -2,8 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { CourseStats } from '@/types';
-import { UNIVERSITIES } from '@/lib/api';
-import { formatCourseCode } from '@/lib/api';
+import { UNIVERSITIES, formatCourseCode, formatInstitutionLabel } from '@/lib/api';
 import { stripCourseCodeSuffix } from '@/lib/all-courses';
 import styles from './CourseDistributionCard.module.css';
 
@@ -49,7 +48,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
         <div className={styles.courseInfo}>
           <span className={styles.courseCode}>{stripCourseCodeSuffix(course.courseCode)}</span>
           <span className={styles.institution}>
-            {UNIVERSITIES[institution]?.shortName || institution}
+            {formatInstitutionLabel(institution, 'short-full')}
           </span>
         </div>
         <div className={styles.year}>{course.year}</div>

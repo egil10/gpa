@@ -152,4 +152,6 @@ async function discoverHFDKCourses() {
   console.log(`\n✅ All done!`);
   
   return allCourses;
+}
 
+discoverHFDKCourses().catch(console.error);

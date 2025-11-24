@@ -106,6 +106,11 @@ export default function DepartmentBrowser({ institutionCode, onCourseSelect }: D
     );
   }
 
+  const institutionDisplayName = `${institution.name}${institution.shortName ? ` (${institution.shortName})` : ''}`;
+  const institutionButtonLabel = institution.shortName
+    ? `${institution.shortName} – ${institution.name}`
+    : institutionDisplayName;
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -116,7 +121,7 @@ export default function DepartmentBrowser({ institutionCode, onCourseSelect }: D
         <p className={styles.subtitle}>
           {faculties.length > 0 
             ? 'Velg et fakultet og institutt for å se alle tilgjengelige emner'
-            : `Utforsk alle emner fra ${institution.name}`
+            : `Utforsk alle emner fra ${institutionDisplayName}`
           }
         </p>
       </div>
@@ -177,7 +182,7 @@ export default function DepartmentBrowser({ institutionCode, onCourseSelect }: D
                 disabled={loading}
                 className={`${styles.fetchAllButton} ${showAllCourses ? styles.active : ''}`}
               >
-                {showAllCourses ? '✓' : '🔍'} Hent alle kurs fra {institution.shortName}
+                {showAllCourses ? '✓' : '🔍'} Hent alle kurs fra {institutionButtonLabel}
               </button>
             </div>
           </>
@@ -193,7 +198,7 @@ export default function DepartmentBrowser({ institutionCode, onCourseSelect }: D
               disabled={loading}
               className={`${styles.fetchAllButton} ${styles.fullWidth} ${showAllCourses ? styles.active : ''}`}
             >
-              {showAllCourses ? '✓' : '🔍'} Hent alle kurs fra {institution.name}
+              {showAllCourses ? '✓' : '🔍'} Hent alle kurs fra {institutionDisplayName}
             </button>
             <p className={styles.info}>
               Ingen fakulteter/institutter er konfigurert ennå. Du kan hente alle emner direkte.

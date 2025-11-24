@@ -103,6 +103,30 @@ export const UNIVERSITIES: Record<string, University> = {
   Steiner: { code: '8225', name: 'Steinerhøyskolen', shortName: 'Steiner' },
 };
 
+export type InstitutionLabelFormat = 'short' | 'full' | 'full-short' | 'short-full';
+
+export function formatInstitutionLabel(
+  code: string,
+  format: InstitutionLabelFormat = 'short'
+): string {
+  const uni = UNIVERSITIES[code];
+  if (!uni) return code;
+
+  const hasShort = Boolean(uni.shortName && uni.shortName !== uni.name);
+
+  switch (format) {
+    case 'full':
+      return uni.name;
+    case 'full-short':
+      return hasShort ? `${uni.name} (${uni.shortName})` : uni.name;
+    case 'short-full':
+      return hasShort ? `${uni.shortName} – ${uni.name}` : uni.name;
+    case 'short':
+    default:
+      return hasShort ? uni.shortName : uni.name;
+  }
+}
+
 export function createSearchPayload(
   institutionCode: string,
   courseCode?: string,

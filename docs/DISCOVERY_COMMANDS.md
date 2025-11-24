@@ -27,7 +27,7 @@ Then restart `npm run dev` (or rebuild/export) before deploying.
 | `npm run discover-bi` | Handelshøyskolen BI |
 | `npm run discover-dmmh` | Dronning Mauds Minne Høgskole |
 | `npm run discover-fih` | Fjellhaug Internasjonale Høgskole |
-| `npm run discover-hfdk` | Høyskolen for dansekunst | **NOT FOUND**
+| `npm run discover-hfdk` | Høyskolen for dansekunst | 
 | `npm run discover-hgut` | Høgskulen for grøn utvikling |
 | `npm run discover-him` | Høgskolen i Molde |
 | `npm run discover-hio` | Høgskolen i Østfold |

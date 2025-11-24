@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { CourseInfo, getCoursesForInstitution } from '@/lib/courses';
-import { UNIVERSITIES } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { getAvailableInstitutions, loadInstitutionCourses, loadAllCourses } from '@/lib/all-courses';
 import styles from './CourseExplorer.module.css';
 
@@ -51,7 +51,12 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
 
   // Get available institutions (only those with data)
   const institutions = useMemo(() => {
-    return getAvailableInstitutions().sort();
+    return getAvailableInstitutions().sort((a, b) =>
+      formatInstitutionLabel(a, 'full').localeCompare(
+        formatInstitutionLabel(b, 'full'),
+        'no'
+      )
+    );
   }, []);
 
   // Filter courses based on search query
@@ -62,10 +67,15 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
 
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
-      courses = courses.filter(c => 
-        c.code.toUpperCase().includes(query) ||
-        c.name.toUpperCase().includes(query)
-      );
+      courses = courses.filter(c => {
+        const codeMatch = c.code.toUpperCase().includes(query);
+        const nameMatch = c.name.toUpperCase().includes(query);
+        const institutionName = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
+        const institutionShort = UNIVERSITIES[c.institution]?.shortName?.toUpperCase() || '';
+        const institutionMatch =
+          institutionName.includes(query) || institutionShort.includes(query);
+        return codeMatch || nameMatch || institutionMatch;
+      });
     }
 
     return courses.sort((a, b) => a.code.localeCompare(b.code));
@@ -120,6 +130,7 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
                 key={inst}
                 className={`${styles.instButton} ${selectedInst === inst ? styles.active : ''}`}
                 onClick={() => setSelectedInst(inst)}
+                title={formatInstitutionLabel(inst, 'full-short')}
               >
                 {UNIVERSITIES[inst]?.shortName || inst}
               </button>
@@ -145,14 +156,14 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
                   key={`${course.code}-${course.institution}`}
                   className={styles.courseItem}
                   onClick={() => handleCourseClick(course)}
-                  title={`${course.name} - ${UNIVERSITIES[course.institution]?.shortName || course.institution}`}
+                  title={`${course.name} – ${formatInstitutionLabel(course.institution, 'short-full')}`}
                 >
                   <div className={styles.courseCode}>{course.code}</div>
                   {course.name && course.name !== course.code && (
                     <div className={styles.courseName}>{course.name}</div>
                   )}
                   <div className={styles.courseInstitution}>
-                    {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                    {formatInstitutionLabel(course.institution, 'short-full')}
                   </div>
                 </button>
               ))}
@@ -178,7 +189,7 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
           ) : (
             <>
               {displayedCourses.length} av {filteredCourses.length} {filteredCourses.length === 1 ? 'emne' : 'emner'}
-              {selectedInst && ` fra ${UNIVERSITIES[selectedInst]?.shortName || selectedInst}`}
+              {selectedInst && ` fra ${formatInstitutionLabel(selectedInst, 'short-full')}`}
             </>
           )}
         </p>

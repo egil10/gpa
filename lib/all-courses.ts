@@ -217,10 +217,21 @@ function searchCoursesFromList(
   const nameMatches: CourseInfo[] = [];
   const codeStartsWith: CourseInfo[] = [];
   const nameStartsWith: CourseInfo[] = [];
+  const institutionStartsWith: CourseInfo[] = [];
+  const institutionMatches: CourseInfo[] = [];
 
   for (const course of courses) {
     const codeUpper = course.code.toUpperCase();
     const nameUpper = course.name.toUpperCase();
+    const institution = UNIVERSITIES[course.institution];
+    const institutionShortUpper = (institution?.shortName || '').toUpperCase();
+    const institutionFullUpper = (institution?.name || '').toUpperCase();
+    const institutionStarts =
+      (institutionShortUpper && institutionShortUpper.startsWith(normalizedQuery)) ||
+      (institutionFullUpper && institutionFullUpper.startsWith(normalizedQuery));
+    const institutionContains =
+      (institutionShortUpper && institutionShortUpper.includes(normalizedQuery)) ||
+      (institutionFullUpper && institutionFullUpper.includes(normalizedQuery));
 
     if (codeUpper === normalizedQuery) {
       // Exact code match - highest priority
@@ -233,6 +244,10 @@ function searchCoursesFromList(
       nameStartsWith.push(course);
     } else if (nameUpper.includes(normalizedQuery)) {
       nameMatches.push(course);
+    } else if (institutionStarts) {
+      institutionStartsWith.push(course);
+    } else if (institutionContains) {
+      institutionMatches.push(course);
     }
   }
 
@@ -242,6 +257,8 @@ function searchCoursesFromList(
     ...codeMatches,
     ...nameStartsWith,
     ...nameMatches,
+    ...institutionStartsWith,
+    ...institutionMatches,
   ].slice(0, limit);
 }
 

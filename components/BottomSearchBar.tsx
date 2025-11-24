@@ -3,7 +3,7 @@ import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
 import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
-import { UNIVERSITIES } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { formatCourseCode } from '@/lib/api';
 import styles from './BottomSearchBar.module.css';
 
@@ -334,7 +334,7 @@ export default function BottomSearchBar({ variant = 'floating', className = '' }
                         )}
                       </div>
                       <div className={styles.suggestionInstitution}>
-                        {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                        {formatInstitutionLabel(course.institution, 'short-full')}
                       </div>
                     </button>
                   ))}

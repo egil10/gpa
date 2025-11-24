@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
-import { UNIVERSITIES } from '@/lib/api';
+import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
 import styles from './CourseAutocomplete.module.css';
 
@@ -231,7 +231,7 @@ export default function CourseAutocomplete({
                 <div className={styles.suggestionName}>{course.name}</div>
               )}
               <div className={styles.suggestionInstitution}>
-                {UNIVERSITIES[course.institution]?.shortName || course.institution}
+                {formatInstitutionLabel(course.institution, 'short-full')}
               </div>
             </button>
           ))}
