@@ -1,6 +1,5 @@
 /**
- * Discover and fetch all UiB (Universitetet i Bergen) courses in batches
- * Uses the same structure as UiO discovery script
+ * Discover and fetch ALL NLA courses
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
@@ -15,23 +14,21 @@ interface CourseExport {
   totalStudents: number;
   lastYear: number;
   lastYearStudents: number;
-  studentCountByYear: Record<number, number>; // Year -> student count
+  studentCountByYear: Record<number, number>;
 }
 
-async function discoverUiBCourses() {
+async function discoverNLACourses() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║     UiB Courses Discovery & Export (Batched)                ║
+║     NLA All Courses Discovery & Export (Batched)           ║
 ╚════════════════════════════════════════════════════════════╝
   `);
 
-  const institutionCode = '1120';
-  const institutionName = 'UiB';
+  const institutionCode = '8223';
+  const institutionName = 'NLA';
   
-  // Fetch years from most recent to oldest
-  // Going back as far as API allows (typically 2000+)
   const currentYear = new Date().getFullYear();
-  const years = [];
+  const years: number[] = [];
   for (let year = currentYear; year >= 2000; year--) {
     years.push(year);
   }
@@ -40,7 +37,6 @@ async function discoverUiBCourses() {
   console.log(`📡 Fetching all courses from ${institutionName}...`);
   console.log(`   Processing ${years.length} years in batches...\n`);
   
-  // Process year by year
   for (let i = 0; i < years.length; i++) {
     const year = years[i];
     console.log(`[${i + 1}/${years.length}] 📅 Fetching year ${year}...`);
@@ -52,78 +48,68 @@ async function discoverUiBCourses() {
       
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
       
-      // Merge into master map
-      courses.forEach(course => {
-        const baseCode = course.courseCode.split('-')[0]; // Remove -1 suffix
+      courses.forEach((course: DiscoveredCourse) => {
+        const baseCode = course.courseCode.replace(/-1$/, '');
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
-          // Add year if not present
           if (!existing.years.includes(year)) {
             existing.years.push(year);
-            existing.years.sort((a, b) => b - a); // Most recent first
+            existing.years.sort((a, b) => b - a);
           }
-          // Update student counts
           if (!existing.studentCountByYear[year]) {
             existing.studentCountByYear[year] = 0;
           }
           existing.studentCountByYear[year] += course.totalStudents;
           existing.totalStudents = Math.max(existing.totalStudents, course.totalStudents);
-          existing.lastYear = existing.years[0]; // Most recent year
+          existing.lastYear = existing.years[0];
           existing.lastYearStudents = existing.studentCountByYear[existing.lastYear] || 0;
+          if (course.courseName && (!existing.courseName || course.courseName.length > existing.courseName.length)) {
+            existing.courseName = course.courseName;
+          }
         } else {
-          // Create new entry
           allCoursesMap.set(baseCode, {
             courseCode: baseCode,
+            courseName: course.courseName,
             years: [year],
             totalStudents: course.totalStudents,
             lastYear: year,
             lastYearStudents: course.totalStudents,
-            studentCountByYear: {
-              [year]: course.totalStudents
-            },
+            studentCountByYear: { [year]: course.totalStudents },
           });
         }
       });
       
       console.log(`   📊 Total unique courses so far: ${allCoursesMap.size}\n`);
       
-      // Small delay between requests to be nice to the API
       if (i < years.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-      
     } catch (error) {
       console.error(`   ❌ Error fetching ${year}:`, error instanceof Error ? error.message : error);
       console.log(`   ⚠️  Continuing with next year...\n`);
     }
   }
   
-  // Convert to array and sort
   const allCourses = Array.from(allCoursesMap.values())
-    .filter(course => course.years.length > 0) // Only courses with data
+    .filter(course => course.years.length > 0)
     .sort((a, b) => a.courseCode.localeCompare(b.courseCode));
   
   console.log(`\n✅ Discovery complete!`);
   console.log(`   Total unique courses: ${allCourses.length}\n`);
   
-  // Create data directory if it doesn't exist
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
   
-  // Save to JSON file (optimized format)
-  const outputFile = path.join(dataDir, 'uib-all-courses.json');
+  const outputFile = path.join(dataDir, 'nla-all-courses.json');
   const exportData = createOptimizedExport(institutionCode, allCourses);
-  
-  // Write compact JSON (no whitespace for smaller size)
   fs.writeFileSync(outputFile, JSON.stringify(exportData));
   
   console.log(`✅ Exported ${allCourses.length} courses to:`);
   console.log(`   ${outputFile}\n`);
   
-  // Print summary statistics
   console.log(`📊 Summary:`);
   console.log(`   Total courses: ${allCourses.length}`);
   console.log(`   Courses with 2024 data: ${allCourses.filter(c => c.years.includes(2024)).length}`);
@@ -135,12 +121,10 @@ async function discoverUiBCourses() {
     .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
     .toLocaleString()}`);
   
-  // Show courses by year coverage
-  const maxYears = Math.max(...allCourses.map(c => c.years.length));
+  const maxYears = Math.max(...allCourses.map(c => c.years.length), 0);
   const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
   console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
   
-  // Show sample courses
   console.log(`\n📚 Sample courses:`);
   allCourses.slice(0, 10).forEach(course => {
     const yearsStr = course.years.slice(0, 3).join(', ') + (course.years.length > 3 ? '...' : '');
@@ -151,7 +135,6 @@ async function discoverUiBCourses() {
     console.log(`   ... and ${allCourses.length - 10} more courses`);
   }
   
-  // Show courses by first letter
   console.log(`\n📈 Courses by prefix:`);
   const prefixCounts: Record<string, number> = {};
   allCourses.forEach(course => {
@@ -171,6 +154,6 @@ async function discoverUiBCourses() {
   return allCourses;
 }
 
-// Run discovery
-discoverUiBCourses().catch(console.error);
+discoverNLACourses().catch(console.error);
+
 

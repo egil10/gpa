@@ -41,16 +41,16 @@ Then restart `npm run dev` (or rebuild/export) before deploying.
 | `npm run discover-mf` | MF vitenskapelig høyskole |
 | `npm run discover-nhh-all` | Norges handelshøyskole (all courses) |
 | `npm run discover-nih` | Norges idrettshøgskole |
-| `npm run discover-nla` | NLA Høgskolen |
+| `npm run discover-nla` | NLA Høgskolen | **ERROR**
 | `npm run discover-nmbu` | Norges miljø- og biovitenskapelige universitet |
 | `npm run discover-nmh` | Norges musikkhøgskole |
 | `npm run discover-nord` | Nord universitet |
 | `npm run discover-ntnu` | Norges teknisk-naturvitenskapelige universitet |
 | `npm run discover-oslomet` | OsloMet – storbyuniversitetet |
 | `npm run discover-sh` | Samisk høgskole |
-| `npm run discover-steiner` | Steinerhøyskolen |
+| `npm run discover-steiner` | Steinerhøyskolen | **ERROR**
 | `npm run discover-uia` | Universitetet i Agder |
-| `npm run discover-uib` | Universitetet i Bergen |
+| `npm run discover-uib` | Universitetet i Bergen | **ERROR**
 | `npm run discover-uio` | Universitetet i Oslo |
 | `npm run discover-uis` | Universitetet i Stavanger |
 | `npm run discover-uit` | Universitetet i Tromsø |
