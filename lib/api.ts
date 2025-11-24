@@ -766,49 +766,56 @@ export async function fetchAllYearsData(
     
     // Try each format
     for (const formattedCode of uniqueFormats) {
-      // For JUS courses, try with study program filter first
+      // For JUS courses, try with study program filter first (try multiple variations)
       if (isJUSCourse) {
-        try {
-          // Try with 'jus' study program filter
-          const payload = createSearchPayload(
-            institutionCode, 
-            formattedCode, 
-            undefined, 
-            departmentFilter,
-            { studiumCode: 'jus' }
-          );
-          const data = await fetchWithProxy(payload);
-          
-          if (data && data.length > 0) {
-            // Check if we got matching data - be more lenient with matching for JUS courses
-            const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
-            const matching = data.filter(item => {
-              const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-              const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
-              // More lenient matching for JUS courses
-              return normalizedItemCode === normalizedBase || 
-                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
-                     itemCode === formattedCode.toUpperCase() ||
-                     (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
-            });
+        const studyProgramCodes = ['jus', 'JUS', 'Jus']; // Try different case variations
+        let foundWithFilter = false;
+        
+        for (const studiumCode of studyProgramCodes) {
+          try {
+            const payload = createSearchPayload(
+              institutionCode, 
+              formattedCode, 
+              undefined, 
+              departmentFilter,
+              { studiumCode }
+            );
+            const data = await fetchWithProxy(payload);
             
-            if (matching.length > 0) {
-              console.log(`[fetchAllYearsData] Found JUS course data with study program filter: ${formattedCode} (${matching.length} entries)`);
-              const { aggregateDuplicateEntries } = await import('./utils');
-              const aggregated = aggregateDuplicateEntries(matching);
+            if (data && data.length > 0) {
+              // Check if we got matching data - be more lenient with matching for JUS courses
+              const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
+              const matching = data.filter(item => {
+                const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+                const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+                // More lenient matching for JUS courses - match if normalized codes match or if item code starts with our base
+                return normalizedItemCode === normalizedBase || 
+                       itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                       itemCode === formattedCode.toUpperCase() ||
+                       (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
+              });
               
-              // Cache the fetched data
-              if (institution && aggregated.length > 0) {
-                const { storeGradeDataInCache } = await import('./grade-data-cache');
-                storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+              if (matching.length > 0) {
+                console.log(`[fetchAllYearsData] Found JUS course data with study program filter (${studiumCode}): ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
+                const { aggregateDuplicateEntries } = await import('./utils');
+                const aggregated = aggregateDuplicateEntries(matching);
+                
+                // Cache the fetched data
+                if (institution && aggregated.length > 0) {
+                  const { storeGradeDataInCache } = await import('./grade-data-cache');
+                  storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+                }
+                
+                return aggregated;
+              } else {
+                console.debug(`[fetchAllYearsData] Study program filter (${studiumCode}) returned ${data.length} entries for ${formattedCode}, but none matched course code ${courseCode}`);
               }
-              
-              return aggregated;
             }
+          } catch (error) {
+            // Continue to try next study program code or without filter
+            console.debug(`[fetchAllYearsData] JUS course with study program filter (${studiumCode}) failed for ${formattedCode}:`, error);
+            continue;
           }
-        } catch (error) {
-          // Continue to try without study program filter
-          console.debug(`[fetchAllYearsData] JUS course with study program filter failed for ${formattedCode}, trying without filter`);
         }
       }
       
@@ -818,20 +825,45 @@ export async function fetchAllYearsData(
         const data = await fetchWithProxy(payload);
         
         if (data && data.length > 0) {
-          // Found data with this format - aggregate and return
-          const { aggregateDuplicateEntries } = await import('./utils');
-          let aggregated = aggregateDuplicateEntries(data);
+          // Filter to ensure we only return data for the specific course we're looking for
+          // This is important because the API might return data for multiple courses if the format doesn't match exactly
+          const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
+          const matching = data.filter(item => {
+            const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+            // Match if normalized codes match, or if item code matches the formatted code we searched for
+            // For JUS courses, be more lenient - match if the base code matches (e.g., "JUS233" matches "JUS233-1", "JUS233-0", etc.)
+            if (isJUSCourse) {
+              return normalizedItemCode === normalizedBase || 
+                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                     itemCode === formattedCode.toUpperCase() ||
+                     (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
+            } else {
+              return normalizedItemCode === normalizedBase || 
+                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                     itemCode === formattedCode.toUpperCase();
+            }
+          });
           
-          // Cache the fetched data (after aggregation)
-          if (institution && aggregated.length > 0) {
-            const { storeGradeDataInCache } = await import('./grade-data-cache');
-            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+          if (matching.length > 0) {
+            console.log(`[fetchAllYearsData] Found course data without study program filter: ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
+            const { aggregateDuplicateEntries } = await import('./utils');
+            let aggregated = aggregateDuplicateEntries(matching);
+            
+            // Cache the fetched data (after aggregation)
+            if (institution && aggregated.length > 0) {
+              const { storeGradeDataInCache } = await import('./grade-data-cache');
+              storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+            }
+            
+            return aggregated;
+          } else {
+            console.debug(`[fetchAllYearsData] API returned ${data.length} entries for ${formattedCode}, but none matched course code ${courseCode}`);
           }
-          
-          return aggregated;
         }
       } catch (error) {
         // Continue to next format
+        console.debug(`[fetchAllYearsData] Error fetching ${formattedCode}:`, error);
         continue;
       }
     }
