@@ -7,7 +7,6 @@ import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { markCourseAsUnavailable } from '@/lib/course-availability';
 import { processMultiYearData } from '@/lib/utils';
 import { CourseStats } from '@/types';
-import { getInstitutionForCourse } from '@/lib/courses';
 import { stripCourseCodeSuffix, getCourseByCode } from '@/lib/all-courses';
 import styles from '@/styles/Search.module.css';
 
@@ -28,13 +27,20 @@ export default function SearchPage() {
         const uniFromUrl = uni ? String(uni) : undefined;
         const codeStr = stripCourseCodeSuffix(String(code), uniFromUrl);
         setCourseCode(codeStr);
-        const courseInstitution = getInstitutionForCourse(codeStr);
-        if (courseInstitution) {
-          setInstitution(courseInstitution);
-        } else if (uni) {
-          // Only use URL uni if course doesn't have known institution
-          setInstitution(String(uni));
-        }
+        // Try to find the institution by searching all courses
+        getCourseByCode(codeStr, undefined).then(foundCourse => {
+          if (foundCourse) {
+            setInstitution(foundCourse.institution);
+          } else if (uni) {
+            // Use URL uni if course wasn't found in our database
+            setInstitution(String(uni));
+          }
+        }).catch(() => {
+          // If search fails, use URL uni parameter if available
+          if (uni) {
+            setInstitution(String(uni));
+          }
+        });
       } else if (uni) {
         setInstitution(String(uni));
       }

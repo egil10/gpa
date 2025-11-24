@@ -154,7 +154,11 @@ export default function Home() {
             }
           }
           const key = `${course.institution}-${normalizedCode}`;
-          dataMap.set(key, course);
+          // Store with normalized course code to match course list format
+          dataMap.set(key, {
+            ...course,
+            courseCode: normalizedCode,
+          });
         });
         setCoursesData(dataMap);
         // Mark as complete immediately
@@ -239,7 +243,7 @@ export default function Home() {
   }, [allCourses, selectedInstitution, searchQuery, initialLoadComplete, coursesData, loadingCourses]);
 
   // Helper function to load course data
-  // Skip API calls if we have pre-rendered data or are on GitHub Pages
+  // Skip API calls on GitHub Pages
   const loadCoursesData = useCallback((coursesToLoad: CourseInfo[]) => {
     if (coursesToLoad.length === 0) return;
     
@@ -247,19 +251,23 @@ export default function Home() {
     const isGitHubPages = typeof window !== 'undefined' && 
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
     
-    // Skip API calls if we have pre-rendered data (already loaded)
-    if (preRenderedData && preRenderedData.courses.length > 0) {
-      return;
-    }
     // Skip API calls on GitHub Pages (they will fail due to CORS)
     if (isGitHubPages) {
       return;
     }
+    
+    // Filter out courses that already have data
+    const coursesToFetch = coursesToLoad.filter(course => {
+      const key = `${course.institution}-${course.code}`;
+      return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+    });
+    
+    if (coursesToFetch.length === 0) return;
 
     // Mark as loading
     setLoadingCourses(prev => {
       const next = new Set(prev);
-      coursesToLoad.forEach(c => next.add(`${c.institution}-${c.code}`));
+      coursesToFetch.forEach(c => next.add(`${c.institution}-${c.code}`));
       return next;
     });
 
@@ -267,7 +275,7 @@ export default function Home() {
     let cancelled = false;
     
     Promise.all(
-      coursesToLoad.map(async (course) => {
+      coursesToFetch.map(async (course) => {
         try {
           const uniData = UNIVERSITIES[course.institution];
           if (!uniData) return null;
@@ -310,7 +318,7 @@ export default function Home() {
 
       setLoadingCourses(prev => {
         const next = new Set(prev);
-        coursesToLoad.forEach(c => next.delete(`${c.institution}-${c.code}`));
+        coursesToFetch.forEach(c => next.delete(`${c.institution}-${c.code}`));
         return next;
       });
 
@@ -329,16 +337,12 @@ export default function Home() {
   }, []);
 
   // Load initial popular courses (12 courses with most candidates, distributed across institutions)
-  // Skip API calls if we have pre-rendered data or are on GitHub Pages
+  // Skip API calls on GitHub Pages
   useEffect(() => {
     // Check if we're on GitHub Pages (skip API calls)
     const isGitHubPages = typeof window !== 'undefined' && 
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
     if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
-    // Skip API calls if we have pre-rendered data
-    if (preRenderedData && preRenderedData.courses.length > 0) {
-      return;
-    }
     // Skip API calls on GitHub Pages (they will fail anyway)
     if (isGitHubPages) {
       setInitialLoadComplete(true);
@@ -346,18 +350,35 @@ export default function Home() {
     }
     
     // If institution filter is 'all', use popular courses in round-robin fashion
+    // Load data for all top courses, even if pre-rendered data exists (some institutions might be missing)
     if (selectedInstitution === 'all') {
       if (topInstitutionCourses.length > 0) {
-        const batchSize = Math.max(topInstitutionCourses.length, INITIAL_COURSES_COUNT);
+        // Load data for ALL top institution courses that don't have data yet
         const toLoad = topInstitutionCourses
           .filter(course => {
             const key = `${course.institution}-${course.code}`;
             return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-          })
-          .slice(0, batchSize);
+          });
 
         if (toLoad.length > 0) {
-          loadCoursesData(toLoad);
+          // Load in batches to avoid overwhelming the API
+          const batchSize = 10; // Load 10 at a time
+          const batches = [];
+          for (let i = 0; i < toLoad.length; i += batchSize) {
+            batches.push(toLoad.slice(i, i + batchSize));
+          }
+          
+          // Load first batch immediately
+          if (batches.length > 0) {
+            loadCoursesData(batches[0]);
+          }
+          
+          // Load remaining batches with delays
+          batches.slice(1).forEach((batch, idx) => {
+            setTimeout(() => {
+              loadCoursesData(batch);
+            }, (idx + 1) * 2000); // 2 second delay between batches
+          });
         } else {
           setInitialLoadComplete(true);
         }
@@ -441,6 +462,53 @@ export default function Home() {
 
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
+    // In default view (all institutions, no search), only show top course per institution
+    if (isTopDefaultView && topInstitutionCourses.length > 0) {
+      // Only use courses from topInstitutionCourses (one per institution)
+      const coursesWithData = topInstitutionCourses
+        .map(course => {
+          const key = `${course.institution}-${course.code}`;
+          const data = coursesData.get(key);
+          if (data && data.institution === course.institution) {
+            return data;
+          }
+          return null;
+        })
+        .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+      
+      // Sort by selected sort option
+      coursesWithData.sort((a, b) => {
+        switch (sortBy) {
+          case 'most-a': {
+            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            return bPercent - aPercent;
+          }
+          case 'least-a': {
+            const aPercent = a.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            const bPercent = b.distributions.find(d => d.grade === 'A')?.percentage || 0;
+            return aPercent - bPercent;
+          }
+          case 'highest-avg':
+            return (b.averageGrade || 0) - (a.averageGrade || 0);
+          case 'lowest-avg':
+            return (a.averageGrade || 0) - (b.averageGrade || 0);
+          case 'most-students':
+            return b.totalStudents - a.totalStudents;
+          case 'least-students':
+            return a.totalStudents - b.totalStudents;
+          case 'alphabetical-az':
+            return a.courseCode.localeCompare(b.courseCode, 'no', { sensitivity: 'base' });
+          case 'alphabetical-za':
+            return b.courseCode.localeCompare(a.courseCode, 'no', { sensitivity: 'base' });
+          default:
+            return 0;
+        }
+      });
+      
+      return coursesWithData;
+    }
+    
     // Filter courses by institution and search query
     let filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
@@ -611,7 +679,7 @@ export default function Home() {
     });
     
     return finalCourses;
-  }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy]);
+  }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy, isTopDefaultView, topInstitutionCourses]);
 
   // Update course order when sorting (separate effect to avoid infinite loop)
   useEffect(() => {

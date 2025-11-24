@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'reac
 import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
-import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions } from '@/lib/all-courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { formatCourseCode } from '@/lib/api';
 import { isCourseUnavailable } from '@/lib/course-availability';
@@ -47,12 +47,23 @@ export default function BottomSearchBar({
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
 
-  // Preload courses on mount
+  // Preload courses from all institutions on mount (for better search performance)
   useEffect(() => {
+    // Preload major institutions first (for immediate autocomplete)
     preloadInstitutionCourses('UiO');
     preloadInstitutionCourses('NTNU');
     preloadInstitutionCourses('UiB');
     preloadInstitutionCourses('NHH');
+    
+    // Preload remaining institutions in background (don't block)
+    setTimeout(() => {
+      const allInstitutions = getAvailableInstitutions();
+      allInstitutions.forEach((inst: string) => {
+        if (!['UiO', 'NTNU', 'UiB', 'NHH'].includes(inst)) {
+          preloadInstitutionCourses(inst);
+        }
+      });
+    }, 1000); // Delay to not block initial load
   }, []);
 
   useEffect(() => {
