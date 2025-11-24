@@ -48,7 +48,7 @@ export async function courseExistsInData(
   try {
     const courses = await loadInstitutionCourses(institution);
     // Only remove "-1" suffix, not standalone "1" (e.g., "STK-MAT2011" should not become "STK-MAT201")
-    const normalizedCode = courseCode.replace(/-1$/, '').trim().toUpperCase();
+    const normalizedCode = courseCode.replace(/-[0-9]+$/, '').trim().toUpperCase();
     return courses.some(c => c.code.toUpperCase() === normalizedCode);
   } catch {
     return false;

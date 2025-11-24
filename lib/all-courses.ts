@@ -59,25 +59,30 @@ const courseDataCache: Map<string, CourseInfo[]> = new Map();
 const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
- * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010")
+ * Strip numeric suffix from course code (e.g., "IN2010-1" -> "IN2010", "INF100-0" -> "INF100")
+ * Removes API artifacts like "-0", "-1", "-2" but preserves meaningful variants like "-HFSEM", "-MNEKS"
+ * 
  * Handles different formats consistently across institutions:
- * - Standard format: "IN2010-1" -> "IN2010" (removes "-1" suffix)
- * - Courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't "-1" suffix)
- * - UiB courses: Same handling as other institutions (removes "-1" suffix only)
+ * - Standard format: "IN2010-1" -> "IN2010" (removes numeric suffix)
+ * - UiB variants: "INF100-0" -> "INF100" (removes numeric suffix)
+ * - Meaningful variants: "EXPHIL-HFSEM" -> "EXPHIL-HFSEM" (preserves non-numeric suffix)
+ * - Courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't numeric suffixes)
+ * 
  * Examples:
- *   "IN2010-1" -> "IN2010" (removes API suffix)
- *   "EXPHIL-HFEKS-0" -> "EXPHIL-HFEKS-0" (preserves full code, no "-1" suffix)
+ *   "IN2010-1" -> "IN2010" (removes numeric API suffix)
+ *   "INF100-0" -> "INF100" (removes numeric API suffix)
+ *   "EXPHIL-HFSEM" -> "EXPHIL-HFSEM" (preserves meaningful variant)
+ *   "EXPHIL-HFEKS-0" -> "EXPHIL-HFEKS" (removes numeric suffix, preserves meaningful part)
  *   "STK-MAT2011" -> "STK-MAT2011" (preserves - dash and trailing 1)
  *   "FYS-STK3155" -> "FYS-STK3155" (preserves - dash)
  * 
- * Note: This matches how the discovery scripts store course codes (using replace(/-1$/, ''))
+ * Note: This matches how the discovery scripts should store course codes
  */
 export function stripCourseCodeSuffix(code: string, institution?: string): string {
-  // For all institutions, only remove "-1" suffix (dash followed by 1 at the end)
-  // This is the API format suffix, not part of the actual course code
-  // Don't remove standalone "1" as it might be part of the course code (e.g., "STK-MAT2011")
-  // This is consistent with how discovery scripts process course codes
-  return code.replace(/-1$/, '').trim();
+  // Remove numeric suffixes (dash followed by one or more digits at the end)
+  // This removes API artifacts like "-0", "-1", "-2", etc.
+  // But preserves meaningful suffixes like "-HFSEM", "-MNEKS", "-MOSEM"
+  return code.replace(/-[0-9]+$/, '').trim();
 }
 
 /**

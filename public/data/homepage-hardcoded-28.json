@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-24T19:25:03.024Z",
+  "generatedAt": "2025-11-24T19:39:59.657Z",
   "courses": [
     {
       "courseCode": "TDT4110",
@@ -452,7 +452,7 @@
       "normalizedCode": "FIN16"
     },
     {
-      "courseCode": "FELLES-2",
+      "courseCode": "FELLES",
       "year": 2020,
       "institution": "HVL",
       "totalStudents": 490,
@@ -500,7 +500,7 @@
       ],
       "averageGrade": 2.98,
       "courseName": "FELLES-2",
-      "normalizedCode": "FELLES-2"
+      "normalizedCode": "FELLES"
     },
     {
       "courseCode": "SYK1005",
@@ -677,7 +677,7 @@
       "normalizedCode": "LOG505"
     },
     {
-      "courseCode": "BSY-221",
+      "courseCode": "BSY",
       "year": 2025,
       "institution": "LDH",
       "totalStudents": 308,
@@ -715,7 +715,7 @@
       ],
       "averageGrade": 3.28,
       "courseName": "BSY-221",
-      "normalizedCode": "BSY-221"
+      "normalizedCode": "BSY"
     },
     {
       "courseCode": "BASP1035L-O",

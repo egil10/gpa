@@ -93,7 +93,7 @@ export async function searchNHHBachelorCourses(query: string): Promise<NHHBachel
  */
 export async function getNHHBachelorCourseByCode(code: string): Promise<NHHBachelorCourse | null> {
   const courses = await loadNHHBachelorCourses();
-  const normalizedCode = code.trim().toUpperCase().replace(/-1$/, '');
+  const normalizedCode = code.trim().toUpperCase().replace(/-[0-9]+$/, '');
   
   return courses.find(c => 
     c.courseCode.toUpperCase() === normalizedCode

@@ -54,7 +54,8 @@ async function discoverUiBCourses() {
       
       // Merge into master map
       courses.forEach(course => {
-        const baseCode = course.courseCode.replace(/-1$/, ''); // Remove API suffix only
+        // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM", "-MNEKS")
+        const baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {

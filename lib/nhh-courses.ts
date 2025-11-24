@@ -82,7 +82,7 @@ export async function searchNHHCourses(query: string): Promise<NHHCourse[]> {
  */
 export async function getNHHCourseByCode(code: string): Promise<NHHCourse | null> {
   const courses = await loadNHHCourses();
-  const normalizedCode = code.trim().toUpperCase().replace(/-1$/, '');
+  const normalizedCode = code.trim().toUpperCase().replace(/-[0-9]+$/, '');
   
   return courses.find(c => 
     c.courseCode.toUpperCase() === normalizedCode

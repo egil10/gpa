@@ -30,7 +30,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
   const getDisplayCode = (code: string, inst: string): string => {
     // For all institutions, only remove "-1" suffix (dash followed by 1 at the end)
     // This is the API format suffix, not part of the actual course code
-    return code.replace(/-1$/, '').trim();
+    return code.replace(/-[0-9]+$/, '').trim();
   };
   
   const handleClick = (e: React.MouseEvent) => {

@@ -77,7 +77,7 @@ async function fetchCourseGradeData(
           const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
           const matchingData = data.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-            const normalizedItemCode = itemCode.replace(/-1$/, '');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
             return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
           });
           
@@ -109,7 +109,7 @@ async function fetchCourseGradeData(
           const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
           const matchingData = allData.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-            const normalizedItemCode = itemCode.replace(/-1$/, '');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
             return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
           });
           
@@ -138,8 +138,8 @@ async function fetchCourseGradeData(
   // For UiB, try one more thing: query without course code filter and find the course in results
   if (institution === 'UiB') {
     try {
-      // Use consistent normalization: remove "-1" suffix only
-      const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
+      // Use consistent normalization: remove numeric suffixes (e.g., "-0", "-1") but preserve meaningful variants
+      const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
       
       // Try querying just by institution and year to see all courses
       const payloadAllCourses = createSearchPayload(institutionCode, undefined, latestYear);
@@ -154,10 +154,26 @@ async function fetchCourseGradeData(
       if (responseAll.ok && responseAll.status === 200) {
         const allData: GradeData[] = await responseAll.json();
         // Find courses that match (using consistent normalization)
+        // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
         const matchingData = allData.filter(item => {
           const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-          const normalizedItemCode = itemCode.replace(/-1$/, '');
-          return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
+          const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+          
+          // Exact match after normalization
+          if (normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '')) {
+            return true;
+          }
+          
+          // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
+          // only match if the item code starts with the exact search code
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          if (normalizedOriginal.includes('-')) {
+            return normalizedItemCode.startsWith(normalizedOriginal + '-') || normalizedItemCode === normalizedOriginal;
+          }
+          
+          // If search code has no dash, only match exact codes (not variants with dashes)
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          return false;
         });
         
         if (matchingData.length > 0) {

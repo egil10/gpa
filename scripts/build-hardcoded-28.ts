@@ -216,10 +216,10 @@ async function main() {
 
     if (stats) {
       // Normalize course code for key matching (same logic as homepage)
-      // For all institutions, consistently remove "-1" suffix only
-      let normalizedCode = course.code.replace(/-1$/, '').trim();
+      // For all institutions, consistently remove numeric suffixes (e.g., "-0", "-1") but preserve meaningful variants
+      let normalizedCode = course.code.replace(/-[0-9]+$/, '').trim();
       if (course.institution !== 'UiB') {
-        normalizedCode = normalizedCode.replace(/-1$/, '').trim();
+        normalizedCode = normalizedCode.replace(/-[0-9]+$/, '').trim();
         if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
           normalizedCode = normalizedCode.slice(0, -1);
         }

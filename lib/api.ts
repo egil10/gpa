@@ -513,11 +513,29 @@ export async function fetchGradeData(
       
       if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
-        const normalizedBase = cleaned.replace(/-1$/, ''); // Remove -1 suffix for matching
+        // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // Only match if the codes are exactly equal after normalization
+        // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
+        const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
         const matchingData = allData.filter(item => {
           const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const normalizedItemCode = itemCode.replace(/-1$/, ''); // Consistent normalization
-          return normalizedItemCode === normalizedBase || itemCode === cleaned;
+          const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
+          
+          // Exact match after normalization
+          if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
+            return true;
+          }
+          
+          // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
+          // only match if the item code starts with the exact search code
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          if (normalizedBase.includes('-')) {
+            return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
+          }
+          
+          // If search code has no dash, only match exact codes (not variants with dashes)
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          return false;
         });
         
         if (matchingData.length > 0) {
@@ -646,11 +664,30 @@ export async function fetchAllYearsData(
       
       if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
-        const normalizedBase = cleaned.replace(/-1$/, ''); // Remove -1 suffix for matching
+        // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // Only match if the codes are exactly equal after normalization, or if the search code
+        // is a prefix of the item code (e.g., "EXPHIL-HFSEM" matches "EXPHIL-HFSEM")
+        // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
+        const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
         const matchingData = allData.filter(item => {
           const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const normalizedItemCode = itemCode.replace(/-1$/, ''); // Consistent normalization
-          return normalizedItemCode === normalizedBase || itemCode === cleaned;
+          const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
+          
+          // Exact match after normalization
+          if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
+            return true;
+          }
+          
+          // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
+          // only match if the item code starts with the exact search code
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          if (normalizedBase.includes('-')) {
+            return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
+          }
+          
+          // If search code has no dash, only match exact codes (not variants with dashes)
+          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+          return false;
         });
         
         if (matchingData.length > 0) {

@@ -52,7 +52,7 @@ export function extractCoursesFromDepartmentData(data: GradeData[]): DepartmentC
  */
 export function normalizeCourseCode(code: string): string {
   // Only remove "-1" suffix (dash followed by 1 at the end)
-  return code.replace(/-1$/, '').trim();
+  return code.replace(/-[0-9]+$/, '').trim();
 }
 
 /**

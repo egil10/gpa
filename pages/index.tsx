@@ -223,7 +223,7 @@ export default function Home() {
             // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI)
             // Course lists use base codes like "TDT4110" or "BØK110"
             // For all institutions, consistently remove "-1" suffix only
-            let normalizedCode = course.courseCode.replace(/-1$/, '').trim();
+            let normalizedCode = course.courseCode.replace(/-[0-9]+$/, '').trim();
             // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
             if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
               normalizedCode = normalizedCode.slice(0, -1);
