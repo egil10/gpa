@@ -110,9 +110,14 @@ function printProgress(current: number, total: number, script: DiscoveryScript, 
   
   const timeStr = formatTime(elapsed);
   const timeDisplay = getCurrentTime();
+  const avgTime = current > 0 ? elapsed / current : 0;
+  const remaining = total - current;
+  const estimatedTime = avgTime * remaining;
+  const eta = estimatedTime > 0 ? `ETA: ${formatTime(estimatedTime)}` : '';
   
   // Clear line and print progress
-  process.stdout.write(`\r${colors.cyan}${bar}${colors.reset} ${percentage.toString().padStart(3)}% | ${current}/${total} | ${colors.bright}${script.displayName.padEnd(25)}${colors.reset} | ${colors.yellow}${timeStr.padStart(8)}${colors.reset} | ${colors.dim}${timeDisplay}${colors.reset} | ${status}`);
+  const displayName = script.displayName ? script.displayName.padEnd(20) : 'Processing...';
+  process.stdout.write(`\r${colors.cyan}${bar}${colors.reset} ${percentage.toString().padStart(3)}% | ${current}/${total} | ${colors.bright}${displayName}${colors.reset} | ${colors.yellow}${timeStr.padStart(8)}${colors.reset} ${eta ? `| ${colors.dim}${eta}${colors.reset}` : ''} | ${status}`);
 }
 
 function printSummary(results: Array<{ script: DiscoveryScript; success: boolean; duration: number; error?: string }>) {
@@ -163,7 +168,8 @@ async function runDiscoveryScript(script: DiscoveryScript): Promise<{ success: b
       ? `npm run ${script.npmCommand}`
       : `npx tsx scripts/${script.script}`;
     
-    // Suppress npm output to keep our display clean, but capture errors
+    // Capture output but don't show it in real-time (we show our own status)
+    // Redirect stdout to keep terminal clean, but capture stderr for errors
     const { stdout, stderr } = await execAsync(command, {
       cwd: process.cwd(),
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
@@ -173,6 +179,15 @@ async function runDiscoveryScript(script: DiscoveryScript): Promise<{ success: b
     
     const duration = Date.now() - startTime;
     
+    // Parse stdout for useful info (like course counts)
+    let courseCount = 0;
+    if (stdout) {
+      const courseMatch = stdout.match(/(\d+)\s+courses?/i);
+      if (courseMatch) {
+        courseCount = parseInt(courseMatch[1], 10);
+      }
+    }
+    
     // Check if there were any critical errors in stderr
     // Warnings are usually fine, but actual errors should be reported
     if (stderr && stderr.length > 0) {
@@ -180,12 +195,18 @@ async function runDiscoveryScript(script: DiscoveryScript): Promise<{ success: b
         line.trim().length > 0 && 
         !line.includes('warning') && 
         !line.includes('WARN') &&
-        !line.includes('npm') // Ignore npm info messages
+        !line.includes('npm') && // Ignore npm info messages
+        !line.includes('tsx') // Ignore tsx info messages
       );
       
       if (errorLines.length > 0) {
         return { success: false, duration, error: errorLines.join('; ') };
       }
+    }
+    
+    // Show course count if we found it
+    if (courseCount > 0) {
+      console.log(`${colors.dim}   Found ${colors.cyan}${courseCount.toLocaleString()}${colors.dim} courses${colors.reset}`);
     }
     
     return { success: true, duration };
@@ -207,42 +228,142 @@ async function runDiscoveryScript(script: DiscoveryScript): Promise<{ success: b
   }
 }
 
+// Run scripts in parallel with concurrency limit
+async function runWithConcurrency(
+  scripts: DiscoveryScript[],
+  concurrency: number
+): Promise<Array<{ script: DiscoveryScript; success: boolean; duration: number; error?: string }>> {
+  const results: Array<{ script: DiscoveryScript; success: boolean; duration: number; error?: string }> = [];
+  const running = new Set<number>();
+  let completed = 0;
+  let currentIndex = 0;
+  const totalStartTime = Date.now();
+
+  // Status tracking for each script
+  const scriptStatuses = new Map<number, { startTime: number; status: string }>();
+
+  // Update display periodically
+  const updateInterval = setInterval(() => {
+    if (completed < scripts.length) {
+      const elapsed = Date.now() - totalStartTime;
+      const avgTime = completed > 0 ? elapsed / completed : 0;
+      const remaining = scripts.length - completed;
+      const estimatedTime = avgTime * remaining;
+      
+      // Show running scripts
+      const runningScripts = Array.from(running).map(idx => scripts[idx].displayName).join(', ');
+      const status = running.size > 0 
+        ? `${colors.blue}Running (${running.size}): ${runningScripts}${colors.reset}`
+        : `${colors.yellow}Waiting...${colors.reset}`;
+      
+      printProgress(completed, scripts.length, { displayName: `${completed}/${scripts.length} completed` } as DiscoveryScript, elapsed, status);
+    }
+  }, 500); // Update every 500ms
+
+  async function runNext(): Promise<void> {
+    while (currentIndex < scripts.length) {
+      const index = currentIndex++;
+      const script = scripts[index];
+      
+      running.add(index);
+      scriptStatuses.set(index, { startTime: Date.now(), status: 'Starting...' });
+      
+      console.log(`\n${colors.cyan}${colors.bright}[${index + 1}/${scripts.length}]${colors.reset} ${colors.bright}${script.displayName}${colors.reset} ${colors.dim}(${getCurrentTime()})${colors.reset}`);
+      console.log(`${colors.dim}   Running: npm run ${script.npmCommand || script.script}${colors.reset}`);
+      
+      const scriptStartTime = Date.now();
+      
+      runDiscoveryScript(script)
+        .then(result => {
+          const duration = Date.now() - scriptStartTime;
+          running.delete(index);
+          completed++;
+          
+          const icon = result.success ? `${colors.green}✅${colors.reset}` : `${colors.red}❌${colors.reset}`;
+          const timeStr = formatTime(duration);
+          
+          console.log(`${icon} ${colors.bright}${script.displayName}${colors.reset} ${result.success ? colors.green : colors.red}${result.success ? 'completed' : 'failed'}${colors.reset} in ${colors.yellow}${timeStr}${colors.reset}`);
+          
+          if (!result.success && result.error) {
+            console.log(`${colors.red}   Error: ${result.error.substring(0, 100)}${result.error.length > 100 ? '...' : ''}${colors.reset}`);
+          }
+          
+          results[index] = {
+            script,
+            success: result.success,
+            duration,
+            error: result.error,
+          };
+        })
+        .catch(error => {
+          const duration = Date.now() - scriptStartTime;
+          running.delete(index);
+          completed++;
+          
+          console.log(`${colors.red}❌${colors.reset} ${colors.bright}${script.displayName}${colors.reset} ${colors.red}failed${colors.reset} in ${colors.yellow}${formatTime(duration)}${colors.reset}`);
+          console.log(`${colors.red}   Error: ${error.message || String(error)}${colors.reset}`);
+          
+          results[index] = {
+            script,
+            success: false,
+            duration,
+            error: error.message || String(error),
+          };
+        })
+        .finally(() => {
+          // Continue with next script
+          runNext();
+        });
+      
+      // Wait a bit before starting next script to avoid overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+
+  // Start initial batch
+  const initialBatch = Math.min(concurrency, scripts.length);
+  for (let i = 0; i < initialBatch; i++) {
+    runNext();
+  }
+
+  // Wait for all to complete
+  while (completed < scripts.length) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  clearInterval(updateInterval);
+  
+  // Final progress update
+  const totalDuration = Date.now() - totalStartTime;
+  printProgress(scripts.length, scripts.length, { displayName: 'All completed' } as DiscoveryScript, totalDuration, `${colors.green}✅ All done!${colors.reset}`);
+  console.log(); // New line
+
+  return results;
+}
+
 async function main() {
   printHeader();
   
-  const results: Array<{ script: DiscoveryScript; success: boolean; duration: number; error?: string }> = [];
+  // Allow concurrency to be set via environment variable, default to 3
+  // Too high concurrency might overwhelm the API, too low is slow
+  const concurrency = parseInt(process.env.DISCOVERY_CONCURRENCY || '3', 10);
+  
+  console.log(`${colors.bright}Configuration:${colors.reset}`);
+  console.log(`  ${colors.cyan}•${colors.reset} Total scripts: ${discoveryScripts.length}`);
+  console.log(`  ${colors.cyan}•${colors.reset} Concurrency: ${colors.yellow}${concurrency}${colors.reset} (set DISCOVERY_CONCURRENCY env var to change)`);
+  console.log(`  ${colors.cyan}•${colors.reset} Start time: ${colors.dim}${getCurrentTime()}${colors.reset}\n`);
+  
   const totalStartTime = Date.now();
   
-  for (let i = 0; i < discoveryScripts.length; i++) {
-    const script = discoveryScripts[i];
-    const scriptStartTime = Date.now();
-    
-    // Print initial status
-    printProgress(i + 1, discoveryScripts.length, script, Date.now() - totalStartTime, `${colors.blue}Starting...${colors.reset}`);
-    
-    const result = await runDiscoveryScript(script);
-    const scriptDuration = Date.now() - scriptStartTime;
-    
-    results.push({
-      script,
-      success: result.success,
-      duration: scriptDuration,
-      error: result.error,
-    });
-    
-    // Print completion status
-    const status = result.success 
-      ? `${colors.green}✅ Done${colors.reset}`
-      : `${colors.red}❌ Failed${colors.reset}`;
-    
-    printProgress(i + 1, discoveryScripts.length, script, Date.now() - totalStartTime, status);
-    console.log(); // New line after each script
-    
-    // Small delay between scripts to be nice to the API
-    if (i < discoveryScripts.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  }
+  // Run scripts in parallel with concurrency limit
+  const results = await runWithConcurrency(discoveryScripts, concurrency);
+  
+  // Sort results by original order
+  results.sort((a, b) => {
+    const aIndex = discoveryScripts.indexOf(a.script);
+    const bIndex = discoveryScripts.indexOf(b.script);
+    return aIndex - bIndex;
+  });
   
   const totalDuration = Date.now() - totalStartTime;
   printSummary(results);
