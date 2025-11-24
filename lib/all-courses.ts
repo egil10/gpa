@@ -93,10 +93,13 @@ function courseHasData(courseData: CourseData): boolean {
   // 1. It has years array with at least one year
   // 2. It has lastYearStudents count (indicates data exists)
   // 3. Years array is not empty
-  return (
-    (courseData.years && courseData.years.length > 0) ||
-    (courseData.lastYearStudents !== undefined && courseData.lastYearStudents > 0)
-  );
+  // Be more lenient - if years array exists (even if empty), or if lastYearStudents is defined, include it
+  // This ensures courses like JUS2311 with y:[2024] and s:58 are included
+  const hasYears = Array.isArray(courseData.years) && courseData.years.length > 0;
+  const hasStudentCount = courseData.lastYearStudents !== undefined && courseData.lastYearStudents !== null;
+  
+  // Include if either condition is true
+  return hasYears || hasStudentCount;
 }
 
 /**
@@ -323,9 +326,12 @@ export async function getCourseByCode(
   if (institution) {
     const courses = await loadInstitutionCourses(institution);
     console.log(`[getCourseByCode] Loaded ${courses.length} courses for ${institution}`);
+    
     // When institution is specified, use unique key for exact matching to avoid conflicts
     const uniqueKey = `${institution}-${normalizedCode}`;
-    const found = courses.find(c => {
+    
+    // Try multiple matching strategies for robustness
+    let found = courses.find(c => {
       // Prioritize unique key match if available
       if (c.key && c.key === uniqueKey) {
         return true;
@@ -333,19 +339,49 @@ export async function getCourseByCode(
       // Fallback to code match if key is not available
       return c.code.toUpperCase() === normalizedCode;
     });
+    
+    // If not found, try case-insensitive match and also check if code matches after normalization
+    if (!found) {
+      found = courses.find(c => {
+        const courseCodeUpper = c.code.toUpperCase().trim();
+        const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper, institution);
+        return normalizedCourseCode === normalizedCode || courseCodeUpper === normalizedCode;
+      });
+    }
+    
+    // If still not found, try partial match (for cases where there might be slight variations)
+    if (!found && normalizedCode.length >= 4) {
+      found = courses.find(c => {
+        const courseCodeUpper = c.code.toUpperCase().trim();
+        const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper, institution);
+        // Try exact match first, then check if the normalized code is contained
+        return normalizedCourseCode === normalizedCode || 
+               (normalizedCourseCode.startsWith(normalizedCode) && normalizedCourseCode.length <= normalizedCode.length + 2);
+      });
+    }
+    
     if (found) {
       console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution}) using ${found.key ? 'unique key' : 'code match'}`);
     } else {
-      // Log first few courses for debugging
-      const sampleCodes = courses.slice(0, 5).map(c => `${c.code}${c.key ? ` (key: ${c.key})` : ''}`);
-      console.log(`[getCourseByCode] Course not found. Looking for key: "${uniqueKey}". Sample course codes: ${sampleCodes.join(', ')}`);
+      // Log more debugging info
+      const sampleCodes = courses.slice(0, 10).map(c => `${c.code}${c.key ? ` (key: ${c.key})` : ''}`);
+      const jusCourses = courses.filter(c => c.code.toUpperCase().startsWith('JUS')).slice(0, 5).map(c => c.code);
+      console.log(`[getCourseByCode] Course not found. Looking for key: "${uniqueKey}" or code: "${normalizedCode}"`);
+      console.log(`[getCourseByCode] Sample course codes: ${sampleCodes.join(', ')}`);
+      if (jusCourses.length > 0) {
+        console.log(`[getCourseByCode] Sample JUS courses: ${jusCourses.join(', ')}`);
+      }
     }
     return found || null;
   } else {
     const allCourses = await loadAllCourses();
     // When searching all institutions, we can't use unique key directly
     // Return first match (could be ambiguous if code is not unique)
-    const matches = allCourses.filter(c => c.code.toUpperCase() === normalizedCode);
+    const matches = allCourses.filter(c => {
+      const courseCodeUpper = c.code.toUpperCase().trim();
+      const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper);
+      return normalizedCourseCode === normalizedCode || courseCodeUpper === normalizedCode;
+    });
     if (matches.length > 1) {
       console.warn(`[getCourseByCode] Multiple courses found for code "${normalizedCode}" across institutions: ${matches.map(c => `${c.code} (${c.institution})`).join(', ')}. Returning first match.`);
     }

@@ -66,25 +66,29 @@ export default function SearchPage() {
           return;
         }
 
-        // First, validate that the course code exists in our course list
+        // Try to find course in pre-loaded list (non-blocking)
+        // If not found, we'll still try the API - some courses might not be in the pre-loaded list
+        let normalizedCode = stripCourseCodeSuffix(courseCode, institution);
+        let formattedCode = formatCourseCode(normalizedCode, institution);
+        
         try {
           console.log(`[Search] Validating course: ${courseCode} (${institution})`);
           const course = await getCourseByCode(courseCode, institution);
-          if (!course) {
-            // Course code doesn't exist - show not found message
-            console.warn(`[Search] Course not found: ${courseCode} (${institution})`);
-            setError(`Emnekode "${courseCode}" ikke funnet`);
-            setLoading(false);
-            setAllYearsStats({});
-            return;
+          if (course) {
+            console.log(`[Search] Course found in pre-loaded list: ${course.code} (${course.institution})`);
+            // Use the actual course code from the found course, not the search query
+            // This handles cases where search query (e.g., "INF110") differs from actual code (e.g., "INFO110")
+            normalizedCode = stripCourseCodeSuffix(course.code, institution);
+            formattedCode = formatCourseCode(normalizedCode, institution);
+          } else {
+            console.warn(`[Search] Course not in pre-loaded list: ${courseCode} (${institution}), but will try API anyway`);
+            // Course not in pre-loaded list, but we'll still try the API
+            // Some courses might exist in the API but not be in our pre-loaded list
           }
-          console.log(`[Search] Course found: ${course.code} (${course.institution})`);
-
-          // Course exists, proceed to fetch data
-          // Use the actual course code from the found course, not the search query
-          // This handles cases where search query (e.g., "INF110") differs from actual code (e.g., "INFO110")
-        const normalizedCode = stripCourseCodeSuffix(course.code, institution);
-        const formattedCode = formatCourseCode(normalizedCode, institution);
+        } catch (err) {
+          console.warn(`[Search] Error validating course: ${err}, but will try API anyway`);
+          // Continue even if validation fails - try API anyway
+        }
         
         // Note: We allow API calls to attempt even on GitHub Pages
         // If they fail due to CORS, the error handler will display a helpful message
