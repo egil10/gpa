@@ -43,9 +43,12 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
   const displayCourseCode = getDisplayCode(course.courseCode, institution);
 
   // Check if either Bestått or Ikke bestått exists with actual data (count > 0)
+  // Also check if they exist in the distributions array at all (even with 0 count)
   const hasBestatt = course.distributions.some(d => d.grade === 'Bestått' && d.count > 0);
   const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått' && d.count > 0);
-  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
+  const hasBestattEntry = course.distributions.some(d => d.grade === 'Bestått');
+  const hasIkkeBestattEntry = course.distributions.some(d => d.grade === 'Ikke bestått');
+  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt || hasBestattEntry || hasIkkeBestattEntry;
   
   // Check if there are any A-F grades with actual data (count > 0)
   const hasLetterGrades = course.distributions.some(d => 
@@ -68,7 +71,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   }
   
-  // If either Bestått or Ikke bestått has data, we always include BOTH in the chart
+  // If either Bestått or Ikke bestått has data OR exists in distributions, we always include BOTH in the chart
   // This ensures both x-axis labels are shown even if one has zero count or is missing
   if (hasAnyPassFailData) {
     // Find the actual distribution entries (might be undefined if not present)
@@ -96,16 +99,26 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
   
   // Convert to array: A-F first (if included), then Bestått/Ikke bestått
   // If only pass/fail data exists, only show pass/fail grades (no empty A-F bars)
-  const chartData = [
-    ...(hasLetterGrades || !hasAnyPassFailData ? letterGrades.map(g => {
+  const chartData: Array<{ grade: string; percentage: number; count: number }> = [];
+  
+  // Add A-F grades if they have data OR if there's no pass/fail data
+  if (hasLetterGrades || !hasAnyPassFailData) {
+    letterGrades.forEach(g => {
       const entry = distributionMap.get(g);
-      return entry || { grade: g, percentage: 0, count: 0 };
-    }) : []),
-    ...(hasAnyPassFailData ? [
-      distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 },
-      distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 }
-    ] : []),
-  ].filter(entry => entry && entry.grade); // Remove any invalid entries
+      if (entry) {
+        chartData.push(entry);
+      }
+    });
+  }
+  
+  // Always add both Bestått and Ikke bestått if we have any pass/fail data
+  // This ensures both bars are shown even if one has 0 count
+  if (hasAnyPassFailData) {
+    const bestattEntry = distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 };
+    const ikkeBestattEntry = distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 };
+    chartData.push(bestattEntry);
+    chartData.push(ikkeBestattEntry);
+  }
 
   return (
     <div className={styles.card} onClick={handleClick}>
@@ -120,23 +133,48 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
       </div>
       
       <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-            <XAxis 
-              dataKey="grade" 
-              tick={{ fontSize: 12, fill: 'var(--text-secondary)' }}
-              axisLine={{ stroke: 'var(--border)' }}
-            />
-            <YAxis 
-              hide
-            />
-            <Bar dataKey="percentage" radius={[4, 4, 0, 0]}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={GRADE_COLORS[entry.grade] || '#000000'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={120}>
+            <BarChart 
+              data={chartData} 
+              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              barCategoryGap="20%"
+            >
+              <XAxis 
+                dataKey="grade" 
+                tick={{ fontSize: 12, fill: 'var(--text-secondary)' }}
+                axisLine={{ stroke: 'var(--border)' }}
+              />
+              <YAxis 
+                hide
+                domain={[0, (dataMax: number) => {
+                  // For pass/fail only data, always use 100 as max to show full scale
+                  if (hasAnyPassFailData && !hasLetterGrades) {
+                    return 100;
+                  }
+                  // For letter grades, use at least 5% to ensure visibility
+                  return Math.max(dataMax || 0, 5);
+                }]}
+              />
+              <Bar 
+                dataKey="percentage" 
+                radius={[4, 4, 0, 0]}
+                minPointSize={3}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={GRADE_COLORS[entry.grade] || '#000000'}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+            <span>Ingen data</span>
+          </div>
+        )}
       </div>
 
       <div className={styles.stats}>

@@ -87,19 +87,30 @@ export function stripCourseCodeSuffix(code: string, institution?: string): strin
 
 /**
  * Check if a course has data available (has years with students)
+ * Only includes courses that have actual student data to prevent empty course pages
  */
 function courseHasData(courseData: CourseData): boolean {
-  // Course has data if:
-  // 1. It has years array with at least one year
-  // 2. It has lastYearStudents count (indicates data exists)
-  // 3. Years array is not empty
-  // Be more lenient - if years array exists (even if empty), or if lastYearStudents is defined, include it
-  // This ensures courses like JUS2311 with y:[2024] and s:58 are included
-  const hasYears = Array.isArray(courseData.years) && courseData.years.length > 0;
-  const hasStudentCount = courseData.lastYearStudents !== undefined && courseData.lastYearStudents !== null;
+  // Course has data if it has lastYearStudents > 0 (most reliable indicator of actual data)
+  // This ensures we only include courses with actual retrievable data from the API
+  // Courses with lastYearStudents = 0 or undefined likely have no grade data available
+  const hasStudentCount = courseData.lastYearStudents !== undefined && 
+                          courseData.lastYearStudents !== null && 
+                          courseData.lastYearStudents > 0;
   
-  // Include if either condition is true
-  return hasYears || hasStudentCount;
+  if (hasStudentCount) {
+    return true; // Has actual student data
+  }
+  
+  // If no lastYearStudents but has years array with data, include it (legacy format)
+  // This handles edge cases where data format might be different
+  const hasYears = Array.isArray(courseData.years) && courseData.years.length > 0;
+  if (hasYears) {
+    // Only include if lastYearStudents is not explicitly 0 (might be missing/undefined)
+    // If it's explicitly 0, that means no students, so exclude it
+    return courseData.lastYearStudents !== 0;
+  }
+  
+  return false; // No data available
 }
 
 /**
