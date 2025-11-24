@@ -216,11 +216,18 @@ async function main() {
 
     if (stats) {
       // Normalize course code for key matching (same logic as homepage)
+      // IMPORTANT: Only split UiB codes if a dash exists, otherwise use as-is (e.g., "INF100" should not become "INF")
       let normalizedCode = course.code;
       if (course.institution === 'UiB') {
-        normalizedCode = normalizedCode.split('-')[0];
+        // Only split if there's actually a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
+        // If no dash (e.g., "INF100"), use as-is
+        if (normalizedCode.includes('-')) {
+          normalizedCode = normalizedCode.split('-')[0].trim();
+        } else {
+          normalizedCode = normalizedCode.trim();
+        }
       } else {
-        normalizedCode = normalizedCode.replace(/-1$/, '');
+        normalizedCode = normalizedCode.replace(/-1$/, '').trim();
         if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
           normalizedCode = normalizedCode.slice(0, -1);
         }

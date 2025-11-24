@@ -93,11 +93,13 @@ export async function getNHHCourseByCode(code: string): Promise<NHHCourse | null
  * Convert NHH course to CourseInfo format for compatibility
  */
 export function nhhCourseToCourseInfo(course: NHHCourse): CourseInfo {
+  const uniqueKey = `NHH-${course.courseCode}`;
   return {
     code: course.courseCode,
     name: course.courseName || course.courseCode,
     institution: 'NHH',
     institutionCode: '1240',
+    key: uniqueKey,
   };
 }
 

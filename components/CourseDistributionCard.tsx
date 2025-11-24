@@ -62,31 +62,30 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   });
   
-  // Then add Bestått and Ikke bestått if they exist (even if count is 0)
+  // Check if either Bestått or Ikke bestått exists
   const bestatt = course.distributions.find(d => d.grade === 'Bestått');
   const ikkeBestatt = course.distributions.find(d => d.grade === 'Ikke bestått');
+  const hasAnyPassFailData = bestatt || ikkeBestatt;
   
-  if (bestatt) {
+  // If either Bestått or Ikke bestått exists, include both in the chart
+  // This ensures both x-axis labels are shown even if one has zero count
+  if (hasAnyPassFailData) {
     distributionMap.set('Bestått', {
       grade: 'Bestått',
-      percentage: bestatt.percentage,
-      count: bestatt.count,
+      percentage: bestatt?.percentage || 0,
+      count: bestatt?.count || 0,
     });
-  }
-  
-  if (ikkeBestatt) {
     distributionMap.set('Ikke bestått', {
       grade: 'Ikke bestått',
-      percentage: ikkeBestatt.percentage,
-      count: ikkeBestatt.count,
+      percentage: ikkeBestatt?.percentage || 0,
+      count: ikkeBestatt?.count || 0,
     });
   }
   
   // Convert to array, keeping A-F order first, then Bestått/Ikke bestått
   const chartData = [
     ...letterGrades.map(g => distributionMap.get(g)!),
-    ...(bestatt ? [distributionMap.get('Bestått')!] : []),
-    ...(ikkeBestatt ? [distributionMap.get('Ikke bestått')!] : []),
+    ...(hasAnyPassFailData ? [distributionMap.get('Bestått')!, distributionMap.get('Ikke bestått')!] : []),
   ].filter(Boolean); // Remove any undefined entries
 
   const topGrade = course.distributions.reduce((max, dist) => 

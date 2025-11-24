@@ -6,6 +6,8 @@ export interface CourseInfo {
   name: string;
   institution: string;
   institutionCode: string;
+  /** Unique key combining institution and code: `${institution}-${code}` */
+  key?: string;
 }
 
 // Get available institutions (those with data files)

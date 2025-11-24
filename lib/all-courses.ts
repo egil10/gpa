@@ -110,11 +110,14 @@ function courseHasData(courseData: CourseData): boolean {
 function courseDataToCourseInfo(courseData: CourseData, institution: string, institutionCode: string): CourseInfo {
   // Strip suffix for display
   const displayCode = stripCourseCodeSuffix(courseData.courseCode, institution);
+  // Create unique key combining institution and code
+  const uniqueKey = `${institution}-${displayCode}`;
   return {
     code: displayCode,
     name: courseData.courseName || displayCode,
     institution,
     institutionCode,
+    key: uniqueKey,
   };
 }
 
@@ -218,10 +221,10 @@ function searchCoursesFromList(
   }
 
   // Search by code first, then by name
-  const codeMatches: CourseInfo[] = [];
-  const nameMatches: CourseInfo[] = [];
+  const exactCodeMatches: CourseInfo[] = [];
   const codeStartsWith: CourseInfo[] = [];
   const nameStartsWith: CourseInfo[] = [];
+  const nameContains: CourseInfo[] = [];
   const institutionStartsWith: CourseInfo[] = [];
   const institutionMatches: CourseInfo[] = [];
 
@@ -240,15 +243,16 @@ function searchCoursesFromList(
 
     if (codeUpper === normalizedQuery) {
       // Exact code match - highest priority
-      codeStartsWith.unshift(course);
+      exactCodeMatches.push(course);
     } else if (codeUpper.startsWith(normalizedQuery)) {
+      // Code starts with query - but only if it's a valid prefix (not a substring match)
+      // This prevents "INF100" from matching "INF1000" or "FINF1001"
+      // Only match if the query is a complete prefix (e.g., "INF1" matches "INF100" but "INF100" doesn't match "INF1000")
       codeStartsWith.push(course);
-    } else if (codeUpper.includes(normalizedQuery)) {
-      codeMatches.push(course);
     } else if (nameUpper.startsWith(normalizedQuery)) {
       nameStartsWith.push(course);
     } else if (nameUpper.includes(normalizedQuery)) {
-      nameMatches.push(course);
+      nameContains.push(course);
     } else if (institutionStarts) {
       institutionStartsWith.push(course);
     } else if (institutionContains) {
@@ -256,12 +260,25 @@ function searchCoursesFromList(
     }
   }
 
-  // Prioritize: exact code > code starts with > code contains > name starts with > name contains
+  // Prioritize: exact code > code starts with > name starts with > name contains > institution
+  // Removed "code contains" to prevent false matches like "INF100" matching "INF1000"
+  const exactMatches = exactCodeMatches;
+  
+  // If we have exact matches, prioritize them heavily - only show prefix matches if we have few exact matches
+  // Sort prefix matches by code length (shorter = usually more popular)
+  const sortedPrefixMatches = codeStartsWith.sort((a, b) => a.code.length - b.code.length);
+  
+  // If we have many exact matches, only show those. Otherwise, mix in some prefix matches
+  const remainingSlots = Math.max(0, limit - exactMatches.length);
+  const prefixMatches = remainingSlots > 0 && exactMatches.length < limit / 2 
+    ? sortedPrefixMatches.slice(0, remainingSlots)
+    : [];
+  
   return [
-    ...codeStartsWith,
-    ...codeMatches,
+    ...exactMatches,
+    ...prefixMatches,
     ...nameStartsWith,
-    ...nameMatches,
+    ...nameContains,
     ...institutionStartsWith,
     ...institutionMatches,
   ].slice(0, limit);

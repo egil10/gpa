@@ -62,11 +62,13 @@ export async function loadHomepageTopCourses(): Promise<HomepageTopDataset | nul
 }
 
 export function mapTopCourseToCourseInfo(course: HomepageTopCourse): CourseInfo {
+  const uniqueKey = `${course.institution}-${course.courseCode}`;
   return {
     code: course.courseCode,
     name: course.courseName,
     institution: course.institution,
     institutionCode: course.institutionCode,
+    key: uniqueKey,
   };
 }
 
