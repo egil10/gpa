@@ -31,8 +31,8 @@ Then restart `npm run dev` (or rebuild/export) before deploying.
 | `npm run discover-hgut` | Høgskulen for grøn utvikling |
 | `npm run discover-him` | Høgskolen i Molde |
 | `npm run discover-hio` | Høgskolen i Østfold |
-| `npm run discover-hk` | Høyskolen Kristiania | **NOT FOUND**
-| `npm run discover-hlt` | Høyskolen for ledelse og teologi | **NOT FOUND**
+| `npm run discover-hk` | Høyskolen Kristiania | 
+| `npm run discover-hlt` | Høyskolen for ledelse og teologi | 
 | `npm run discover-hvo` | Høgskulen i Volda |
 | `npm run discover-hvl` | Høgskulen på Vestlandet |
 | `npm run discover-inn` | Universitetet i Innlandet |
