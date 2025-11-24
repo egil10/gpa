@@ -27,6 +27,7 @@ const HARDCODED_28_COURSES = [
   { code: 'INTER1100', institution: 'OsloMet', institutionCode: '1175', name: 'INTER1100' },
   { code: 'EXPHIL03', institution: 'UiO', institutionCode: '1110', name: 'EXPHIL03' },
   { code: 'EXPHIL', institution: 'UiB', institutionCode: '1120', name: 'EXPHIL' },
+  { code: 'INF100', institution: 'UiB', institutionCode: '1120', name: 'INF100' },
   { code: 'AOS100-B', institution: 'NMBU', institutionCode: '1173', name: 'AOS100-B' },
   { code: 'PGR112', institution: 'HK', institutionCode: '8253', name: 'PGR112' },
   { code: 'SAM2000', institution: 'USN', institutionCode: '1176', name: 'SAM2000' },

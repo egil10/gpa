@@ -25,12 +25,27 @@ const GRADE_COLORS: Record<string, string> = {
 export default function CourseDistributionCard({ course, institution }: CourseDistributionCardProps) {
   const router = useRouter();
   
+  // Get display code - for UiB, ensure we don't truncate codes incorrectly
+  // If courseCode already has no dash (like "INF100"), use it directly
+  // Otherwise, strip suffix appropriately
+  const getDisplayCode = (code: string, inst: string): string => {
+    // For UiB, only split if there's actually a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
+    // If no dash (e.g., "INF100"), use as-is
+    if (inst === 'UiB' && code.includes('-')) {
+      return code.split('-')[0].trim();
+    }
+    // For other institutions, just remove "-1" suffix
+    return code.replace(/-1$/, '').trim();
+  };
+  
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     // Strip suffix from course code for URL (formatCourseCode will add it back when making API calls)
-    const displayCode = stripCourseCodeSuffix(course.courseCode);
+    const displayCode = getDisplayCode(course.courseCode, institution);
     router.push(`/sok?code=${encodeURIComponent(displayCode)}&uni=${institution}&year=${course.year}`);
   };
+  
+  const displayCourseCode = getDisplayCode(course.courseCode, institution);
 
   // Always show all A-F grades (even if count is 0), plus Bestått/Ikke bestått if they exist
   // This ensures we can see the full distribution
@@ -82,7 +97,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     <div className={styles.card} onClick={handleClick}>
       <div className={styles.header}>
         <div className={styles.courseInfo}>
-          <span className={styles.courseCode}>{stripCourseCodeSuffix(course.courseCode)}</span>
+          <span className={styles.courseCode}>{displayCourseCode}</span>
           <span className={styles.institution}>
             {formatInstitutionLabel(institution, 'short-full')}
           </span>

@@ -73,9 +73,15 @@ const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 export function stripCourseCodeSuffix(code: string, institution?: string): string {
   // For UiB, course codes from API can have multiple dashes (e.g., "EXPHIL-HFEKS-0")
   // We need to extract just the base code (first part before any dash)
+  // BUT: Only split if there's actually a dash - don't truncate codes like "INF100" that have no dash
   // This matches how the discovery script stores them
   if (institution === 'UiB') {
-    return code.split('-')[0].trim();
+    // Only split if there's a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
+    // If no dash (e.g., "INF100"), return as-is
+    if (code.includes('-')) {
+      return code.split('-')[0].trim();
+    }
+    return code.trim();
   }
   
   // For other institutions, only remove "-1" suffix (dash followed by 1 at the end)

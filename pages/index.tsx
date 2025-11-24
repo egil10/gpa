@@ -64,7 +64,7 @@ function getBasePath(routerBasePath?: string): string {
   return '';
 }
 const INITIAL_COURSES_COUNT = 15; // Show 15 hardcoded courses on initial load
-const HARDCODED_28_TOTAL = 28; // Total hardcoded courses (show all 28 when "Load more" is clicked)
+const HARDCODED_28_TOTAL = 29; // Total hardcoded courses (show all 29 when "Load more" is clicked)
 const TOP_INITIAL_DISPLAY_COUNT = 12;
 
 export default function Home() {
@@ -548,16 +548,16 @@ export default function Home() {
     if (isTopDefaultView) {
       // If we have hardcoded 28-course data, use it exclusively (instant, no API calls needed)
       if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
+        // Use ALL hardcoded courses directly - they're already loaded and ready to display
         const coursesWithData = hardcoded28Data.courses
           .map(course => {
-            const key = `${course.institution}-${course.normalizedCode}`;
-            const data = coursesData.get(key);
-            if (data && data.institution === course.institution) {
-              return data;
-            }
-            return null;
-          })
-          .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+            // Create a CourseStats-compatible object directly from hardcoded data
+            // No need to look up in coursesData - use the hardcoded data directly
+            return {
+              ...course,
+              courseCode: course.normalizedCode,
+            };
+          });
         
         // Sort by selected sort option
         coursesWithData.sort((a, b) => {
@@ -832,16 +832,12 @@ export default function Home() {
       topInstitutionCourses.length > 0;
 
     if (isTopDefaultView) {
-      // If we have hardcoded 28-course data, show all 28 when "Load more" is clicked
+      // If we have hardcoded 28-course data, show all courses when "Load more" is clicked
       if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        const coursesWithData = hardcoded28Data.courses.filter(course => {
-          const key = `${course.institution}-${course.normalizedCode}`;
-          return coursesDataRef.current.has(key);
-        });
-        
-        if (displayCount < coursesWithData.length && displayCount < HARDCODED_28_TOTAL) {
-          // Show all 28 hardcoded courses instantly
-          setDisplayCount(HARDCODED_28_TOTAL);
+        // All hardcoded courses are already loaded, so just show them all
+        if (displayCount < hardcoded28Data.courses.length) {
+          // Show all hardcoded courses instantly
+          setDisplayCount(hardcoded28Data.courses.length);
           return;
         }
         return;
@@ -1273,14 +1269,10 @@ useEffect(() => {
     if (loading) return false;
 
     if (isTopDefaultView) {
-      // If we have hardcoded 28-course data, check if we have more than 15 displayed
+      // If we have hardcoded 28-course data, check if we have more than initial display count
       if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        const coursesWithData = hardcoded28Data.courses.filter(course => {
-          const key = `${course.institution}-${course.normalizedCode}`;
-          return coursesDataRef.current.has(key);
-        });
-        // Show "Load more" if we're showing less than all 28
-        return displayCount < coursesWithData.length && displayCount < HARDCODED_28_TOTAL;
+        // Show "Load more" if we're showing less than all hardcoded courses
+        return displayCount < hardcoded28Data.courses.length;
       }
       
       // Fallback: Check if we have more courses to display (either with data or that need loading)
