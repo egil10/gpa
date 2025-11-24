@@ -156,13 +156,17 @@ export default function BottomSearchBar({
         setSelectedCourse(null);
       } else {
         try {
-          // Limit to 3 suggestions
+          // Limit to 3 suggestions - searchAllCourses already enforces the limit
           const results = await searchAllCourses(searchQuery, undefined, 3);
           const filteredResults = results.filter(
             course => !isCourseUnavailable(course.code, course.institution)
           );
-          setSuggestions(filteredResults.slice(0, 3));
-          setShowSuggestions(filteredResults.length > 0);
+          // Remove duplicates and enforce strict limit of 3
+          const uniqueResults = Array.from(
+            new Map(filteredResults.map(c => [c.key, c])).values()
+          ).slice(0, 3);
+          setSuggestions(uniqueResults);
+          setShowSuggestions(uniqueResults.length > 0);
           
           // Check if query matches a course (only if we have results)
           if (results.length > 0) {

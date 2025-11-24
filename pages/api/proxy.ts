@@ -31,13 +31,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       body: JSON.stringify(req.body),
     });
 
-    // Handle 204 No Content
+    // Handle 204 No Content - return empty array instead of 204 to avoid client-side errors
     if (response.status === 204) {
-      return res.status(204).end();
+      return res.status(200).json([]);
     }
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: 'API request failed' });
+      // For non-200 status codes, return empty array instead of error
+      // This prevents client-side retry loops
+      return res.status(200).json([]);
     }
 
     const data = await response.json();

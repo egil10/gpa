@@ -254,7 +254,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
         body: JSON.stringify(payload),
       });
 
-      if (response.status === 204 || !response.ok) {
+      if (response.status === 204) {
+        return []; // Return empty array instead of throwing
+      }
+      
+      if (!response.ok) {
         throw new Error('No data found');
       }
 
@@ -276,7 +280,7 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       });
 
       if (response.status === 204) {
-        throw new Error('No data found');
+        return []; // Return empty array instead of throwing
       }
 
       if (!response.ok) {
@@ -367,7 +371,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       throw new Error(`Rate limited by proxy ${proxyIndex}. Please try again later.`);
     }
 
-    if (response.status === 204 || !response.ok) {
+    if (response.status === 204) {
+      return []; // Return empty array instead of throwing
+    }
+    
+    if (!response.ok) {
       throw new Error(`Proxy ${proxyIndex} returned ${response.status}`);
     }
 
@@ -471,11 +479,25 @@ export async function fetchGradeData(
   // This handles cases where the API might return codes with or without "-1" suffix
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
+    
+    // Try direct formats first (fast)
     const formatsToTry = [
       `${cleaned}-1`,           // Standard format with -1
       cleaned,                  // Without any suffix
       formatCourseCode(cleaned, institution), // formatCourseCode result
     ];
+    
+    // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
+    // This avoids the expensive "query all courses" fallback
+    if (!normalizedBase.includes('-')) {
+      // Common UiB variant suffixes based on actual data
+      const commonVariants = ['HFSEM', 'MNEKS', 'MOSEM', 'HFEKS', 'MNEKS-0', 'HFSEM-0', 'MOSEM-0'];
+      for (const variant of commonVariants) {
+        formatsToTry.push(`${normalizedBase}-${variant}`);
+        formatsToTry.push(`${normalizedBase}-${variant}-1`);
+      }
+    }
     
     // Remove duplicates
     const uniqueFormats = Array.from(new Set(formatsToTry));
@@ -505,11 +527,13 @@ export async function fetchGradeData(
       }
     }
     
-    // If all direct queries failed, try querying all courses for the institution and filtering
-    // Use consistent normalization: remove "-1" suffix only (matching discovery script approach)
-    try {
-      const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
-      const allData = await fetchWithProxy(payloadAllCourses);
+    // LAST RESORT: If all direct queries failed, try querying all courses for the institution and filtering
+    // WARNING: This is VERY SLOW for UiB (7255 courses) - only use as last resort
+    // Skip this expensive fallback if we've already tried many formats
+    if (uniqueFormats.length < 10) {
+      try {
+        const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
+        const allData = await fetchWithProxy(payloadAllCourses);
       
       if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
@@ -550,6 +574,32 @@ export async function fetchGradeData(
           }
           
           return aggregated;
+        }
+        
+        // If no exact match found and search code has no dash, try to find variants
+        // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // This handles cases where the base course code exists but has no data, only variants do
+        if (!normalizedBase.includes('-')) {
+          const variantMatches = allData.filter(item => {
+            const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+            // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
+            return normalizedItemCode.startsWith(normalizedBase + '-');
+          });
+          
+          if (variantMatches.length > 0) {
+            // Found variants - aggregate their data
+            const { aggregateDuplicateEntries } = await import('./utils');
+            let aggregated = aggregateDuplicateEntries(variantMatches);
+            
+            // Cache the fetched data (after aggregation)
+            if (institution && aggregated.length > 0) {
+              const { storeGradeDataInCache } = await import('./grade-data-cache');
+              storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+            }
+            
+            return aggregated;
+          }
         }
       }
     } catch (error) {
@@ -622,11 +672,25 @@ export async function fetchAllYearsData(
   // Some courses use "INF100" (no suffix), others use "EXPHIL-HFEKS-0" (with suffix)
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
+    
+    // Try direct formats first (fast)
     const formatsToTry = [
       `${cleaned}-1`,           // Standard format with -1
       cleaned,                  // Without any suffix
       formatCourseCode(cleaned, institution), // formatCourseCode result
     ];
+    
+    // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
+    // This avoids the expensive "query all courses" fallback
+    if (!normalizedBase.includes('-')) {
+      // Common UiB variant suffixes based on actual data
+      const commonVariants = ['HFSEM', 'MNEKS', 'MOSEM', 'HFEKS', 'MNEKS-0', 'HFSEM-0', 'MOSEM-0'];
+      for (const variant of commonVariants) {
+        formatsToTry.push(`${normalizedBase}-${variant}`);
+        formatsToTry.push(`${normalizedBase}-${variant}-1`);
+      }
+    }
     
     // Remove duplicates
     const uniqueFormats = Array.from(new Set(formatsToTry));
@@ -656,11 +720,13 @@ export async function fetchAllYearsData(
       }
     }
     
-    // If all direct queries failed, try querying all courses for the institution and filtering
-    // Use consistent normalization: remove "-1" suffix only (matching discovery script approach)
-    try {
-      const payloadAllCourses = createSearchPayload(institutionCode, undefined, undefined, departmentFilter);
-      const allData = await fetchWithProxy(payloadAllCourses);
+    // LAST RESORT: If all direct queries failed, try querying all courses for the institution and filtering
+    // WARNING: This is VERY SLOW for UiB (7255 courses) - only use as last resort
+    // Skip this expensive fallback if we've already tried many formats
+    if (uniqueFormats.length < 10) {
+      try {
+        const payloadAllCourses = createSearchPayload(institutionCode, undefined, undefined, departmentFilter);
+        const allData = await fetchWithProxy(payloadAllCourses);
       
       if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
@@ -702,6 +768,32 @@ export async function fetchAllYearsData(
           }
           
           return aggregated;
+        }
+        
+        // If no exact match found and search code has no dash, try to find variants
+        // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+        // This handles cases where the base course code exists but has no data, only variants do
+        if (!normalizedBase.includes('-')) {
+          const variantMatches = allData.filter(item => {
+            const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+            // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
+            return normalizedItemCode.startsWith(normalizedBase + '-');
+          });
+          
+          if (variantMatches.length > 0) {
+            // Found variants - aggregate their data
+            const { aggregateDuplicateEntries } = await import('./utils');
+            let aggregated = aggregateDuplicateEntries(variantMatches);
+            
+            // Cache the fetched data (after aggregation)
+            if (institution && aggregated.length > 0) {
+              const { storeGradeDataInCache } = await import('./grade-data-cache');
+              storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+            }
+            
+            return aggregated;
+          }
         }
       }
     } catch (error) {

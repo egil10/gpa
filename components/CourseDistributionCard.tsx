@@ -42,26 +42,31 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
   
   const displayCourseCode = getDisplayCode(course.courseCode, institution);
 
-  // Always show all A-F grades (even if count is 0), plus Bestått/Ikke bestått if they exist
-  // This ensures we can see the full distribution
-  const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
-  
-  // First, populate all A-F grades with 0 if not present
-  letterGrades.forEach(grade => {
-    const existing = course.distributions.find(d => d.grade === grade);
-    distributionMap.set(grade, {
-      grade,
-      percentage: existing?.percentage || 0,
-      count: existing?.count || 0,
-    });
-  });
-  
   // Check if either Bestått or Ikke bestått exists in the distributions array
-  // We check for the grade string explicitly to be thorough
   const hasBestatt = course.distributions.some(d => d.grade === 'Bestått');
   const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått');
   const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
+  
+  // Check if there are any A-F grades with actual data (count > 0)
+  const hasLetterGrades = course.distributions.some(d => 
+    ['A', 'B', 'C', 'D', 'E', 'F'].includes(d.grade) && d.count > 0
+  );
+  
+  const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
+  
+  // Only include A-F grades if they have data OR if there's no pass/fail data
+  // This prevents showing empty A-F bars when only pass/fail grades exist
+  if (hasLetterGrades || !hasAnyPassFailData) {
+    letterGrades.forEach(grade => {
+      const existing = course.distributions.find(d => d.grade === grade);
+      distributionMap.set(grade, {
+        grade,
+        percentage: existing?.percentage || 0,
+        count: existing?.count || 0,
+      });
+    });
+  }
   
   // If either Bestått or Ikke bestått exists, we always include BOTH in the chart
   // This ensures both x-axis labels are shown even if one has zero count or is missing
@@ -89,13 +94,13 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   }
   
-  // Convert to array, keeping A-F order first, then Bestått/Ikke bestått
-  // Ensure all entries have valid data (no undefined/null/NaN)
+  // Convert to array: A-F first (if included), then Bestått/Ikke bestått
+  // If only pass/fail data exists, only show pass/fail grades (no empty A-F bars)
   const chartData = [
-    ...letterGrades.map(g => {
+    ...(hasLetterGrades || !hasAnyPassFailData ? letterGrades.map(g => {
       const entry = distributionMap.get(g);
       return entry || { grade: g, percentage: 0, count: 0 };
-    }),
+    }) : []),
     ...(hasAnyPassFailData ? [
       distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 },
       distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 }

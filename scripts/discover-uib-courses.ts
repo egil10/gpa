@@ -53,9 +53,14 @@ async function discoverUiBCourses() {
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
       
       // Merge into master map
+      // IMPORTANT: For UiB, we preserve meaningful variants (e.g., "EXPHIL-HFSEM", "EXPHIL-MNEKS")
+      // Only merge courses that are truly the same (same code after removing numeric suffixes)
+      // Do NOT merge "EXPHIL-HFSEM" with "EXPHIL-MNEKS" - they are different courses
       courses.forEach(course => {
         // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM", "-MNEKS")
-        const baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only
+        // Use the FULL course code (after removing only numeric suffixes) as the key
+        // This ensures "EXPHIL-HFSEM" and "EXPHIL-MNEKS" are stored separately
+        const baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only, preserve meaningful parts
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {

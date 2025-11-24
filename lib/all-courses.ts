@@ -210,11 +210,15 @@ function searchCoursesFromList(
   if (!normalizedQuery) {
     // Return popular courses (by code length - shorter codes are usually more popular)
     return courses
-      .filter(c => c.code.length <= 8) // Filter out very long codes
+      .filter(c => c.code.length <= 8 && c.code.length >= 4) // Filter out very long codes and very short codes (likely prefixes)
       .sort((a, b) => a.code.length - b.code.length)
       .slice(0, limit);
   }
 
+  // Filter out courses with very short codes (1-3 characters) unless query is also very short
+  // This prevents showing "IN", "IND", "INF" as valid courses when user types "INF"
+  const minCodeLength = normalizedQuery.length <= 3 ? normalizedQuery.length : 4;
+  
   // Search by code first, then by name
   const exactCodeMatches: CourseInfo[] = [];
   const codeStartsWith: CourseInfo[] = [];
@@ -235,6 +239,12 @@ function searchCoursesFromList(
     const institutionContains =
       (institutionShortUpper && institutionShortUpper.includes(normalizedQuery)) ||
       (institutionFullUpper && institutionFullUpper.includes(normalizedQuery));
+
+    // Skip courses with codes that are too short (likely prefixes, not real courses)
+    // Only allow short codes if they're exact matches and the query is also short
+    if (codeUpper.length < minCodeLength && codeUpper !== normalizedQuery) {
+      continue;
+    }
 
     if (codeUpper === normalizedQuery) {
       // Exact code match - highest priority
@@ -269,14 +279,34 @@ function searchCoursesFromList(
     ? sortedPrefixMatches.slice(0, remainingSlots)
     : [];
   
-  return [
+  // Combine all results and remove duplicates (by unique key)
+  const allResults: CourseInfo[] = [];
+  const seenKeys = new Set<string>();
+  
+  for (const course of [
     ...exactMatches,
     ...prefixMatches,
     ...nameStartsWith,
     ...nameContains,
     ...institutionStartsWith,
     ...institutionMatches,
-  ].slice(0, limit);
+  ]) {
+    // Use key if available, otherwise create a composite key from institution and code
+    const courseKey = course.key || `${course.institution}-${course.code}`;
+    
+    // Skip if we've already seen this course (by unique key)
+    if (!seenKeys.has(courseKey)) {
+      seenKeys.add(courseKey);
+      allResults.push(course);
+      
+      // Stop once we have enough results
+      if (allResults.length >= limit) {
+        break;
+      }
+    }
+  }
+  
+  return allResults;
 }
 
 /**
