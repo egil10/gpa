@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Github, Calculator, Home } from 'lucide-react';
+import { Github, Calculator, Home, BookOpen } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -63,6 +63,10 @@ export default function Footer() {
             <Link href="/kalkulator" className={styles.footerLink}>
               <Calculator size={18} />
               <span>GPA Kalkulator</span>
+            </Link>
+            <Link href="/katalog" className={styles.footerLink}>
+              <BookOpen size={18} />
+              <span>Emnekatalog</span>
             </Link>
             <a 
               href="https://github.com/egil10/gpa" 

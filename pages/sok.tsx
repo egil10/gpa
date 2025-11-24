@@ -61,33 +61,33 @@ export default function SearchPage() {
           }
 
           // Course exists, proceed to fetch data
-          const formattedCode = formatCourseCode(courseCode, institution);
-          
-          setLoading(true);
-          setError(null);
-          setAllYearsStats({});
-          
-          fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
-            .then(data => {
-              if (data && data.length > 0) {
-                const multiYearData = processMultiYearData(data);
-                setAllYearsStats(multiYearData);
-                setLoading(false);
-                setError(null);
-              } else {
-                setError('Ingen data funnet for dette emnet');
-                setLoading(false);
-              }
-            })
-            .catch(err => {
+        const formattedCode = formatCourseCode(courseCode, institution);
+        
+        setLoading(true);
+        setError(null);
+        setAllYearsStats({});
+        
+        fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
+          .then(data => {
+            if (data && data.length > 0) {
+              const multiYearData = processMultiYearData(data);
+              setAllYearsStats(multiYearData);
+              setLoading(false);
+              setError(null);
+            } else {
+              setError('Ingen data funnet for dette emnet');
+              setLoading(false);
+            }
+          })
+          .catch(err => {
               // Check if error is CORS-related or actual "no data"
               if (err.message && err.message.includes('CORS')) {
                 setError(err.message);
               } else {
                 setError('Ingen data funnet for dette emnet');
               }
-              setLoading(false);
-            });
+            setLoading(false);
+          });
         } catch (err) {
           // Error validating course - show error
           setError(`Emnekode "${courseCode}" ikke funnet`);

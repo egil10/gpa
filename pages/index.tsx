@@ -898,13 +898,13 @@ export default function Home() {
                 className={styles.select}
               >
                 <option value="most-a">Mest A-er</option>
-                <option value="least-a">Færrest A-er</option>
                 <option value="highest-avg">Høyest snitt</option>
-                <option value="lowest-avg">Lavest snitt</option>
                 <option value="most-students">Flest kandidater</option>
-                <option value="least-students">Færrest kandidater</option>
                 <option value="alphabetical-az">A-Z (emnekode)</option>
                 <option value="alphabetical-za">Z-A (emnekode)</option>
+                <option value="least-students">Færrest kandidater</option>
+                <option value="lowest-avg">Lavest snitt</option>
+                <option value="least-a">Færrest A-er</option>
               </select>
             </div>
             <div className={styles.controlGroup}>
@@ -918,11 +918,13 @@ export default function Home() {
                 className={styles.select}
               >
                 <option value="all">Alle</option>
-                {Object.entries(UNIVERSITIES).map(([key, uni]) => (
-                  <option key={key} value={key}>
-                    {uni.shortName}
-                  </option>
-                ))}
+                {Object.entries(UNIVERSITIES)
+                  .sort(([, a], [, b]) => a.shortName.localeCompare(b.shortName, 'no'))
+                  .map(([key, uni]) => (
+                    <option key={key} value={key}>
+                      {uni.shortName}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className={styles.controlGroup}>
