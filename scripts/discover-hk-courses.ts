@@ -137,4 +137,25 @@ async function discoverHKCourses() {
   
   console.log(`\n📈 Courses by prefix:`);
   const prefixCounts: Record<string, number> = {};
-
+  allCourses.forEach(course => {
+    const prefix = course.courseCode.charAt(0);
+    prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
+  });
+  
+  Object.entries(prefixCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .forEach(([prefix, count]) => {
+      console.log(`   ${prefix}*: ${count} courses`);
+    });
+  
+  console.log(`\n✅ All done!`);
+  
+  return allCourses;
+}
+  
+// Run discovery
+discoverHKCourses().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

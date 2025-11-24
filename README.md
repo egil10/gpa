@@ -1,6 +1,6 @@
 # Norwegian GPA Calculator
 
-A comprehensive web application for calculating Grade Point Average (GPA) for Norwegian universities and high schools (videregående skole). The application provides grade distribution statistics and course search functionality for major Norwegian higher education institutions.
+A comprehensive web application for calculating Grade Point Average (GPA) for Norwegian universities and high schools (videregående skole). The application provides grade distribution statistics and course search functionality for major Norwegian higher education institutions!
 
 ## Overview
 
