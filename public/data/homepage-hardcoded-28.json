@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-24T18:44:25.659Z",
+  "generatedAt": "2025-11-24T19:25:03.024Z",
   "courses": [
     {
       "courseCode": "TDT4110",
@@ -77,9 +77,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 1902,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "INTER1100",
       "normalizedCode": "INTER1100"
     },
@@ -425,9 +435,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 547,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "FIN16",
       "normalizedCode": "FIN16"
     },
@@ -824,9 +844,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 261,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "ITVKI10124",
       "normalizedCode": "ITVKI10124"
     },
@@ -957,9 +987,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 171,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "BHPRA210",
       "normalizedCode": "BHPRA210"
     },
@@ -998,9 +1038,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 129,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "NORDTRAD20",
       "normalizedCode": "NORDTRAD20"
     },
@@ -1172,9 +1222,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 38,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "DE104",
       "normalizedCode": "DE104"
     },
@@ -1254,9 +1314,19 @@
           "grade": "F",
           "count": 0,
           "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 34,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
         }
       ],
-      "averageGrade": 0,
+      "averageGrade": 3,
       "courseName": "SAAL1GDG",
       "normalizedCode": "SAAL1GDG"
     }
