@@ -534,8 +534,8 @@ export async function fetchGradeData(
       try {
         const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
         const allData = await fetchWithProxy(payloadAllCourses);
-      
-      if (allData && allData.length > 0) {
+        
+        if (allData && allData.length > 0) {
         // Find courses that match the normalized code (consistent with how we store codes)
         // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
         // Only match if the codes are exactly equal after normalization
@@ -602,8 +602,9 @@ export async function fetchGradeData(
           }
         }
       }
-    } catch (error) {
-      // If this fallback also fails, continue to return empty array below
+      } catch (error) {
+        // If this fallback also fails, continue to return empty array below
+      }
     }
     
     // All attempts failed - return empty array
@@ -796,8 +797,9 @@ export async function fetchAllYearsData(
           }
         }
       }
-    } catch (error) {
-      // If this fallback also fails, continue to return empty array below
+      } catch (error) {
+        // If this fallback also fails, continue to return empty array below
+      }
     }
     
     // All attempts failed - return empty array
@@ -919,5 +921,4 @@ export function formatCourseCode(courseCode: string, institution: string): strin
   }
   return `${cleaned}-1`;
 }
-
 
