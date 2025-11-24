@@ -43,6 +43,12 @@
     "discover-dmmh": "tsx scripts/discover-dmmh-courses.ts",
     "discover-fih": "tsx scripts/discover-fih-courses.ts",
     "discover-hgut": "tsx scripts/discover-hgut-courses.ts",
+    "discover-hfdk": "tsx scripts/discover-hfdk-courses.ts",
+    "discover-hlt": "tsx scripts/discover-hlt-courses.ts",
+    "discover-hk": "tsx scripts/discover-hk-courses.ts",
+    "discover-ldh": "tsx scripts/discover-ldh-courses.ts",
+    "discover-nla": "tsx scripts/discover-nla-courses.ts",
+    "discover-steiner": "tsx scripts/discover-steiner-courses.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts"
   },
   "dependencies": {

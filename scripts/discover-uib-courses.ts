@@ -1,4 +1,4 @@
-/**
+npm run discover-hgut/**
  * Discover and fetch all UiB (Universitetet i Bergen) courses in batches
  * Uses the same structure as UiO discovery script
  */

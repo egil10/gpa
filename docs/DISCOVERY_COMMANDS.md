@@ -27,17 +27,17 @@ Then restart `npm run dev` (or rebuild/export) before deploying.
 | `npm run discover-bi` | Handelshøyskolen BI |
 | `npm run discover-dmmh` | Dronning Mauds Minne Høgskole |
 | `npm run discover-fih` | Fjellhaug Internasjonale Høgskole |
-| `npm run discover-hfdk` | Høyskolen for dansekunst |
+| `npm run discover-hfdk` | Høyskolen for dansekunst | **NOT FOUND**
 | `npm run discover-hgut` | Høgskulen for grøn utvikling |
 | `npm run discover-him` | Høgskolen i Molde |
 | `npm run discover-hio` | Høgskolen i Østfold |
-| `npm run discover-hk` | Høyskolen Kristiania |
-| `npm run discover-hlt` | Høyskolen for ledelse og teologi |
+| `npm run discover-hk` | Høyskolen Kristiania | **NOT FOUND**
+| `npm run discover-hlt` | Høyskolen for ledelse og teologi | **NOT FOUND**
 | `npm run discover-hvo` | Høgskulen i Volda |
 | `npm run discover-hvl` | Høgskulen på Vestlandet |
 | `npm run discover-inn` | Universitetet i Innlandet |
 | `npm run discover-khio` | Kunsthøgskolen i Oslo |
-| `npm run discover-ldh` | Lovisenberg diakonale høgskole |
+| `npm run discover-ldh` | Lovisenberg diakonale høgskole | **ERROR**
 | `npm run discover-mf` | MF vitenskapelig høyskole |
 | `npm run discover-nhh` | Norges handelshøyskole (Bachelor legacy) |
 | `npm run discover-nhh-all` | Norges handelshøyskole (all courses) |
