@@ -62,35 +62,45 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   });
   
-  // Check if either Bestått or Ikke bestått exists
+  // Check if either Bestått or Ikke bestått exists (even if count is 0)
   const bestatt = course.distributions.find(d => d.grade === 'Bestått');
   const ikkeBestatt = course.distributions.find(d => d.grade === 'Ikke bestått');
-  const hasAnyPassFailData = bestatt || ikkeBestatt;
+  // If either exists, we want to show both labels (even if one has 0 count)
+  const hasAnyPassFailData = !!(bestatt || ikkeBestatt);
   
-  // If either Bestått or Ikke bestått exists, include both in the chart
+  // If either Bestått or Ikke bestått exists (even with 0 count), include both in the chart
   // This ensures both x-axis labels are shown even if one has zero count
   if (hasAnyPassFailData) {
+    // Ensure we always have valid numbers, defaulting to 0
+    const bestattPercentage = (bestatt?.percentage != null && !isNaN(bestatt.percentage)) ? bestatt.percentage : 0;
+    const bestattCount = (bestatt?.count != null && !isNaN(bestatt.count)) ? bestatt.count : 0;
+    const ikkeBestattPercentage = (ikkeBestatt?.percentage != null && !isNaN(ikkeBestatt.percentage)) ? ikkeBestatt.percentage : 0;
+    const ikkeBestattCount = (ikkeBestatt?.count != null && !isNaN(ikkeBestatt.count)) ? ikkeBestatt.count : 0;
+    
     distributionMap.set('Bestått', {
       grade: 'Bestått',
-      percentage: bestatt?.percentage || 0,
-      count: bestatt?.count || 0,
+      percentage: bestattPercentage,
+      count: bestattCount,
     });
     distributionMap.set('Ikke bestått', {
       grade: 'Ikke bestått',
-      percentage: ikkeBestatt?.percentage || 0,
-      count: ikkeBestatt?.count || 0,
+      percentage: ikkeBestattPercentage,
+      count: ikkeBestattCount,
     });
   }
   
   // Convert to array, keeping A-F order first, then Bestått/Ikke bestått
+  // Ensure all entries have valid data (no undefined/null/NaN)
   const chartData = [
-    ...letterGrades.map(g => distributionMap.get(g)!),
-    ...(hasAnyPassFailData ? [distributionMap.get('Bestått')!, distributionMap.get('Ikke bestått')!] : []),
-  ].filter(Boolean); // Remove any undefined entries
-
-  const topGrade = course.distributions.reduce((max, dist) => 
-    dist.percentage > max.percentage ? dist : max
-  );
+    ...letterGrades.map(g => {
+      const entry = distributionMap.get(g);
+      return entry || { grade: g, percentage: 0, count: 0 };
+    }),
+    ...(hasAnyPassFailData ? [
+      distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 },
+      distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 }
+    ] : []),
+  ].filter(entry => entry && entry.grade); // Remove any invalid entries
 
   return (
     <div className={styles.card} onClick={handleClick}>

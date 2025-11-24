@@ -27,20 +27,28 @@ export default function SearchPage() {
         const uniFromUrl = uni ? String(uni) : undefined;
         const codeStr = stripCourseCodeSuffix(String(code), uniFromUrl);
         setCourseCode(codeStr);
-        // Try to find the institution by searching all courses
-        getCourseByCode(codeStr, undefined).then(foundCourse => {
-          if (foundCourse) {
-            setInstitution(foundCourse.institution);
-          } else if (uni) {
-            // Use URL uni if course wasn't found in our database
-            setInstitution(String(uni));
-          }
-        }).catch(() => {
-          // If search fails, use URL uni parameter if available
-          if (uni) {
-            setInstitution(String(uni));
-          }
-        });
+        // If uni is provided in URL, use it directly (prioritize URL parameter)
+        // Otherwise, try to find the institution by searching all courses
+        if (uniFromUrl) {
+          setInstitution(uniFromUrl);
+          // Validate that the course exists for this institution
+          getCourseByCode(codeStr, uniFromUrl).then(foundCourse => {
+            if (!foundCourse) {
+              console.warn(`[Search] Course ${codeStr} not found for institution ${uniFromUrl}, but continuing with URL institution`);
+            }
+          }).catch(() => {
+            // Ignore validation errors, just use the URL institution
+          });
+        } else {
+          // No institution in URL - try to find it by searching all courses
+          getCourseByCode(codeStr, undefined).then(foundCourse => {
+            if (foundCourse) {
+              setInstitution(foundCourse.institution);
+            }
+          }).catch(() => {
+            // If search fails, keep default institution
+          });
+        }
       } else if (uni) {
         setInstitution(String(uni));
       }

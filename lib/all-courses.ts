@@ -298,18 +298,33 @@ export async function getCourseByCode(
   if (institution) {
     const courses = await loadInstitutionCourses(institution);
     console.log(`[getCourseByCode] Loaded ${courses.length} courses for ${institution}`);
-    const found = courses.find(c => c.code.toUpperCase() === normalizedCode);
+    // When institution is specified, use unique key for exact matching to avoid conflicts
+    const uniqueKey = `${institution}-${normalizedCode}`;
+    const found = courses.find(c => {
+      // Prioritize unique key match if available
+      if (c.key && c.key === uniqueKey) {
+        return true;
+      }
+      // Fallback to code match if key is not available
+      return c.code.toUpperCase() === normalizedCode;
+    });
     if (found) {
-      console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution})`);
+      console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution}) using ${found.key ? 'unique key' : 'code match'}`);
     } else {
       // Log first few courses for debugging
-      const sampleCodes = courses.slice(0, 5).map(c => c.code);
-      console.log(`[getCourseByCode] Course not found. Sample course codes: ${sampleCodes.join(', ')}`);
+      const sampleCodes = courses.slice(0, 5).map(c => `${c.code}${c.key ? ` (key: ${c.key})` : ''}`);
+      console.log(`[getCourseByCode] Course not found. Looking for key: "${uniqueKey}". Sample course codes: ${sampleCodes.join(', ')}`);
     }
     return found || null;
   } else {
     const allCourses = await loadAllCourses();
-    return allCourses.find(c => c.code.toUpperCase() === normalizedCode) || null;
+    // When searching all institutions, we can't use unique key directly
+    // Return first match (could be ambiguous if code is not unique)
+    const matches = allCourses.filter(c => c.code.toUpperCase() === normalizedCode);
+    if (matches.length > 1) {
+      console.warn(`[getCourseByCode] Multiple courses found for code "${normalizedCode}" across institutions: ${matches.map(c => `${c.code} (${c.institution})`).join(', ')}. Returning first match.`);
+    }
+    return matches[0] || null;
   }
 }
 
