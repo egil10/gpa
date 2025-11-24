@@ -32,14 +32,11 @@ async function fetchCourseGradeData(
   institution: string,
   latestYear: number
 ): Promise<CourseStats | null> {
-  // For UiB, try multiple formats since they might use different formats
+  // For UiB, try multiple formats since they might use different formats in the API
+  // This handles cases where the API might return codes with or without "-1" suffix
   const formatsToTry: string[] = [];
   
   if (institution === 'UiB') {
-    // UiB discovery stores codes without suffix (using .split('-')[0])
-    // But the API returns them with suffixes like "EXPHIL-HFEKS-0"
-    // Since we can't know the exact suffix, we'll try direct queries first,
-    // then fall back to querying all courses and filtering
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     
     // 1. Try standard format with -1 (most common)
@@ -76,10 +73,12 @@ async function fetchCourseGradeData(
         const data: GradeData[] = await response.json();
         if (data && data.length > 0) {
           // Check if any returned course codes match our original course code (normalized)
-          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+          // Use consistent normalization: remove "-1" suffix only
+          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
           const matchingData = data.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-            return itemCode === normalizedOriginal || itemCode.split('-')[0] === normalizedOriginal;
+            const normalizedItemCode = itemCode.replace(/-1$/, '');
+            return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
           });
           
           if (matchingData.length > 0) {
@@ -106,10 +105,12 @@ async function fetchCourseGradeData(
         const allData: GradeData[] = await responseNoYear.json();
         if (allData && allData.length > 0) {
           // Filter to only courses that match our course code (normalized)
-          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+          // Use consistent normalization: remove "-1" suffix only
+          const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
           const matchingData = allData.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-            return itemCode === normalizedOriginal || itemCode.split('-')[0] === normalizedOriginal;
+            const normalizedItemCode = itemCode.replace(/-1$/, '');
+            return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
           });
           
           if (matchingData.length > 0) {
@@ -137,7 +138,8 @@ async function fetchCourseGradeData(
   // For UiB, try one more thing: query without course code filter and find the course in results
   if (institution === 'UiB') {
     try {
-      const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '');
+      // Use consistent normalization: remove "-1" suffix only
+      const normalizedOriginal = courseCode.toUpperCase().replace(/\s/g, '').replace(/-1$/, '');
       
       // Try querying just by institution and year to see all courses
       const payloadAllCourses = createSearchPayload(institutionCode, undefined, latestYear);
@@ -151,11 +153,11 @@ async function fetchCourseGradeData(
       
       if (responseAll.ok && responseAll.status === 200) {
         const allData: GradeData[] = await responseAll.json();
-        // Find courses that match (normalizing both sides)
+        // Find courses that match (using consistent normalization)
         const matchingData = allData.filter(item => {
           const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
-          const itemBaseCode = itemCode.split('-')[0];
-          return itemBaseCode === normalizedOriginal || itemCode === normalizedOriginal;
+          const normalizedItemCode = itemCode.replace(/-1$/, '');
+          return normalizedItemCode === normalizedOriginal || itemCode === courseCode.toUpperCase().replace(/\s/g, '');
         });
         
         if (matchingData.length > 0) {

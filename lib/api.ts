@@ -467,7 +467,8 @@ export async function fetchGradeData(
   }
 
   // Fall back to API if cache miss
-  // For UiB, try multiple formats since course codes can have different formats
+  // For UiB, try multiple formats since course codes can have different formats in the API
+  // This handles cases where the API might return codes with or without "-1" suffix
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     const formatsToTry = [
@@ -505,17 +506,18 @@ export async function fetchGradeData(
     }
     
     // If all direct queries failed, try querying all courses for the institution and filtering
+    // Use consistent normalization: remove "-1" suffix only (matching discovery script approach)
     try {
       const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
       const allData = await fetchWithProxy(payloadAllCourses);
       
       if (allData && allData.length > 0) {
-        // Find courses that match the base code (first part before any dash)
-        const normalizedBase = cleaned;
+        // Find courses that match the normalized code (consistent with how we store codes)
+        const normalizedBase = cleaned.replace(/-1$/, ''); // Remove -1 suffix for matching
         const matchingData = allData.filter(item => {
           const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const itemBaseCode = itemCode.includes('-') ? itemCode.split('-')[0] : itemCode;
-          return itemBaseCode === normalizedBase || itemCode === normalizedBase;
+          const normalizedItemCode = itemCode.replace(/-1$/, ''); // Consistent normalization
+          return normalizedItemCode === normalizedBase || itemCode === cleaned;
         });
         
         if (matchingData.length > 0) {
@@ -637,18 +639,18 @@ export async function fetchAllYearsData(
     }
     
     // If all direct queries failed, try querying all courses for the institution and filtering
-    // This handles cases where the exact API format is unknown (e.g., "EXPHIL-HFEKS-0")
+    // Use consistent normalization: remove "-1" suffix only (matching discovery script approach)
     try {
       const payloadAllCourses = createSearchPayload(institutionCode, undefined, undefined, departmentFilter);
       const allData = await fetchWithProxy(payloadAllCourses);
       
       if (allData && allData.length > 0) {
-        // Find courses that match the base code (first part before any dash)
-        const normalizedBase = cleaned;
+        // Find courses that match the normalized code (consistent with how we store codes)
+        const normalizedBase = cleaned.replace(/-1$/, ''); // Remove -1 suffix for matching
         const matchingData = allData.filter(item => {
           const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const itemBaseCode = itemCode.includes('-') ? itemCode.split('-')[0] : itemCode;
-          return itemBaseCode === normalizedBase || itemCode === normalizedBase;
+          const normalizedItemCode = itemCode.replace(/-1$/, ''); // Consistent normalization
+          return normalizedItemCode === normalizedBase || itemCode === cleaned;
         });
         
         if (matchingData.length > 0) {

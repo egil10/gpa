@@ -39,14 +39,29 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
     );
   }
 
-  // Filter data: only include pass/fail grades if BOTH are present
+  // Filter data: include pass/fail grades if EITHER has data
+  // If either Bestått or Ikke bestått exists, we always include BOTH in the chart
   const hasBestatt = data.some((dist) => dist.grade === 'Bestått');
   const hasIkkeBestatt = data.some((dist) => dist.grade === 'Ikke bestått');
-  const showPassFail = hasBestatt && hasIkkeBestatt;
+  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
   
-  const chartData = showPassFail
-    ? data
-    : data.filter((dist) => dist.grade !== 'Bestått' && dist.grade !== 'Ikke bestått');
+  // If either has data, ensure both are included (even if one has 0 count)
+  let chartData: GradeDistribution[];
+  if (hasAnyPassFailData) {
+    // Start with existing data, but ensure both Bestått and Ikke bestått are present
+    chartData = [...data];
+    
+    // Add missing pass/fail grades with 0 values if they don't exist
+    if (!hasBestatt) {
+      chartData.push({ grade: 'Bestått', percentage: 0, count: 0 });
+    }
+    if (!hasIkkeBestatt) {
+      chartData.push({ grade: 'Ikke bestått', percentage: 0, count: 0 });
+    }
+  } else {
+    // If neither has data, filter them out
+    chartData = data.filter((dist) => dist.grade !== 'Bestått' && dist.grade !== 'Ikke bestått');
+  }
 
   return (
     <div className={styles.chartContainer}>
@@ -103,7 +118,7 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
           ))}
       </div>
 
-      {showPassFail && (
+      {hasAnyPassFailData && (
         <div className={styles.passFailStats}>
           {chartData
             .filter((dist) => dist.grade === 'Bestått' || dist.grade === 'Ikke bestått')

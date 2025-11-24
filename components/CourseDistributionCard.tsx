@@ -25,16 +25,11 @@ const GRADE_COLORS: Record<string, string> = {
 export default function CourseDistributionCard({ course, institution }: CourseDistributionCardProps) {
   const router = useRouter();
   
-  // Get display code - for UiB, ensure we don't truncate codes incorrectly
-  // If courseCode already has no dash (like "INF100"), use it directly
-  // Otherwise, strip suffix appropriately
+  // Get display code - consistently remove "-1" suffix for all institutions
+  // This matches how course codes are stored in the discovery scripts
   const getDisplayCode = (code: string, inst: string): string => {
-    // For UiB, only split if there's actually a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
-    // If no dash (e.g., "INF100"), use as-is
-    if (inst === 'UiB' && code.includes('-')) {
-      return code.split('-')[0].trim();
-    }
-    // For other institutions, just remove "-1" suffix
+    // For all institutions, only remove "-1" suffix (dash followed by 1 at the end)
+    // This is the API format suffix, not part of the actual course code
     return code.replace(/-1$/, '').trim();
   };
   

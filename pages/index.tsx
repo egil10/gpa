@@ -220,24 +220,13 @@ export default function Home() {
           const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
           data.courses.forEach((course) => {
             // Normalize course code: remove API formatting suffixes for key matching
-            // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI) or "EXPHIL-HFEKS-0" (UiB)
-            // Course lists use base codes like "TDT4110" or "BØK110" or "EXPHIL"
-            let normalizedCode = course.courseCode;
-            // For UiB, only split if there's actually a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
-            // If no dash (e.g., "INF100"), use as-is
-            if (course.institution === 'UiB') {
-              if (normalizedCode.includes('-')) {
-                normalizedCode = normalizedCode.split('-')[0].trim();
-              } else {
-                normalizedCode = normalizedCode.trim();
-              }
-            } else {
-              // Remove "-1" suffix (standard format for most universities)
-              normalizedCode = normalizedCode.replace(/-1$/, '').trim();
-              // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
-              if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-                normalizedCode = normalizedCode.slice(0, -1);
-              }
+            // API returns codes like "TDT4110-1" (most unis) or "BØK1101" (BI)
+            // Course lists use base codes like "TDT4110" or "BØK110"
+            // For all institutions, consistently remove "-1" suffix only
+            let normalizedCode = course.courseCode.replace(/-1$/, '').trim();
+            // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
+            if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+              normalizedCode = normalizedCode.slice(0, -1);
             }
             const key = `${course.institution}-${normalizedCode}`;
             // Store with normalized course code to match course list format
@@ -719,16 +708,12 @@ export default function Home() {
       const unorderedCourses: (CourseStats & { institution: string; courseName: string })[] = [];
       
       coursesWithData.forEach(course => {
-        // Normalize course code for key matching (same as when creating keys)
         // Normalize course code for key matching (same logic as pre-rendered data)
-        let normalizedCode = course.courseCode;
-        if (course.institution === 'UiB') {
-          normalizedCode = normalizedCode.split('-')[0];
-        } else {
-          normalizedCode = normalizedCode.replace(/-1$/, '');
-          if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-            normalizedCode = normalizedCode.slice(0, -1);
-          }
+        // For all institutions, consistently remove "-1" suffix only
+        let normalizedCode = course.courseCode.replace(/-1$/, '').trim();
+        // For BI courses, remove trailing "1" (format: COURSECODE1 -> COURSECODE)
+        if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+          normalizedCode = normalizedCode.slice(0, -1);
         }
         const key = `${course.institution}-${normalizedCode}`;
         if (courseOrder.includes(key)) {

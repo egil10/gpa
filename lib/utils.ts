@@ -24,20 +24,22 @@ export function normalizeGradeDistribution(
     });
   }
   
-  // Conditionally include Pass/Fail grades only if BOTH exist
+  // Conditionally include Pass/Fail grades: if EITHER has data, include BOTH
+  // This ensures both x-axis labels are shown even if one has zero count
   const hasBestatt = gradeMap['Bestått'] && gradeMap['Bestått'].count > 0;
   const hasIkkeBestatt = gradeMap['Ikke bestått'] && gradeMap['Ikke bestått'].count > 0;
+  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt;
   
-  if (hasBestatt && hasIkkeBestatt) {
+  if (hasAnyPassFailData) {
+    // Always include both Bestått and Ikke bestått if either has data
     for (const grade of PASS_FAIL_GRADES) {
       const data = gradeMap[grade];
-      if (data && data.count > 0) {
-        distributions.push({
-          grade,
-          count: data.count,
-          percentage: data.percentage,
-        });
-      }
+      // Include even if count is 0 (to show on x-axis)
+      distributions.push({
+        grade,
+        count: data?.count || 0,
+        percentage: data?.percentage || 0,
+      });
     }
   }
   

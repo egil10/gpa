@@ -60,33 +60,23 @@ const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
  * Strip suffix from course code for display (e.g., "IN2010-1" -> "IN2010")
- * Handles different formats for different institutions:
- * - Most unis: "IN2010-1" -> "IN2010" (removes "-1" suffix)
- * - UiB: "EXPHIL-HFEKS-0" -> "EXPHIL" (takes first part before any dash)
- * - Other courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't suffixes)
+ * Handles different formats consistently across institutions:
+ * - Standard format: "IN2010-1" -> "IN2010" (removes "-1" suffix)
+ * - Courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't "-1" suffix)
+ * - UiB courses: Same handling as other institutions (removes "-1" suffix only)
  * Examples:
  *   "IN2010-1" -> "IN2010" (removes API suffix)
- *   "EXPHIL-HFEKS-0" -> "EXPHIL" (UiB format)
+ *   "EXPHIL-HFEKS-0" -> "EXPHIL-HFEKS-0" (preserves full code, no "-1" suffix)
  *   "STK-MAT2011" -> "STK-MAT2011" (preserves - dash and trailing 1)
  *   "FYS-STK3155" -> "FYS-STK3155" (preserves - dash)
+ * 
+ * Note: This matches how the discovery scripts store course codes (using replace(/-1$/, ''))
  */
 export function stripCourseCodeSuffix(code: string, institution?: string): string {
-  // For UiB, course codes from API can have multiple dashes (e.g., "EXPHIL-HFEKS-0")
-  // We need to extract just the base code (first part before any dash)
-  // BUT: Only split if there's actually a dash - don't truncate codes like "INF100" that have no dash
-  // This matches how the discovery script stores them
-  if (institution === 'UiB') {
-    // Only split if there's a dash (e.g., "EXPHIL-HFEKS-0" -> "EXPHIL")
-    // If no dash (e.g., "INF100"), return as-is
-    if (code.includes('-')) {
-      return code.split('-')[0].trim();
-    }
-    return code.trim();
-  }
-  
-  // For other institutions, only remove "-1" suffix (dash followed by 1 at the end)
+  // For all institutions, only remove "-1" suffix (dash followed by 1 at the end)
   // This is the API format suffix, not part of the actual course code
   // Don't remove standalone "1" as it might be part of the course code (e.g., "STK-MAT2011")
+  // This is consistent with how discovery scripts process course codes
   return code.replace(/-1$/, '').trim();
 }
 
