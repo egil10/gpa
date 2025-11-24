@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { ArrowUpDown, Filter, Search, ArrowUp, X, Plus } from 'lucide-react';
+import { ArrowUpDown, Filter, Search, ArrowUp, X, RotateCcw } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
@@ -19,9 +20,10 @@ const COURSES_PER_PAGE = 9;
 // In production (GitHub Pages), this is '/gpa'
 const isProduction = process.env.NODE_ENV === 'production';
 const BASEPATH = isProduction ? '/gpa' : '';
-const INITIAL_COURSES_COUNT = 12; // Show 12 popular courses on initial load
+const INITIAL_COURSES_COUNT = 15; // Show 15 popular courses (5 full rows) on initial load
 
 export default function Home() {
+  const router = useRouter();
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
   const [coursesData, setCoursesData] = useState<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -735,14 +737,49 @@ export default function Home() {
     // Force re-render by clearing any cached course data that might not match new filters
     // The effects will reload the appropriate courses based on new filters/search
   };
-  
-  
+
+  const handleResetFilters = useCallback(() => {
+    const emptyCoursesMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
+    const emptyLoadingSet = new Set<string>();
+
+    coursesDataRef.current = emptyCoursesMap;
+    loadingCoursesRef.current = emptyLoadingSet;
+
+    setCoursesData(emptyCoursesMap);
+    setLoadingCourses(emptyLoadingSet);
+    setSearchInput('');
+    setSearchQuery('');
+    setSearchHint('');
+    setPendingSortBy('most-a');
+    setSortBy('most-a');
+    setPendingInstitution('all');
+    setSelectedInstitution('all');
+    setDisplayCount(INITIAL_COURSES_COUNT);
+    setInitialLoadComplete(false);
+    setCourseOrder([]);
+    setLastSortBy(null);
+  }, []);
+
+useEffect(() => {
+  if (!router.isReady) return;
+  if (router.query.reset === '1') {
+    handleResetFilters();
+    router.replace(router.pathname, undefined, { shallow: true });
+  }
+}, [router, handleResetFilters]);
 
   const handleSearchClear = () => {
     setSearchInput('');
     setSearchQuery('');
     setDisplayCount(COURSES_PER_PAGE);
   };
+
+  const resetDisabled = useMemo(() => {
+    const searchActive = searchInput.trim().length > 0 || searchQuery.trim().length > 0;
+    const sortChanged = pendingSortBy !== 'most-a' || sortBy !== 'most-a';
+    const institutionChanged = pendingInstitution !== 'all' || selectedInstitution !== 'all';
+    return !searchActive && !sortChanged && !institutionChanged;
+  }, [searchInput, searchQuery, pendingSortBy, sortBy, pendingInstitution, selectedInstitution]);
 
   // Limit displayed courses to displayCount (always limit to 9 at a time)
   const displayedCourses = useMemo(() => {
@@ -927,7 +964,7 @@ export default function Home() {
                   ))}
               </select>
             </div>
-            <div className={styles.controlGroup}>
+            <div className={`${styles.controlGroup} ${styles.controlsActions}`}>
               <button
                 type="submit"
                 className={styles.applyButton}
@@ -935,6 +972,16 @@ export default function Home() {
               >
                 <ArrowUp size={16} />
                 <span>Bruk</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className={styles.resetButton}
+                aria-label="Tilbakestill til start"
+                disabled={resetDisabled}
+              >
+                <RotateCcw size={16} />
+                <span>Tilbakestill</span>
               </button>
             </div>
           </form>

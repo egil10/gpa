@@ -26,10 +26,10 @@ We need a proxy server that:
    - Add the `api/proxy.js` file
    - Deploy
 
-3. **Update API URL** in `lib/api.ts`:
-   ```typescript
-   const PROXY_URL = 'https://your-proxy.vercel.app/api/proxy';
-   ```
+3. **Set the proxy URL** before building the site:
+   - Create `.env.local` (or set an Actions secret) with  
+     `NEXT_PUBLIC_PROXY_URL=https://your-proxy.vercel.app/api/proxy`
+   - Rebuild/export so the value is baked into the static files
 
 4. **Redeploy your site**
 
@@ -37,9 +37,9 @@ We need a proxy server that:
 
 Temporarily use a public CORS proxy (not for production):
 
-Update `lib/api.ts`:
-```typescript
-const API_URL = 'https://cors-anywhere.herokuapp.com/https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
+Set `NEXT_PUBLIC_PROXY_URL` to the temporary proxy before building:
+```
+NEXT_PUBLIC_PROXY_URL=https://cors-anywhere.herokuapp.com/https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData
 ```
 
 **Note**: These services are unreliable and may have rate limits.
@@ -74,17 +74,10 @@ I've created `api/proxy.js` - a serverless function ready to deploy.
 
 4. **Get your proxy URL** (e.g., `https://gpa-proxy.vercel.app`)
 
-5. **Update `lib/api.ts`**:
-   ```typescript
-   const PROXY_URL = 'https://your-proxy-url.vercel.app/api/proxy';
-   ```
-
-6. **Commit and push**:
-   ```bash
-   git add lib/api.ts
-   git commit -m "Use proxy for API calls"
-   git push origin main
-   ```
+5. **Configure the app**:
+   - Create `.env.local` with `NEXT_PUBLIC_PROXY_URL=https://your-proxy-url.vercel.app/api/proxy`
+   - Run `npm run build && npm run export`
+   - Commit/push the rebuilt `out/` directory (or let CI handle it)
 
 ## Alternative: Keep It Simple
 

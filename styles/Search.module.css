@@ -3,6 +3,12 @@
   min-height: 60vh;
 }
 
+.inlineSearchBar {
+  max-width: 900px;
+  margin: var(--space-3xl) auto var(--space-2xl);
+  padding: 0 var(--space-lg);
+}
+
 .courseHeader {
   padding: var(--space-5xl) 0 var(--space-4xl);
   border-bottom: 1px solid var(--border);
@@ -487,6 +493,13 @@
   .courseHeader {
     padding: var(--space-4xl) 0 var(--space-3xl);
     padding-top: calc(var(--space-4xl) + env(safe-area-inset-top));
+  }
+
+  .inlineSearchBar {
+    margin: var(--space-2xl) auto var(--space-xl);
+    padding: 0 var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
   }
 
   .courseCode {

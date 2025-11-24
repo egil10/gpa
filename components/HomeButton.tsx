@@ -11,7 +11,12 @@ export default function HomeButton() {
   if (isHomePage) return null;
 
   return (
-    <Link href="/" className={styles.homeButton} aria-label="Go to home" title="Hjem">
+    <Link
+      href={{ pathname: '/', query: { reset: '1' } }}
+      className={styles.homeButton}
+      aria-label="Go to home"
+      title="Hjem"
+    >
       <Home size={20} />
     </Link>
   );

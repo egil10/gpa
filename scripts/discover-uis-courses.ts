@@ -55,7 +55,7 @@ async function discoverUiSCourses() {
       // Merge into master map
       // UiS uses format COURSECODE-1 (with dash), same as UiO/NTNU/OsloMet/Nord/NMBU/UiA/INN
       courses.forEach(course => {
-        const baseCode = course.courseCode.split('-')[0]; // Remove -1 suffix
+        const baseCode = course.courseCode.replace(/-1$/, ''); // Remove API suffix only
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {

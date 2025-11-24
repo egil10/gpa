@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
+import BottomSearchBar from '@/components/BottomSearchBar';
 import MultiYearChart from '@/components/MultiYearChart';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { processMultiYearData } from '@/lib/utils';
@@ -120,6 +121,9 @@ export default function SearchPage() {
           </div>
         )}
         <div className="container">
+          <div className={styles.inlineSearchBar}>
+            <BottomSearchBar variant="inline" />
+          </div>
           {loading && (
             <div className={styles.loading}>
               <p>Laster data...</p>

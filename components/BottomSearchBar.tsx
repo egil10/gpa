@@ -7,7 +7,12 @@ import { UNIVERSITIES } from '@/lib/api';
 import { formatCourseCode } from '@/lib/api';
 import styles from './BottomSearchBar.module.css';
 
-export default function BottomSearchBar() {
+interface BottomSearchBarProps {
+  variant?: 'floating' | 'inline';
+  className?: string;
+}
+
+export default function BottomSearchBar({ variant = 'floating', className = '' }: BottomSearchBarProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<CourseInfo[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -16,6 +21,8 @@ export default function BottomSearchBar() {
   const [searchBarOpacity, setSearchBarOpacity] = useState(1);
   const [notFoundMessage, setNotFoundMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  const isFloating = variant === 'floating';
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -31,6 +38,11 @@ export default function BottomSearchBar() {
 
   // Fade search bar near footer
   useEffect(() => {
+    if (!isFloating) {
+      setSearchBarOpacity(1);
+      return;
+    }
+
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -51,7 +63,7 @@ export default function BottomSearchBar() {
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isFloating]);
 
   // Search with debouncing
   const performSearch = useCallback((searchQuery: string) => {
@@ -240,8 +252,8 @@ export default function BottomSearchBar() {
   return (
     <>
       <div 
-        className={styles.searchBarContainer}
-        style={{ opacity: searchBarOpacity, pointerEvents: searchBarOpacity > 0.3 ? 'auto' : 'none' }}
+        className={`${styles.searchBarContainer} ${isFloating ? '' : styles.inlineVariant} ${className}`.trim()}
+        style={isFloating ? { opacity: searchBarOpacity, pointerEvents: searchBarOpacity > 0.3 ? 'auto' : 'none' } : undefined}
       >
         <div className={styles.backdrop}></div>
         <div className={styles.searchBar}>

@@ -18,22 +18,22 @@ Your site on GitHub Pages can't directly call NSD API due to CORS restrictions.
 ### Step 3: Get Proxy URL
 After deployment, you'll get a URL like: `https://gpa-proxy-xyz.vercel.app`
 
-### Step 4: Update Your Code
-In `lib/api.ts`, change:
-```typescript
-const API_URL = 'https://your-proxy-url.vercel.app/api/proxy';
+### Step 4: Configure the URL
+Create `.env.local` (or set an Actions secret) before running the build:
+```
+NEXT_PUBLIC_PROXY_URL=https://your-proxy-url.vercel.app/api/proxy
 ```
 
 ### Step 5: Redeploy
-Push to GitHub, and your site will use the proxy!
+Run `npm run build && npm run export`, commit the updated static files (or let CI do it), and push to GitHub. The site will now use your proxy!
 
 ## Alternative: Use CORS Proxy (Temporary)
 
 For quick testing, you can use a public CORS proxy:
 
-Update `lib/api.ts`:
-```typescript
-const API_URL = 'https://corsproxy.io/?https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
+Set `NEXT_PUBLIC_PROXY_URL` before building:
+```
+NEXT_PUBLIC_PROXY_URL=https://corsproxy.io/?https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData
 ```
 
 **Warning**: Not reliable for production, but works for testing.

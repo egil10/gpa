@@ -30,7 +30,7 @@ When using public CORS proxies (like allorigins.win or corsproxy.io), you will s
 To eliminate these errors completely:
 
 1. Deploy `api/proxy.js` to Vercel (free, 5 minutes)
-2. Update `lib/api.ts` with your proxy URL
+2. Set `NEXT_PUBLIC_PROXY_URL=https://your-proxy-url.vercel.app/api/proxy` before building
 3. Errors will disappear completely
 
 See `docs/CORS_SOLUTION.md` for step-by-step instructions.

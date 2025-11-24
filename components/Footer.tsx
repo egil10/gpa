@@ -56,7 +56,10 @@ export default function Footer() {
         <div className={styles.footerBottom}>
           <p className="text-light">© {currentYear} Karakterstatistikk</p>
           <div className={styles.footerLinks}>
-            <Link href="/" className={styles.footerLink}>
+            <Link
+              href={{ pathname: '/', query: { reset: '1' } }}
+              className={styles.footerLink}
+            >
               <Home size={18} />
               <span>Hjem</span>
             </Link>

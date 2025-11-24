@@ -16,6 +16,21 @@
   width: 100%;
 }
 
+.inlineVariant {
+  position: static;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+}
+
+.inlineVariant .backdrop {
+  display: none;
+}
+
+.inlineVariant .searchBar {
+  position: static;
+}
+
 .backdrop {
   position: absolute;
   bottom: 0;

@@ -40,6 +40,12 @@ const CORS_PROXIES = [
   'https://cors-anywhere.herokuapp.com/',
 ];
 
+// Optional custom proxy URL (e.g., hosted on Vercel/Cloudflare/Netlify)
+// Can be configured via NEXT_PUBLIC_PROXY_URL or legacy NEXT_PUBLIC_CORS_PROXY_URL
+const CUSTOM_PROXY_URL = (process.env.NEXT_PUBLIC_PROXY_URL ||
+  process.env.NEXT_PUBLIC_CORS_PROXY_URL ||
+  '').trim();
+
 // Use proxy in production, direct API in development
 const isDevelopment = typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -187,29 +193,42 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     }
   }
 
-  // In production, try Vercel proxy first (if available and not on GitHub Pages)
+  const tryProxyUrl = async (url: string, label: string) => {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status === 204) {
+      throw new Error('No data found');
+    }
+
+    if (!response.ok) {
+      throw new Error(`${label} returned ${response.status}`);
+    }
+
+    const data: GradeData[] = await response.json();
+    return data;
+  };
+
+  // Try custom proxy first if defined (works on GitHub Pages and other static hosts)
+  if (CUSTOM_PROXY_URL) {
+    try {
+      return await tryProxyUrl(CUSTOM_PROXY_URL, 'Custom proxy');
+    } catch (error) {
+      // Fall through to Vercel/public proxies
+    }
+  }
+
+  // In production, try Vercel proxy next (if available and not on GitHub Pages)
   if (useVercelProxy && !isGitHubPages) {
     const vercelProxyUrl = getVercelProxyUrl();
     if (vercelProxyUrl) {
       try {
-        const response = await fetch(vercelProxyUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.status === 204) {
-          throw new Error('No data found');
-        }
-
-        if (!response.ok) {
-          throw new Error(`Vercel proxy returned ${response.status}`);
-        }
-
-        const data: GradeData[] = await response.json();
-        return data;
+        return await tryProxyUrl(vercelProxyUrl, 'Vercel proxy');
       } catch (error) {
         // If Vercel proxy fails, silently fall back to public proxies
         // No logging needed - expected when proxy doesn't exist or fails

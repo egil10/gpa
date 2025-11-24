@@ -58,7 +58,7 @@ async function discoverUiOCourses() {
       
       // Merge into master map
       courses.forEach(course => {
-        const baseCode = course.courseCode.split('-')[0]; // Remove -1 suffix
+        const baseCode = course.courseCode.replace(/-1$/, ''); // Remove API suffix only
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
