@@ -99,5 +99,61 @@ async function discoverLDHCourses() {
   console.log(`   Total unique courses: ${allCourses.length}\n`);
   
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
-  if (!fs.exists*** End Patch to=functions.apply_patch code_execution_status="success" code_output_signed=Falseinted JSON response```json
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  
+  const outputFile = path.join(dataDir, 'ldh-all-courses.json');
+  const exportData = createOptimizedExport(institutionCode, allCourses);
+  fs.writeFileSync(outputFile, JSON.stringify(exportData));
+  
+  console.log(`✅ Exported ${allCourses.length} courses to:`);
+  console.log(`   ${outputFile}\n`);
+  
+  console.log(`📊 Summary:`);
+  console.log(`   Total courses: ${allCourses.length}`);
+  console.log(`   Courses with 2024 data: ${allCourses.filter(c => c.years.includes(2024)).length}`);
+  if (allCourses.some(c => c.years.includes(2025))) {
+    console.log(`   Courses with 2025 data: ${allCourses.filter(c => c.years.includes(2025)).length}`);
+  }
+  console.log(`   Total students (2024): ${allCourses
+    .filter(c => c.years.includes(2024))
+    .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
+    .toLocaleString()}`);
+  
+  const maxYears = Math.max(...allCourses.map(c => c.years.length), 0);
+  const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
+  console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
+  
+  console.log(`\n📚 Sample courses:`);
+  allCourses.slice(0, 10).forEach(course => {
+    const yearsStr = course.years.slice(0, 3).join(', ') + (course.years.length > 3 ? '...' : '');
+    console.log(`   ${course.courseCode.padEnd(12)} - ${course.lastYearStudents.toLocaleString().padStart(6)} students (${course.years.length} years: ${yearsStr})`);
+  });
+  
+  if (allCourses.length > 10) {
+    console.log(`   ... and ${allCourses.length - 10} more courses`);
+  }
+  
+  console.log(`\n📈 Courses by prefix:`);
+  const prefixCounts: Record<string, number> = {};
+  allCourses.forEach(course => {
+    const prefix = course.courseCode.charAt(0);
+    prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
+  });
+  
+  Object.entries(prefixCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .forEach(([prefix, count]) => {
+      console.log(`   ${prefix}*: ${count} courses`);
+    });
+  
+  console.log(`\n✅ All done!`);
+  
+  return allCourses;
+}
+
+discoverLDHCourses().catch(console.error);
+
 

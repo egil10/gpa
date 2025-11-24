@@ -39,7 +39,6 @@ Then restart `npm run dev` (or rebuild/export) before deploying.
 | `npm run discover-khio` | Kunsthøgskolen i Oslo |
 | `npm run discover-ldh` | Lovisenberg diakonale høgskole | **ERROR**
 | `npm run discover-mf` | MF vitenskapelig høyskole |
-| `npm run discover-nhh` | Norges handelshøyskole (Bachelor legacy) |
 | `npm run discover-nhh-all` | Norges handelshøyskole (all courses) |
 | `npm run discover-nih` | Norges idrettshøgskole |
 | `npm run discover-nla` | NLA Høgskolen |
