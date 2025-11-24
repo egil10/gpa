@@ -47,6 +47,34 @@ export function optimizeCourse(course: FullCourseExport): OptimizedCourse {
 }
 
 /**
+ * Check if a course has data available (matches the logic in lib/all-courses.ts)
+ * Only includes courses that have actual student data to prevent empty course pages
+ */
+export function courseHasData(course: FullCourseExport): boolean {
+  // Course has data if it has lastYearStudents > 0 (most reliable indicator of actual data)
+  // This ensures we only include courses with actual retrievable data from the API
+  // Courses with lastYearStudents = 0 or undefined likely have no grade data available
+  const hasStudentCount = course.lastYearStudents !== undefined && 
+                          course.lastYearStudents !== null && 
+                          course.lastYearStudents > 0;
+  
+  if (hasStudentCount) {
+    return true; // Has actual student data
+  }
+  
+  // If no lastYearStudents but has years array with data, include it (legacy format)
+  // This handles edge cases where data format might be different
+  const hasYears = Array.isArray(course.years) && course.years.length > 0;
+  if (hasYears) {
+    // Only include if lastYearStudents is not explicitly 0 (might be missing/undefined)
+    // If it's explicitly 0, that means no students, so exclude it
+    return course.lastYearStudents !== 0;
+  }
+  
+  return false; // No data available
+}
+
+/**
  * Create optimized export structure
  */
 export function createOptimizedExport(

@@ -3,7 +3,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport } from './utils/export-format';
+import { createOptimizedExport, courseHasData } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -92,7 +92,7 @@ async function discoverHiMCourses() {
   }
   
   const allCourses = Array.from(allCoursesMap.values())
-    .filter(course => course.years.length > 0)
+    .filter(courseHasData) // Only courses with actual data (lastYearStudents > 0 or years with data)
     .sort((a, b) => a.courseCode.localeCompare(b.courseCode));
   
   console.log(`\n✅ Discovery complete!`);

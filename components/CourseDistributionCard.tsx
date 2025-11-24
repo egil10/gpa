@@ -134,10 +134,10 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
       
       <div className={styles.chartContainer}>
         {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={120}>
+          <ResponsiveContainer width="100%" height={150}>
             <BarChart 
               data={chartData} 
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              margin={{ top: 0, right: 5, left: 5, bottom: 20 }}
               barCategoryGap="20%"
             >
               <XAxis 
@@ -171,7 +171,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+          <div style={{ height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
             <span>Ingen data</span>
           </div>
         )}
