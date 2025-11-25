@@ -42,3 +42,20 @@ institutionFiles.forEach(file => {
 
 console.log(`\n📦 Copied ${institutionFiles.length} institution datasets to public/data/institutions`);
 
+// Also copy VGS grade statistics file
+const vgsSourceFile = path.join(__dirname, '..', 'data', 'vgs-grade-statistics.json');
+const vgsDestFile = path.join(publicDir, 'data', 'vgs-grade-statistics.json');
+
+if (fs.existsSync(vgsSourceFile)) {
+  // Ensure public/data directory exists
+  const publicDataDir = path.join(publicDir, 'data');
+  if (!fs.existsSync(publicDataDir)) {
+    fs.mkdirSync(publicDataDir, { recursive: true });
+  }
+  
+  fs.copyFileSync(vgsSourceFile, vgsDestFile);
+  console.log(`✅ Copied vgs-grade-statistics.json to public/data`);
+} else {
+  console.warn('⚠️  vgs-grade-statistics.json not found in data folder');
+}
+

@@ -47,7 +47,7 @@ let cachedVGSData: VGSGradeDataFile | null = null;
 const VGS_DATA_CACHE_KEY = 'vgs-grade-data';
 const VGS_COURSES_CACHE_KEY = 'vgs-courses-list';
 const VGS_CACHE_VERSION_KEY = 'vgs-cache-version';
-const VGS_CACHE_VERSION = '1.0'; // Increment when data structure changes
+const VGS_CACHE_VERSION = '1.1'; // Increment when data structure changes (updated to include all 994 courses)
 
 /**
  * Load VGS grade data from JSON file (cached)
@@ -98,6 +98,7 @@ async function loadVGSGradeData(): Promise<VGSGradeDataFile> {
   const possiblePaths = [
     '/data/vgs-grade-statistics.json',
     '/gpa/data/vgs-grade-statistics.json',
+    'data/vgs-grade-statistics.json', // Relative path fallback
   ];
 
   for (const path of possiblePaths) {

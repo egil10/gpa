@@ -1,20 +1,84 @@
 # Norwegian GPA Calculator
 
-A production-grade web application for calculating Grade Point Average (GPA) and analyzing grade distribution statistics for Norwegian higher education institutions. Built with Next.js 14, TypeScript, and a sophisticated hybrid data architecture.
+A production-grade web application for analyzing grade distributions (karakterfordelinger) and calculating Grade Point Average (GPA) for Norwegian higher education institutions and videregående skole. Built with Next.js 14, TypeScript, and a sophisticated hybrid data architecture.
 
 **Live Application**: [https://egil10.github.io/gpa/](https://egil10.github.io/gpa/)
 
 ## Overview
 
-This repository implements a comprehensive system for aggregating, processing, and visualizing academic grade data from Norwegian universities and high schools. The application serves over 16,000 course records spanning 26 years (2000-2025) across four major institutions, with an extensible architecture supporting 40+ additional institutions.
+This repository implements a comprehensive system for aggregating, processing, and visualizing academic grade distribution data from Norwegian universities and high schools. The application serves over 16,000 course records spanning 26 years (2000-2025) across four major institutions, with an extensible architecture supporting 40+ additional institutions.
 
-### Core Capabilities
+The core focus of this application is providing detailed grade distribution analysis (karakterfordelinger), allowing students and educators to understand grading patterns, historical trends, and statistical insights across Norwegian educational institutions.
+
+## Core Capabilities
+
+### Grade Distribution Analysis (Karakterfordelinger)
+
+The primary feature of this application is comprehensive grade distribution analysis:
+
+- **Real-time Grade Statistics**: Fetch and display grade distributions for any course from Norwegian institutions
+- **Multi-year Analysis**: View grade distributions across multiple years (2000-2025) with year-by-year breakdowns
+- **Normalized Visualization**: Always displays complete grade scales (A-F for universities, 1-6 for videregående skole) even when certain grades have zero counts
+- **Statistical Overlays**: Mean GPA, total student counts, and percentage breakdowns for each grade
+- **Interactive Charts**: Responsive bar charts using Recharts with hover details and mobile optimization
+- **Pass/Fail Handling**: Support for Bestått/Ikke bestått grades with conditional display logic
+- **Institution Comparison**: Compare grade distributions across different institutions for the same course
+
+### Additional Features
 
 - **GPA Calculation**: University-scale (A=5, B=4, C=3, D=2, E=1, F=0) and videregående skole calculations
-- **Grade Distribution Analysis**: Real-time statistical analysis of course grading patterns
 - **Course Discovery**: Advanced search and autocomplete across institutional boundaries
-- **Data Visualization**: Interactive multi-year grade distribution charts with normalization
 - **Institutional Hierarchy Navigation**: Generic system supporting complex organizational structures
+- **Course Catalog**: Browseable catalog of all indexed courses with filtering and search
+
+## Grade Distribution System
+
+### University Grade System (A-F Scale)
+
+The application processes and visualizes university courses using the standard Norwegian A-F grading scale:
+
+- **A**: Excellent (5 points)
+- **B**: Very good (4 points)
+- **C**: Good (3 points)
+- **D**: Satisfactory (2 points)
+- **E**: Sufficient (1 point)
+- **F**: Fail (0 points)
+- **Bestått**: Pass (3 points equivalent)
+- **Ikke bestått**: Fail (0 points equivalent)
+
+Grade distributions are normalized to always show all A-F grades, even when a course has no students receiving certain grades. This ensures consistent visualization and makes it easy to compare courses.
+
+### Videregående Skole Grade System (1-6 Scale)
+
+For high school courses, the application uses the 1-6 scale:
+
+- **6**: Excellent
+- **5**: Very good
+- **4**: Good
+- **3**: Satisfactory
+- **2**: Sufficient
+- **1**: Fail
+
+The system automatically detects VGS courses and applies the appropriate normalization and visualization.
+
+### Grade Distribution Processing
+
+The application processes grade data through several stages:
+
+1. **Data Aggregation**: Merges duplicate entries from the API (handles cases where the same course instance appears multiple times)
+2. **Normalization**: Ensures all standard grades are present in the distribution (fills missing grades with zero counts)
+3. **Percentage Calculation**: Computes percentage breakdowns for each grade
+4. **Average Calculation**: Calculates weighted average GPA based on grade point values
+5. **Multi-year Combination**: Aggregates data across multiple years when viewing historical trends
+
+### Visualization Features
+
+- **Normalized Display**: A-F or 1-6 grades always shown in order, maintaining consistent x-axis labels
+- **Conditional Pass/Fail**: Bestått/Ikke bestått only shown when present in the data
+- **Responsive Design**: Charts adapt to mobile, tablet, and desktop viewports
+- **Interactive Tooltips**: Hover to see exact counts and percentages
+- **Year Toggle**: Switch between combined multi-year view and individual year breakdowns
+- **Statistical Summary**: Display mean GPA and total student count alongside charts
 
 ## Architecture
 
@@ -82,6 +146,20 @@ This format achieves:
 - Payload construction with type-safe filter generation
 - Error handling with retry logic
 
+**`lib/utils.ts`** - Grade Distribution Processing
+- `normalizeGradeDistribution()`: Ensures A-F grades always present in university distributions
+- `normalizeVGSGradeDistribution()`: Handles 1-6 scale for videregående skole
+- `processGradeData()`: Converts raw API data to structured grade distributions
+- `processMultiYearData()`: Groups and processes data by year
+- `combineAllYears()`: Aggregates multi-year data into single distribution
+- `aggregateDuplicateEntries()`: Merges duplicate course instances
+
+**`lib/vgs-grade-data.ts`** - Videregående Skole Integration
+- Loads VGS grade statistics from parsed JSON files
+- Converts VGS data format to standard GradeData format
+- Handles 1-6 grade scale normalization
+- Supports course code matching and lookup
+
 **`lib/hierarchy-discovery.ts`** - Generic Course Discovery Engine
 - Institution-agnostic hierarchy traversal
 - Configurable drilling paths via JSON configuration
@@ -104,24 +182,38 @@ This format achieves:
 
 #### React Components
 
+**`MultiYearChart`** - Grade Distribution Visualization
+- Primary component for displaying karakterfordelinger
+- Uses Recharts for interactive bar charts
+- Normalized display (A-F or 1-6 grades always shown)
+- Multi-year aggregation and year-by-year breakdown
+- Responsive design with mobile optimization
+- Statistical overlays (mean GPA, student counts)
+- Toggle between combined and individual year views
+
+**`GradeChart`** - Single Year Grade Chart
+- Simplified chart for single-year distributions
+- Consistent styling with MultiYearChart
+- Mobile-optimized layout
+
+**`CourseDistributionCard`** - Course Preview Cards
+- Displays grade distribution preview on homepage and catalog
+- Shows key statistics (mean GPA, total students)
+- Click-through to full course details
+- Handles both university and VGS courses
+
 **`CourseAutocomplete`** / **`CourseNameAutocomplete`**
 - Debounced input (200ms) for performance
 - Keyboard navigation (arrow keys, enter, escape)
 - Institution-specific data loading
 - Accessible ARIA labels and keyboard handlers
 
-**`MultiYearChart`**
-- Grade distribution visualization using Recharts
-- Normalized display (A-F grades always shown, even with zero counts)
-- Multi-year aggregation and year-by-year breakdown
-- Responsive design with mobile optimization
-- Statistical overlays (mean GPA, student counts)
-
 **`GPACalculator`**
 - Real-time calculation as inputs change
 - Support for weighted and unweighted calculations
 - Pass/Fail grade handling (Bestått/Ikke bestått)
 - Grade scale conversion utilities
+- University and VGS grade system support
 
 **`DepartmentBrowser`**
 - Hierarchical navigation through institution structures
@@ -137,6 +229,7 @@ This format achieves:
 - Rate limiting and error handling
 - Progress reporting and data validation
 - Automated merging and deduplication
+- VGS data parsing: `parse-vgs-grade-statistics.ts`, `fetch-vgs-grades-from-api.ts`
 
 ## Technology Stack
 
@@ -166,10 +259,51 @@ Currently indexed:
 - **Norges teknisk-naturvitenskapelige universitet (NTNU)**: 7,643 courses
 - **Universitetet i Bergen (UiB)**: 3,361 courses
 - **Norges handelshøyskole (NHH)**: 657 courses
+- **Videregående skole (VGS)**: High school courses across Norway
 
-**Total**: 16,461 courses with data spanning 2000-2025
+**Total**: 16,461+ courses with data spanning 2000-2025
 
-Infrastructure exists for 40+ additional institutions (scripts and configuration ready, data not yet harvested).
+Infrastructure exists for 40+ additional institutions (scripts and configuration ready, data not yet harvested). See `docs/DISCOVERY_COMMANDS.md` for the complete list of available discovery scripts.
+
+## Data Sources and Links
+
+### Primary Data Source
+
+**Norsk senter for forskningsdata (NSD)** - Norwegian Centre for Research Data
+
+- **Main Statistics Portal**: [https://dbh.hkdir.no/tall-og-statistikk/](https://dbh.hkdir.no/tall-og-statistikk/)
+- **Direct API Endpoint**: `POST https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData`
+- **Student Statistics Page**: [https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205](https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205)
+
+All course and grade distribution data is publicly available through the NSD API. This application aggregates and presents this data in an accessible format.
+
+### Institution-Specific Links
+
+#### NHH (Norges handelshøyskole) - Code: 1240
+
+**All Courses (All Years)**:
+https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205&visKode=false&admdebug=false&columns=arstall&hier=insttype%219%21instkode%219%21emnekode&formel=910%218%21912%218%21914%218%21916%218%21918%218%21920%218%21923%218%21925&index=3&sti=Statlige%20vitenskapelige%20h%C3%B8yskoler%219%21Norges%20handelsh%C3%B8yskole%219%21Statlige%20vitenskapelige%20h%C3%B8yskoler%219%21Norges%20handelsh%C3%B8yskole&param=insttype%3D12%219%21dep_id%3D1%219%21nivakode%3Db3%218%21b4%218%21hk%218%21yu%218%21ar%218%21ln%218%21m2%218%21me%218%21mx%218%21hn%218%21m5%218%21pr%219%21instkode%3D1240&binInst=undefined
+
+#### NTNU (Norges teknisk-naturvitenskapelige universitet) - Code: 1150
+
+**All Courses (All Years)**:
+https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205&visKode=false&admdebug=false&columns=arstall&hier=insttype%219%21instkode%219%21emnekode&formel=910%218%21912%218%21914%218%21916%218%21918%218%21920%218%21923%218%21925&index=3&sti=Universiteter%219%21Norges%20teknisk-naturvitenskapelige%20universitet&param=insttype%3D11%219%21dep_id%3D1%219%21nivakode%3Db3%218%21b4%218%21hk%218%21yu%218%21ar%218%21ln%218%21m2%218%21me%218%21mx%218%21hn%218%21m5%218%21pr%219%21instkode%3D1150&binInst=1101
+
+#### UiO (Universitetet i Oslo) - Code: 1110
+
+**All Courses (All Years)**:
+https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205&visKode=false&admdebug=false&columns=arstall&hier=insttype%219%21instkode%219%21emnekode&formel=910%218%21912%218%21914%218%21916%218%21918%218%21920%218%21923%218%21925&index=3&sti=Universiteter%219%21Universitetet+i+Oslo&param=insttype%3D11%219%21dep_id%3D1%219%21nivakode%3Db3%218%21b4%218%21hk%218%21yu%218%21ar%218%21ln%218%21m2%218%21me%218%21mx%218%21hn%218%21m5%218%21pr%219%21instkode%3D1110&binInst=1101
+
+#### UiB (Universitetet i Bergen) - Code: 1120
+
+**All Courses (All Years)**:
+https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter/statistikk-side/4.1/param?visningId=205&visKode=false&admdebug=false&columns=arstall&hier=insttype%219%21instkode%219%21emnekode&formel=910%218%21912%218%21914%218%21916%218%21918%218%21920%218%21923%218%21925&index=3&sti=Universiteter%219%21Universitetet%20i%20Bergen&param=insttype%3D11%219%21dep_id%3D1%219%21nivakode%3Db3%218%21b4%218%21hk%218%21yu%218%21ar%218%21ln%218%21m2%218%21me%218%21mx%218%21hn%218%21m5%218%21pr%219%21instkode%3D1120&binInst=1101
+
+### Videregående Skole Data
+
+VGS grade distribution data is sourced from UDIR (Utdanningsdirektoratet) statistics and processed from Excel/CSV exports. The data includes grade distributions for high school courses across Norway using the 1-6 scale.
+
+For detailed information about all data sources and how to discover new institutions, see `docs/DATA_SOURCES.md`.
 
 ## API Integration
 
@@ -202,16 +336,178 @@ Three-tier fallback system:
    - Used exclusively by discovery scripts
    - Bypasses all proxy layers
 
+For complete API documentation, see `docs/API_REFERENCE.md`.
+
+## Project Structure
+
+```
+gpa/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              # GitHub Actions deployment workflow
+├── analytics/                      # Analytics and reporting scripts
+│   ├── analytics-report.md
+│   ├── institution-analysis-report.md
+│   ├── pipeline-report-*.md
+│   ├── top-bottom-courses.md
+│   └── README.md
+├── api/                            # API routes (serverless functions)
+│   └── proxy.js                    # CORS proxy handler
+├── assets/                         # Design assets (logos, images)
+│   ├── dist.svg
+│   └── dist.png
+├── components/                     # React components
+│   ├── BottomSearchBar.tsx        # Bottom search bar component
+│   ├── CourseAutocomplete.tsx     # Course code autocomplete
+│   ├── CourseCard.tsx             # Course card for homepage
+│   ├── CourseDistributionCard.tsx # Grade distribution preview cards
+│   ├── CourseExplorer.tsx         # Course exploration interface
+│   ├── CourseNameAutocomplete.tsx # Course name autocomplete
+│   ├── DepartmentBrowser.tsx      # Hierarchical department browser
+│   ├── Footer.tsx                 # Footer component
+│   ├── GPACalculator.tsx          # GPA calculator component
+│   ├── GradeChart.tsx             # Single year grade chart
+│   ├── HomeButton.tsx             # Home navigation button
+│   ├── Layout.tsx                 # Main layout wrapper
+│   ├── LoadingSkeleton.tsx        # Loading state component
+│   ├── MultiYearChart.tsx         # Multi-year grade distribution chart
+│   ├── Navbar.tsx                 # Navigation bar
+│   ├── ScrollToTop.tsx            # Scroll to top button
+│   ├── StatCard.tsx               # Statistics card component
+│   ├── VGSCourseAutocomplete.tsx  # VGS course autocomplete
+│   └── *.module.css               # Component-specific styles
+├── data/                           # Source of truth data files
+│   ├── cache.json                 # API response cache
+│   ├── institutions/              # Optimized JSON course files
+│   │   ├── nhh-all-courses.json
+│   │   ├── ntnu-all-courses.json
+│   │   ├── uio-all-courses.json
+│   │   ├── uib-all-courses.json
+│   │   └── [33+ additional institution files]
+│   ├── udir-vgs-courses.json      # VGS course catalog
+│   ├── vgs-grade-statistics.json  # VGS grade distribution data
+│   └── README.md
+├── docs/                           # Comprehensive documentation
+│   ├── ADDING_COURSES.md          # Guide for adding new courses
+│   ├── API_REFERENCE.md           # Complete NSD API documentation
+│   ├── API.md                     # API integration guide
+│   ├── ARCHITECTURE.md            # System architecture details
+│   ├── BUILD_AND_DEPLOYMENT.md    # Deployment procedures
+│   ├── CORS_ERRORS_EXPLAINED.md   # CORS troubleshooting
+│   ├── CORS_FIX.md                # CORS solution documentation
+│   ├── CORS_SOLUTION.md           # CORS implementation details
+│   ├── COURSE_CODE_ANALYSIS.md    # Course code format analysis
+│   ├── COURSE_FORMAT.md           # Course data format specification
+│   ├── DATA_CACHING.md            # Data caching strategy
+│   ├── DATA_MANAGEMENT.md         # Data workflows and processes
+│   ├── DATA_RETRIEVAL.md          # Data fetching documentation
+│   ├── DATA_SOURCES.md            # Data source links and references
+│   ├── DATA_STORAGE_OPTIMIZATION.md # Data compression techniques
+│   ├── DATA_STORAGE_STRATEGY.md   # Data storage architecture
+│   ├── DATA_STRATEGY.md           # Overall data strategy
+│   ├── DATA_VALIDATION.md         # Data validation procedures
+│   ├── DEPLOYMENT.md              # Deployment guide
+│   ├── DISCOVERY_COMMANDS.md      # Course discovery script reference
+│   ├── DISCOVERY_STATUS.md        # Discovery script status
+│   ├── GITHUB_PAGES_PROXY_SETUP.md # GitHub Pages proxy configuration
+│   ├── HIERARCHY_ARCHITECTURE.md  # Hierarchy system architecture
+│   ├── HOMEPAGE_DATA_BUILD.md     # Homepage data generation
+│   ├── HOW_IT_WORKS.md            # System overview
+│   ├── LOGO_AND_BRANDING.md       # Branding guidelines
+│   ├── MOBILE_OPTIMIZATION.md     # Mobile optimization details
+│   ├── PROJECT_STRUCTURE.md       # Project organization
+│   ├── QUICK_CORS_FIX.md          # Quick CORS troubleshooting
+│   ├── QUICK_START.md             # Quick start guide
+│   ├── README.md                  # Documentation index
+│   ├── RECENT_IMPROVEMENTS.md     # Recent changes and updates
+│   ├── RUNNING_LOCALLY.md         # Local development guide
+│   ├── SETUP_GUIDE.md             # Development environment setup
+│   ├── SWITCHING_TO_ACTIONS.md    # GitHub Actions migration
+│   ├── TROUBLESHOOTING.md         # Common issues and solutions
+│   └── VGS_CACHING.md             # VGS data caching strategy
+├── lib/                            # Core library functions
+│   ├── all-courses.ts             # Unified course loading
+│   ├── api.ts                     # NSD API integration
+│   ├── course-loader.ts           # Generic data loader
+│   ├── courses.ts                 # Course search and filtering
+│   ├── hierarchy-config.ts        # Institution hierarchy configs
+│   ├── hierarchy-discovery.ts     # Generic course discovery
+│   ├── institutions.ts            # Institution metadata
+│   ├── utils.ts                   # Utility functions (grade processing)
+│   └── vgs-grade-data.ts          # VGS grade data handling
+├── pages/                          # Next.js pages (routes)
+│   ├── api/                       # API routes
+│   │   ├── proxy.ts               # TypeScript proxy handler
+│   │   └── [additional API routes]
+│   ├── _app.tsx                   # App wrapper
+│   ├── _document.tsx              # Custom document
+│   ├── index.tsx                  # Home page (karakterfordelinger overview)
+│   ├── kalkulator.tsx             # GPA Calculator page
+│   ├── katalog.tsx                # Course catalog page
+│   ├── om.tsx                     # About page
+│   └── sok.tsx                    # Search page (grade distribution search)
+├── public/                         # Static assets (served directly)
+│   ├── data/                      # Course data files (copied during build)
+│   │   └── institutions/          # Institution course JSON files
+│   ├── dist.png                   # Logo (PNG)
+│   ├── dist.svg                   # Logo (SVG)
+│   ├── favicon.svg                # Favicon
+│   ├── proxy-config.json          # Proxy configuration
+│   └── wordmark.svg               # Wordmark logo
+├── scripts/                        # Utility and discovery scripts
+│   ├── analyze-*.ts               # Analysis scripts
+│   ├── build-*.ts                 # Data building scripts
+│   ├── discover-*.ts              # Course discovery scripts (40+)
+│   ├── fetch-*.ts                 # Data fetching scripts
+│   ├── fix-*.ts                   # Data fixing scripts
+│   ├── normalize-*.ts             # Data normalization scripts
+│   ├── optimize-*.ts              # Data optimization scripts
+│   ├── parse-*.ts                 # Data parsing scripts
+│   ├── populate-*.ts              # Cache population scripts
+│   ├── test-*.ts                  # Testing scripts
+│   ├── utils/                     # Shared script utilities
+│   │   └── export-format.ts      # Export format utilities
+│   └── copy-nhh-data.js           # Pre-build data copy script
+├── styles/                         # Global styles and CSS modules
+│   ├── globals.css                # Global styles
+│   ├── Home.module.css            # Home page styles
+│   ├── Katalog.module.css         # Catalog page styles
+│   ├── Kalkulator.module.css      # Calculator page styles
+│   ├── Search.module.css          # Search page styles
+│   └── About.module.css           # About page styles
+├── types/                          # TypeScript type definitions
+│   ├── gpa.ts                     # GPA calculation types
+│   └── index.ts                   # Shared types
+├── cloudflare-worker-proxy.js     # Cloudflare Worker proxy (alternative)
+├── LICENSE                        # MIT License
+├── next.config.js                 # Next.js configuration
+├── next-env.d.ts                  # Next.js type definitions
+├── package.json                   # Dependencies and scripts
+├── postcss.config.js              # PostCSS configuration
+├── README.md                      # This file
+├── tailwind.config.js             # Tailwind CSS configuration
+├── tsconfig.json                  # TypeScript configuration
+└── vercel.json                    # Vercel deployment config
+```
+
 ## Data Management
 
 ### Course Discovery Workflow
 
+The application includes 40+ discovery scripts for harvesting course data from institutions. Each script:
+
+1. Queries DBH year-by-year (2000 → current year)
+2. Merges and deduplicates course codes (removing API `-1` suffix)
+3. Writes optimized JSON file to `data/institutions/<institution>-all-courses.json`
+
+**Common Discovery Commands**:
+
 ```bash
-# Harvest course data for an institution
+# Harvest course data for major institutions
 npm run discover-ntnu      # NTNU - ~15-20 minutes
-npm run discover-uio       # UiO - ~10-15 minutes
-npm run discover-uib       # UiB - ~10-15 minutes
-npm run discover-nhh-all   # NHH - ~5-10 minutes
+npm run discover-uio        # UiO - ~10-15 minutes
+npm run discover-uib        # UiB - ~10-15 minutes
+npm run discover-nhh-all    # NHH - ~5-10 minutes
 
 # Optimize JSON files (compression)
 npm run optimize-courses
@@ -220,12 +516,13 @@ npm run optimize-courses
 npm run build
 ```
 
-Discovery scripts:
-- Fetch data year-by-year (2000-2025)
-- Merge and deduplicate courses
-- Export to optimized JSON format
-- Save to `data/institutions/*.json`
-- Automatically copied to `public/` during build via prebuild script
+After running discovery scripts, copy generated JSON files to the public folder:
+
+```bash
+cp data/institutions/<file>.json public/data/institutions/
+```
+
+For the complete list of all 40+ discovery commands, see `docs/DISCOVERY_COMMANDS.md`.
 
 ### Data Optimization
 
@@ -237,6 +534,20 @@ The `optimize-course-json.ts` script applies:
 - Metadata stripping
 
 Results: 98.2% size reduction while maintaining full functionality.
+
+### VGS Data Processing
+
+VGS (videregående skole) grade distribution data is processed from UDIR Excel/CSV exports:
+
+```bash
+# Parse VGS grade statistics from Excel/CSV
+npm run parse-vgs-grades
+
+# Fetch VGS grades from API (alternative method)
+npm run fetch-vgs-grades-api
+```
+
+The processed data is stored in `data/vgs-grade-statistics.json` and `data/udir-vgs-courses.json`.
 
 ## Performance Characteristics
 
@@ -315,64 +626,14 @@ Output directory: `out/` (ready for deployment to any static hosting service)
 - `npm run discover-uib` - Harvest UiB courses (2000-2025)
 - `npm run discover-nhh-all` - Harvest NHH courses (2000-2025)
 - `npm run optimize-courses` - Optimize JSON course files
+- `npm run parse-vgs-grades` - Parse VGS grade statistics
+- `npm run fetch-vgs-grades-api` - Fetch VGS grades from API
 
 **Testing**:
 - `npm run test-hierarchy` - Test hierarchy discovery system
 - `npm run test-fetch` - Test API fetching functionality
 
-40+ additional discovery scripts available for other institutions (see `package.json`).
-
-## Project Structure
-
-```
-gpa/
-├── api/                      # API routes (serverless functions)
-│   └── proxy.js              # CORS proxy handler
-├── components/               # React components
-│   ├── CourseAutocomplete.tsx
-│   ├── CourseNameAutocomplete.tsx
-│   ├── DepartmentBrowser.tsx
-│   ├── GPACalculator.tsx
-│   ├── MultiYearChart.tsx
-│   └── [additional components]
-├── data/                     # Source of truth data files
-│   └── institutions/         # Optimized JSON course files
-│       ├── nhh-all-courses.json
-│       ├── ntnu-all-courses.json
-│       ├── uio-all-courses.json
-│       └── uib-all-courses.json
-├── docs/                     # Comprehensive documentation
-│   ├── ARCHITECTURE.md       # System architecture details
-│   ├── API_REFERENCE.md      # NSD API documentation
-│   ├── DATA_MANAGEMENT.md    # Data workflows
-│   └── [additional docs]
-├── lib/                      # Core library functions
-│   ├── api.ts                # NSD API integration
-│   ├── courses.ts            # Course search and filtering
-│   ├── hierarchy-discovery.ts # Generic course discovery
-│   ├── hierarchy-config.ts   # Institution hierarchy configs
-│   ├── course-loader.ts      # Generic data loader
-│   └── utils.ts              # Utility functions
-├── pages/                    # Next.js pages (routes)
-│   ├── _app.tsx              # App wrapper
-│   ├── _document.tsx         # Custom document
-│   ├── index.tsx             # Home page
-│   ├── kalkulator.tsx        # GPA Calculator page
-│   ├── sok.tsx               # Search page
-│   └── om.tsx                # About page
-├── scripts/                  # Utility and discovery scripts
-│   ├── discover-*.ts         # Course discovery scripts
-│   ├── optimize-course-json.ts
-│   └── utils/                # Shared script utilities
-├── styles/                   # Global styles and CSS modules
-├── types/                    # TypeScript type definitions
-│   ├── index.ts              # Shared types
-│   └── gpa.ts                # GPA calculation types
-├── next.config.js            # Next.js configuration
-├── package.json              # Dependencies and scripts
-├── tsconfig.json             # TypeScript configuration
-└── vercel.json               # Vercel deployment config
-```
+40+ additional discovery scripts available for other institutions (see `package.json` and `docs/DISCOVERY_COMMANDS.md`).
 
 ## Security Considerations
 
@@ -413,10 +674,13 @@ Comprehensive documentation available in `docs/`:
 - **ARCHITECTURE.md** - System architecture and design decisions
 - **API_REFERENCE.md** - Complete NSD API documentation
 - **DATA_MANAGEMENT.md** - Course data harvesting and optimization workflows
+- **DATA_SOURCES.md** - Data source links and discovery procedures
 - **DATA_STORAGE_STRATEGY.md** - Data format specifications and optimization techniques
 - **BUILD_AND_DEPLOYMENT.md** - Deployment procedures
+- **DISCOVERY_COMMANDS.md** - Complete reference of all discovery scripts
 - **TROUBLESHOOTING.md** - Common issues and solutions
 - **SETUP_GUIDE.md** - Development environment setup
+- **QUICK_START.md** - Quick start guide for users and developers
 
 ## Contributing
 
@@ -430,12 +694,16 @@ This is an open-source project. Contributions welcome:
 
 ## Data Sources and Attribution
 
-Course and grade data provided by:
-- **Norsk senter for forskningsdata (NSD)** - Norwegian Centre for Research Data
-- API: `https://dbh.hkdir.no/api/`
-- Statistics Portal: `https://dbh.hkdir.no/tall-og-statistikk/`
+Course and grade distribution data provided by:
 
-All course data is publicly available through the NSD API. This application aggregates and presents this data in an accessible format.
+- **Norsk senter for forskningsdata (NSD)** - Norwegian Centre for Research Data
+  - API: `https://dbh.hkdir.no/api/`
+  - Statistics Portal: `https://dbh.hkdir.no/tall-og-statistikk/`
+
+- **Utdanningsdirektoratet (UDIR)** - Directorate for Education
+  - VGS grade statistics and course data
+
+All course data is publicly available through these sources. This application aggregates and presents this data in an accessible format for students and educators.
 
 ## License
 
@@ -475,6 +743,15 @@ Comprehensive TypeScript coverage:
 - Generic types for reusable components
 - Compile-time error checking
 
+### Grade Distribution Processing
+
+Sophisticated grade distribution handling:
+- Automatic normalization (A-F or 1-6 scales)
+- Duplicate entry aggregation
+- Multi-year data combination
+- Pass/Fail conditional display
+- Statistical calculation (mean GPA, percentages)
+
 ## Future Enhancements
 
 Potential improvements and planned features:
@@ -486,12 +763,14 @@ Potential improvements and planned features:
 - Export functionality (PDF reports, CSV downloads)
 - Service worker implementation (offline support)
 - Performance monitoring and analytics
+- Enhanced VGS data coverage
+- Real-time data updates via webhooks
 
 ## Version History
 
 Current version focuses on:
-- Complete course data for 4 major institutions
-- Grade distribution visualization
+- Complete course data for 4 major institutions + VGS
+- Comprehensive grade distribution visualization (karakterfordelinger)
 - University and high school GPA calculators
 - Optimized data storage (98.2% compression)
 - Comprehensive documentation
