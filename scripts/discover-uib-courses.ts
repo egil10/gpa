@@ -18,6 +18,33 @@ interface CourseExport {
   studentCountByYear: Record<number, number>; // Year -> student count
 }
 
+function inferCourseName(courseCode: string): string | undefined {
+  const code = courseCode.toUpperCase();
+  if (code.startsWith('EXPHIL')) return 'Examen philosophicum';
+  if (code.startsWith('JUS')) return 'Rettsvitenskap';
+  if (code.startsWith('ECON')) return 'Samfunnsøkonomi';
+  if (code.startsWith('INF')) return 'Informatikk';
+  if (code.startsWith('MAT')) return 'Matematikk';
+  if (code.startsWith('FYS')) return 'Fysikk';
+  if (code.startsWith('KJE')) return 'Kjemi';
+  if (code.startsWith('BIO')) return 'Biologi';
+  if (code.startsWith('GEO')) return 'Geovitenskap';
+  if (code.startsWith('MOL')) return 'Molekylærbiologi';
+  if (code.startsWith('STAT')) return 'Statistikk';
+  if (code.startsWith('PSA')) return 'Psykologi';
+  if (code.startsWith('PSYK')) return 'Psykologi';
+  if (code.startsWith('MED')) return 'Medisin';
+  if (code.startsWith('OD')) return 'Odontologi';
+  if (code.startsWith('ERN')) return 'Ernæring';
+  if (code.startsWith('FARM')) return 'Farmasi';
+  if (code.startsWith('SAMPOL')) return 'Sammenlignende politikk';
+  if (code.startsWith('SOS')) return 'Sosiologi';
+  if (code.startsWith('TVIT')) return 'Tverrfaglig informasjonsvitenskap';
+  if (code.startsWith('INFO')) return 'Informasjonsvitenskap';
+  if (code.startsWith('MIX')) return 'Medie- og interaksjonsdesign';
+  return undefined;
+}
+
 async function discoverUiBCourses() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
@@ -27,7 +54,7 @@ async function discoverUiBCourses() {
 
   const institutionCode = '1120';
   const institutionName = 'UiB';
-  
+
   // Fetch years from most recent to oldest
   // Going back as far as API allows (typically 2000+)
   const currentYear = new Date().getFullYear();
@@ -36,22 +63,22 @@ async function discoverUiBCourses() {
     years.push(year);
   }
   const allCoursesMap = new Map<string, CourseExport>();
-  
+
   console.log(`📡 Fetching all courses from ${institutionName}...`);
   console.log(`   Processing ${years.length} years in batches...\n`);
-  
+
   // Process year by year
   for (let i = 0; i < years.length; i++) {
     const year = years[i];
     console.log(`[${i + 1}/${years.length}] 📅 Fetching year ${year}...`);
-    
+
     try {
       const startTime = Date.now();
       const courses = await getAllCoursesForInstitution(institutionCode, year);
       const duration = Date.now() - startTime;
-      
+
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
-      
+
       // Merge into master map
       // IMPORTANT: For UiB, we preserve meaningful variants (e.g., "EXPHIL-HFSEM", "EXPHIL-MNEKS")
       // Only merge courses that are truly the same (same code after removing numeric suffixes)
@@ -63,7 +90,7 @@ async function discoverUiBCourses() {
         // Normalize spaces and convert to uppercase for consistent storage
         const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix then normalize
         const existing = allCoursesMap.get(baseCode);
-        
+
         if (existing) {
           // Add year if not present
           if (!existing.years.includes(year)) {
@@ -73,6 +100,9 @@ async function discoverUiBCourses() {
           // Update course name if we found one and it wasn't set before
           if (!existing.courseName && course.courseName) {
             existing.courseName = course.courseName;
+          } else if (!existing.courseName && !course.courseName) {
+            // Try to infer name if missing
+            existing.courseName = inferCourseName(baseCode);
           }
           // Update student counts
           if (!existing.studentCountByYear[year]) {
@@ -86,7 +116,7 @@ async function discoverUiBCourses() {
           // Create new entry (baseCode already normalized)
           allCoursesMap.set(baseCode, {
             courseCode: baseCode, // Already normalized (spaces removed, uppercase)
-            courseName: course.courseName, // Store course name if available
+            courseName: course.courseName || inferCourseName(baseCode), // Store course name if available or infer it
             years: [year],
             totalStudents: course.totalStudents,
             lastYear: year,
@@ -97,44 +127,44 @@ async function discoverUiBCourses() {
           });
         }
       });
-      
+
       console.log(`   📊 Total unique courses so far: ${allCoursesMap.size}\n`);
-      
+
       // Small delay between requests to be nice to the API
       if (i < years.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-      
+
     } catch (error) {
       console.error(`   ❌ Error fetching ${year}:`, error instanceof Error ? error.message : error);
       console.log(`   ⚠️  Continuing with next year...\n`);
     }
   }
-  
+
   // Convert to array and sort
   const allCourses = Array.from(allCoursesMap.values())
     .filter(courseHasData) // Only courses with actual data (lastYearStudents > 0 or years with data)
     .sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-  
+
   console.log(`\n✅ Discovery complete!`);
   console.log(`   Total unique courses: ${allCourses.length}\n`);
-  
+
   // Create data directory if it doesn't exist
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
-  
+
   // Save to JSON file (optimized format)
   const outputFile = path.join(dataDir, 'uib-all-courses.json');
   const exportData = createOptimizedExport(institutionCode, allCourses);
-  
+
   // Write compact JSON (no whitespace for smaller size)
   fs.writeFileSync(outputFile, JSON.stringify(exportData));
-  
+
   console.log(`✅ Exported ${allCourses.length} courses to:`);
   console.log(`   ${outputFile}\n`);
-  
+
   // Print summary statistics
   console.log(`📊 Summary:`);
   console.log(`   Total courses: ${allCourses.length}`);
@@ -146,23 +176,23 @@ async function discoverUiBCourses() {
     .filter(c => c.years.includes(2024))
     .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
     .toLocaleString()}`);
-  
+
   // Show courses by year coverage
   const maxYears = Math.max(...allCourses.map(c => c.years.length));
   const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
   console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
-  
+
   // Show sample courses
   console.log(`\n📚 Sample courses:`);
   allCourses.slice(0, 10).forEach(course => {
     const yearsStr = course.years.slice(0, 3).join(', ') + (course.years.length > 3 ? '...' : '');
     console.log(`   ${course.courseCode.padEnd(12)} - ${course.lastYearStudents.toLocaleString().padStart(6)} students (${course.years.length} years: ${yearsStr})`);
   });
-  
+
   if (allCourses.length > 10) {
     console.log(`   ... and ${allCourses.length - 10} more courses`);
   }
-  
+
   // Show courses by first letter
   console.log(`\n📈 Courses by prefix:`);
   const prefixCounts: Record<string, number> = {};
@@ -170,16 +200,16 @@ async function discoverUiBCourses() {
     const prefix = course.courseCode.charAt(0);
     prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
   });
-  
+
   Object.entries(prefixCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .forEach(([prefix, count]) => {
       console.log(`   ${prefix}*: ${count} courses`);
     });
-  
+
   console.log(`\n✅ All done!`);
-  
+
   return allCourses;
 }
 

@@ -4,7 +4,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport, courseHasData } from './utils/export-format';
+import { createOptimizedExport, courseHasData, normalizeCourseCodeForStorage } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -27,7 +27,7 @@ async function discoverNTNUCourses() {
 
   const institutionCode = '1150';
   const institutionName = 'NTNU';
-  
+
   // Fetch years from most recent to oldest
   // Going back as far as API allows (typically 2000+)
   const currentYear = new Date().getFullYear();
@@ -36,27 +36,27 @@ async function discoverNTNUCourses() {
     years.push(year);
   }
   const allCoursesMap = new Map<string, CourseExport>();
-  
+
   console.log(`📡 Fetching all courses from ${institutionName}...`);
   console.log(`   Processing ${years.length} years in batches...\n`);
-  
+
   // Process year by year
   for (let i = 0; i < years.length; i++) {
     const year = years[i];
     console.log(`[${i + 1}/${years.length}] 📅 Fetching year ${year}...`);
-    
+
     try {
       const startTime = Date.now();
       const courses = await getAllCoursesForInstitution(institutionCode, year);
       const duration = Date.now() - startTime;
-      
+
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
-      
+
       // Merge into master map
       courses.forEach(course => {
-        const baseCode = course.courseCode.split('-')[0]; // Remove -1 suffix
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix and normalize
         const existing = allCoursesMap.get(baseCode);
-        
+
         if (existing) {
           // Add year if not present
           if (!existing.years.includes(year)) {
@@ -85,28 +85,28 @@ async function discoverNTNUCourses() {
           });
         }
       });
-      
+
       console.log(`   📊 Total unique courses so far: ${allCoursesMap.size}\n`);
-      
+
       // Small delay between requests to be nice to the API
       if (i < years.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
-      
+
     } catch (error) {
       console.error(`   ❌ Error fetching ${year}:`, error instanceof Error ? error.message : error);
       console.log(`   ⚠️  Continuing with next year...\n`);
     }
   }
-  
+
   // Convert to array and sort
   const allCourses = Array.from(allCoursesMap.values())
     .filter(courseHasData) // Only courses with actual data (lastYearStudents > 0 or years with data)
     .sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-  
+
   console.log(`\n✅ Discovery complete!`);
   console.log(`   Total unique courses: ${allCourses.length}\n`);
-  
+
   // Analyze duplicate names issue
   console.log(`🔍 Analyzing course name duplicates...\n`);
   const nameMap = new Map<string, string[]>();
@@ -118,7 +118,7 @@ async function discoverNTNUCourses() {
       nameMap.get(course.courseName)!.push(course.courseCode);
     }
   });
-  
+
   const duplicates = Array.from(nameMap.entries()).filter(([_, codes]) => codes.length > 1);
   if (duplicates.length > 0) {
     console.log(`   ⚠️  Found ${duplicates.length} course names with multiple codes:`);
@@ -132,23 +132,23 @@ async function discoverNTNUCourses() {
   } else {
     console.log(`   ✅ No duplicate names found!\n`);
   }
-  
+
   // Create data directory if it doesn't exist
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
-  
+
   // Save to JSON file (optimized format)
   const outputFile = path.join(dataDir, 'ntnu-all-courses.json');
   const exportData = createOptimizedExport(institutionCode, allCourses);
-  
+
   // Write compact JSON (no whitespace for smaller size)
   fs.writeFileSync(outputFile, JSON.stringify(exportData));
-  
+
   console.log(`✅ Exported ${allCourses.length} courses to:`);
   console.log(`   ${outputFile}\n`);
-  
+
   // Print summary statistics
   console.log(`📊 Summary:`);
   console.log(`   Total courses: ${allCourses.length}`);
@@ -160,23 +160,23 @@ async function discoverNTNUCourses() {
     .filter(c => c.years.includes(2024))
     .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
     .toLocaleString()}`);
-  
+
   // Show courses by year coverage
   const maxYears = Math.max(...allCourses.map(c => c.years.length));
   const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
   console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
-  
+
   // Show sample courses
   console.log(`\n📚 Sample courses:`);
   allCourses.slice(0, 10).forEach(course => {
     const yearsStr = course.years.slice(0, 3).join(', ') + (course.years.length > 3 ? '...' : '');
     console.log(`   ${course.courseCode.padEnd(12)} - ${course.lastYearStudents.toLocaleString().padStart(6)} students (${course.years.length} years: ${yearsStr})`);
   });
-  
+
   if (allCourses.length > 10) {
     console.log(`   ... and ${allCourses.length - 10} more courses`);
   }
-  
+
   // Show courses by first letter
   console.log(`\n📈 Courses by prefix:`);
   const prefixCounts: Record<string, number> = {};
@@ -184,16 +184,16 @@ async function discoverNTNUCourses() {
     const prefix = course.courseCode.charAt(0);
     prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
   });
-  
+
   Object.entries(prefixCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .forEach(([prefix, count]) => {
       console.log(`   ${prefix}*: ${count} courses`);
     });
-  
+
   console.log(`\n✅ All done!`);
-  
+
   return allCourses;
 }
 
