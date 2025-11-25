@@ -324,6 +324,43 @@ async function fetchCourseGradeData(
         
         // Always try formatCourseCode result
         codeFormats.push(formatCourseCode(cleaned, institution));
+    } else if (institution === 'LDH') {
+        // LDH (Lovisenberg diakonale høgskole): Some courses have "EMNE" in them (BIS-EMNE1, ROV-EMNE1A)
+        // Also has regular dash codes that work (BSY-100, BSY-101)
+        // Try as-is first
+        codeFormats.push(cleaned);
+        
+        // If code contains "EMNE", try variations
+        if (cleaned.includes('EMNE')) {
+            // Try removing "EMNE" and keeping the rest (e.g., "BIS-EMNE1" -> "BIS-1")
+            const withoutEMNE = cleaned.replace(/EMNE/g, '');
+            codeFormats.push(withoutEMNE);
+            codeFormats.push(`${withoutEMNE}-1`);
+            
+            // Try just the base before EMNE (e.g., "BIS-EMNE1" -> "BIS")
+            const emneIndex = cleaned.indexOf('EMNE');
+            if (emneIndex > 0) {
+                const base = cleaned.substring(0, emneIndex).replace(/-$/, ''); // Remove trailing dash
+                codeFormats.push(base);
+                codeFormats.push(`${base}-1`);
+            }
+        }
+        
+        // If code has a dash, try variations
+        if (cleaned.includes('-')) {
+            const parts = cleaned.split('-');
+            // Try just the base (e.g., "BIS-EMNE1" -> "BIS")
+            if (parts.length > 1) {
+                codeFormats.push(parts[0]);
+                codeFormats.push(`${parts[0]}-1`);
+            }
+        } else {
+            // No dash: try with -1
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
