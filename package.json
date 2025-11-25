@@ -68,7 +68,9 @@
     "normalize-codes": "tsx scripts/normalize-course-codes.ts",
     "discover-udir-vgs": "tsx scripts/discover-udir-vgs-courses.ts",
     "parse-vgs-grades": "tsx scripts/parse-vgs-grade-statistics.ts",
-    "fetch-vgs-grades-api": "tsx scripts/fetch-vgs-grades-from-api.ts"
+    "fetch-vgs-grades-api": "tsx scripts/fetch-vgs-grades-from-api.ts",
+    "build-institution-statistics": "tsx scripts/build-institution-statistics.ts",
+    "fetch-all-grade-data": "tsx scripts/fetch-all-grade-data.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
