@@ -204,41 +204,137 @@
 @media (max-width: 768px) {
   .statisticsPage {
     padding: var(--space-2xl) 0;
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+
+  .header {
+    padding: 0 var(--space-md);
   }
 
   .controls {
     flex-direction: column;
     align-items: stretch;
+    padding: var(--space-md);
+    gap: var(--space-md);
   }
 
   .controlGroup {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--space-xs);
+  }
+
+  .controlGroup label {
+    font-size: var(--text-xs);
   }
 
   .select {
     width: 100%;
     min-width: unset;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+    touch-action: manipulation;
   }
 
   .statsGrid {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
+    padding: 0 var(--space-md);
+  }
+
+  .statCard {
+    padding: var(--space-md);
+  }
+
+  .chartContainer {
+    margin: var(--space-md);
+    padding: var(--space-md);
+    border-radius: 1rem;
+  }
+
+  .trendChart {
+    border-radius: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .trendHeader,
   .trendRow {
     grid-template-columns: 1fr;
     gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .trendHeaderCell,
   .trendCell {
     padding: var(--space-xs) 0;
+    font-size: var(--text-sm);
   }
 
   .trendHeaderCell:first-child,
   .trendCell:first-child {
     font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
+
+  .trendRow {
+    min-height: 44px; /* Better touch target */
+    touch-action: manipulation;
+  }
+
+  .trendRow:active {
+    background: var(--surface-hover);
+  }
+}
+
+@media (max-width: 480px) {
+  .statisticsPage {
+    padding: var(--space-xl) 0;
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: var(--text-sm);
+  }
+
+  .controls {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .statsGrid {
+    padding: 0 var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .statCard {
+    padding: var(--space-sm);
+  }
+
+  .statValue {
+    font-size: var(--text-xl);
+  }
+
+  .chartContainer {
+    margin: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .trendHeader,
+  .trendRow {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .trendHeaderCell,
+  .trendCell {
+    font-size: var(--text-xs);
   }
 }
 

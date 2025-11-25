@@ -26,13 +26,42 @@
   .calculatorPage {
     padding: var(--space-2xl) 0;
     padding-top: calc(var(--space-2xl) + env(safe-area-inset-top));
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
     min-height: 70vh;
   }
   
   .intro {
     margin-bottom: var(--space-2xl);
     padding: 0 var(--space-md);
-    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
-    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+
+  .intro h1 {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .calculatorPage {
+    padding: var(--space-xl) 0;
+    padding-top: calc(var(--space-xl) + env(safe-area-inset-top));
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+
+  .intro {
+    padding: 0 var(--space-sm);
+  }
+
+  .intro h1 {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: var(--text-sm);
   }
 }

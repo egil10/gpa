@@ -87,12 +87,53 @@
 }
 
 @media (max-width: 768px) {
+  .card {
+    padding: var(--space-md);
+    border-radius: 1.25rem;
+  }
+
+  .header {
+    margin-bottom: var(--space-sm);
+  }
+
+  .courseCode {
+    font-size: var(--text-lg);
+  }
+
   .stats {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
   }
   
   .statValue {
     font-size: var(--text-base);
+  }
+
+  .statLabel {
+    font-size: 0.7rem;
+  }
+
+  .bar {
+    margin-top: var(--space-sm);
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: var(--space-sm);
+  }
+
+  .courseCode {
+    font-size: var(--text-base);
+  }
+
+  .stats {
+    gap: var(--space-xs);
+  }
+
+  .statValue {
+    font-size: var(--text-sm);
   }
 }

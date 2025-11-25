@@ -101,14 +101,56 @@
 @media (max-width: 768px) {
   .chartContainer {
     padding: var(--space-md);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+
+  .chartHeader h3 {
+    font-size: var(--text-xl);
+  }
+
+  .chartHeader p {
+    font-size: var(--text-xs);
   }
   
   .stats {
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+  }
+
+  .statItem {
+    padding: var(--space-xs);
+  }
+
+  .grade {
+    font-size: var(--text-base);
+  }
+
+  .count {
+    font-size: var(--text-xs);
   }
 
   .passFailStats {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .chartContainer {
+    padding: var(--space-sm);
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xs);
+  }
+
+  .passFailStats {
+    grid-template-columns: 1fr;
   }
 }
 
