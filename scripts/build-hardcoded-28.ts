@@ -15,18 +15,53 @@ import { GradeData, CourseStats } from '../types';
 
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', 'homepage-hardcoded-28.json');
+const FETCH_TIMEOUT = 30000; // 30 seconds timeout for fetch calls
 
 interface Hardcoded28Payload {
   generatedAt: string;
   courses: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }>;
 }
 
+// Helper function to add timeout to fetch
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout: number = FETCH_TIMEOUT): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  // If options already has a signal, we need to merge them
+  // For simplicity, we'll use our timeout controller and let it take precedence
+  const { signal: existingSignal, ...restOptions } = options;
+  
+  // If there's an existing signal, listen to it and abort our controller if it aborts
+  if (existingSignal) {
+    existingSignal.addEventListener('abort', () => controller.abort());
+  }
+  
+  try {
+    const response = await fetch(url, {
+      ...restOptions,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      // Check if it was our timeout or the existing signal
+      if (controller.signal.aborted && (!existingSignal || !existingSignal.aborted)) {
+        throw new Error(`Request timeout after ${timeout}ms`);
+      }
+    }
+    throw error;
+  }
+}
+
 // Exactly 1 course per institution (36 total)
+// These are individual courses, one per institution - not collections
 const HARDCODED_COURSES = [
   { code: 'TDT4110', institution: 'NTNU', institutionCode: '1150', name: 'TDT4110' },
   { code: 'INTER1100', institution: 'OsloMet', institutionCode: '1175', name: 'INTER1100' },
   { code: 'EXPHIL03', institution: 'UiO', institutionCode: '1110', name: 'EXPHIL03' },
-  { code: 'INF100', institution: 'UiB', institutionCode: '1120', name: 'INF100' }, // Removed duplicate EXPHIL - keeping INF100
+  { code: 'INF100', institution: 'UiB', institutionCode: '1120', name: 'INF100' },
   { code: 'AOS100-B', institution: 'NMBU', institutionCode: '1173', name: 'AOS100-B' },
   { code: 'PGR112', institution: 'HK', institutionCode: '8253', name: 'PGR112' },
   { code: 'SAM2000', institution: 'USN', institutionCode: '1176', name: 'SAM2000' },
@@ -51,6 +86,15 @@ const HARDCODED_COURSES = [
   { code: 'DE104', institution: 'KHIO', institutionCode: '6220', name: 'DE104' },
   { code: 'RLE1003', institution: 'FIH', institutionCode: '8234', name: 'RLE1003' },
   { code: 'SAAL1GDG', institution: 'SH', institutionCode: '0217', name: 'SAAL1GDG' },
+  // Missing institutions - adding top courses from homepage data
+  { code: 'BØK34233', institution: 'BI', institutionCode: '8241', name: 'BØK34233' },
+  { code: 'EX-205', institution: 'UiA', institutionCode: '1171', name: 'EX-205' },
+  { code: 'PRIV100', institution: 'BD', institutionCode: '8227', name: 'PRIV100' },
+  { code: 'DIPLOM', institution: 'BAS', institutionCode: '8243', name: 'DIPLOM' },
+  { code: 'HKPRO2', institution: 'HGUt', institutionCode: '8247', name: 'HKPRO2' },
+  { code: 'DAN3', institution: 'HFDK', institutionCode: '8254', name: 'DAN3' },
+  { code: 'RLE1001', institution: 'HLT', institutionCode: '8248', name: 'RLE1001' },
+  { code: 'STEINER101', institution: 'Steiner', institutionCode: '8225', name: 'STEINER101' },
 ];
 
 async function fetchCourseGradeData(
@@ -80,7 +124,7 @@ async function fetchCourseGradeData(
       const payload = createSearchPayload(institutionCode, formattedCode);
 
       try {
-        const response = await fetch(DIRECT_API, {
+        const response = await fetchWithTimeout(DIRECT_API, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +197,7 @@ async function fetchCourseGradeData(
       ],
     };
 
-    const response = await fetch(DIRECT_API, {
+    const response = await fetchWithTimeout(DIRECT_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -193,70 +237,95 @@ async function fetchCourseGradeData(
 }
 
 async function main() {
-  console.log(`
+  try {
+    console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║   Building hardcoded 28-course dataset                      ║
 ╚════════════════════════════════════════════════════════════╝
 `);
 
-  console.log(`📋 Fetching grade data for ${HARDCODED_COURSES.length} hardcoded courses (1 per institution)...\n`);
+    console.log(`📋 Fetching grade data for ${HARDCODED_COURSES.length} hardcoded courses (1 per institution)...\n`);
 
-  const results: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }> = [];
+    const results: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }> = [];
 
-  for (let i = 0; i < HARDCODED_COURSES.length; i++) {
-    const course = HARDCODED_COURSES[i];
-    console.log(`[${i + 1}/${HARDCODED_28_COURSES.length}] Fetching ${course.code} (${course.institution})...`);
+    for (let i = 0; i < HARDCODED_COURSES.length; i++) {
+      const course = HARDCODED_COURSES[i];
+      try {
+        console.log(`[${i + 1}/${HARDCODED_COURSES.length}] Fetching ${course.code} (${course.institution})...`);
 
-    const stats = await fetchCourseGradeData(
-      course.institutionCode,
-      course.code,
-      course.institution
-    );
+        const stats = await fetchCourseGradeData(
+          course.institutionCode,
+          course.code,
+          course.institution
+        );
 
-    if (stats) {
-      // Normalize course code for key matching (same logic as homepage)
-      // For all institutions, consistently remove numeric suffixes (e.g., "-0", "-1") but preserve meaningful variants
-      let normalizedCode = course.code.replace(/-[0-9]+$/, '').trim();
-      if (course.institution !== 'UiB') {
-        normalizedCode = normalizedCode.replace(/-[0-9]+$/, '').trim();
-        if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
-          normalizedCode = normalizedCode.slice(0, -1);
+        if (stats) {
+          // Normalize course code for key matching (same logic as homepage)
+          // For all institutions, consistently remove numeric suffixes (e.g., "-0", "-1") but preserve meaningful variants
+          let normalizedCode = course.code.replace(/-[0-9]+$/, '').trim();
+          if (course.institution !== 'UiB') {
+            normalizedCode = normalizedCode.replace(/-[0-9]+$/, '').trim();
+            if (course.institution === 'BI' && normalizedCode.endsWith('1') && normalizedCode.length > 4) {
+              normalizedCode = normalizedCode.slice(0, -1);
+            }
+          }
+
+          results.push({
+            ...stats,
+            institution: course.institution,
+            courseName: course.name,
+            normalizedCode: normalizedCode,
+            courseCode: normalizedCode, // Use normalized code
+          });
+          console.log(`  ✅ Found data for ${course.code} (avg: ${stats.averageGrade?.toFixed(1)}, year: ${stats.year}, students: ${stats.totalStudents})`);
+        } else {
+          console.log(`  ⚠️  No data found for ${course.code}`);
         }
+      } catch (error) {
+        // Log error but continue with other courses
+        console.error(`  ❌ Error fetching ${course.code}:`, error instanceof Error ? error.message : String(error));
       }
 
-      results.push({
-        ...stats,
-        institution: course.institution,
-        courseName: course.name,
-        normalizedCode: normalizedCode,
-        courseCode: normalizedCode, // Use normalized code
-      });
-      console.log(`  ✅ Found data for ${course.code} (avg: ${stats.averageGrade?.toFixed(1)}, year: ${stats.year}, students: ${stats.totalStudents})`);
-    } else {
-      console.log(`  ⚠️  No data found for ${course.code}`);
+      // Small delay to avoid overwhelming the API
+      if (i < HARDCODED_COURSES.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
     }
 
-    // Small delay to avoid overwhelming the API
-    if (i < HARDCODED_COURSES.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+    const payload: Hardcoded28Payload = {
+      generatedAt: new Date().toISOString(),
+      courses: results,
+    };
+
+    // Ensure directory exists before writing
+    try {
+      fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
+    } catch (error) {
+      console.error(`❌ Error creating directory:`, error instanceof Error ? error.message : String(error));
+      throw error;
     }
+
+    try {
+      fs.writeFileSync(OUTPUT_FILE, JSON.stringify(payload, null, 2));
+    } catch (error) {
+      console.error(`❌ Error writing file:`, error instanceof Error ? error.message : String(error));
+      throw error;
+    }
+
+    console.log(`\n✅ Hardcoded course data saved!`);
+    console.log(`   - Courses with data: ${results.length}/${HARDCODED_COURSES.length} (1 per institution)`);
+    console.log(`   - Saved to: ${OUTPUT_FILE}\n`);
+    
+    // Exit successfully even if some courses were missing
+    // Only fail if we couldn't write the file or had a fatal error
+  } catch (error) {
+    console.error('❌ Fatal error:', error instanceof Error ? error.stack : String(error));
+    process.exit(1);
   }
-
-  const payload: Hardcoded28Payload = {
-    generatedAt: new Date().toISOString(),
-    courses: results,
-  };
-
-  fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(payload, null, 2));
-
-  console.log(`\n✅ Hardcoded course data saved!`);
-  console.log(`   - Courses with data: ${results.length}/${HARDCODED_COURSES.length} (1 per institution)`);
-  console.log(`   - Saved to: ${OUTPUT_FILE}\n`);
 }
 
 main().catch((error) => {
-  console.error('❌ Fatal error:', error);
+  console.error('❌ Unhandled error:', error instanceof Error ? error.stack : String(error));
   process.exit(1);
 });
 

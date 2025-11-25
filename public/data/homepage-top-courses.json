@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-25T01:18:04.239Z",
+  "generatedAt": "2025-11-25T01:34:25.020Z",
   "courses": [
     {
       "institution": "BI",
@@ -8,15 +8,6 @@
       "courseName": "BØK34233",
       "studentCount": 3083,
       "letterGradeCount": 3083,
-      "latestYear": 2025
-    },
-    {
-      "institution": "BI",
-      "institutionCode": "8241",
-      "courseCode": "BØK34232",
-      "courseName": "BØK34232",
-      "studentCount": 3074,
-      "letterGradeCount": 3074,
       "latestYear": 2025
     },
     {
@@ -38,39 +29,12 @@
       "latestYear": 2025
     },
     {
-      "institution": "NTNU",
-      "institutionCode": "1150",
-      "courseCode": "TMA4100",
-      "courseName": "TMA4100",
-      "studentCount": 1368,
-      "letterGradeCount": 1368,
-      "latestYear": 2024
-    },
-    {
-      "institution": "NTNU",
-      "institutionCode": "1150",
-      "courseCode": "TMA4105",
-      "courseName": "TMA4105",
-      "studentCount": 1044,
-      "letterGradeCount": 1044,
-      "latestYear": 2025
-    },
-    {
       "institution": "HK",
       "institutionCode": "8253",
       "courseCode": "BCR3103",
       "courseName": "BCR3103",
       "studentCount": 866,
       "letterGradeCount": 866,
-      "latestYear": 2025
-    },
-    {
-      "institution": "HK",
-      "institutionCode": "8253",
-      "courseCode": "ODF1100",
-      "courseName": "ODF1100",
-      "studentCount": 844,
-      "letterGradeCount": 844,
       "latestYear": 2025
     },
     {
@@ -83,31 +47,13 @@
       "latestYear": 2024
     },
     {
-      "institution": "USN",
-      "institutionCode": "1176",
-      "courseCode": "ORL1000",
-      "courseName": "ORL1000",
-      "studentCount": 739,
-      "letterGradeCount": 739,
-      "latestYear": 2025
-    },
-    {
-      "institution": "USN",
-      "institutionCode": "1176",
-      "courseCode": "MET1020",
-      "courseName": "MET1020",
-      "studentCount": 683,
-      "letterGradeCount": 683,
-      "latestYear": 2025
-    },
-    {
-      "institution": "UiO",
-      "institutionCode": "1110",
-      "courseCode": "IN1010",
-      "courseName": "IN1010",
-      "studentCount": 611,
-      "letterGradeCount": 611,
-      "latestYear": 2025
+      "institution": "OsloMet",
+      "institutionCode": "1175",
+      "courseCode": "SYBA1200",
+      "courseName": "SYBA1200",
+      "studentCount": 655,
+      "letterGradeCount": 655,
+      "latestYear": 2020
     },
     {
       "institution": "UiT",
@@ -128,15 +74,6 @@
       "latestYear": 2024
     },
     {
-      "institution": "UiT",
-      "institutionCode": "1130",
-      "courseCode": "BED-2061NETT",
-      "courseName": "BED-2061NETT",
-      "studentCount": 507,
-      "letterGradeCount": 507,
-      "latestYear": 2025
-    },
-    {
       "institution": "NHH",
       "institutionCode": "1240",
       "courseCode": "SAM3",
@@ -155,21 +92,12 @@
       "latestYear": 2025
     },
     {
-      "institution": "NHH",
-      "institutionCode": "1240",
-      "courseCode": "MET3",
-      "courseName": "MET3",
-      "studentCount": 457,
-      "letterGradeCount": 457,
-      "latestYear": 2024
-    },
-    {
-      "institution": "Nord",
-      "institutionCode": "1174",
-      "courseCode": "SYK1004",
-      "courseName": "SYK1004",
-      "studentCount": 440,
-      "letterGradeCount": 440,
+      "institution": "NMBU",
+      "institutionCode": "1173",
+      "courseCode": "STAT100",
+      "courseName": "STAT100",
+      "studentCount": 468,
+      "letterGradeCount": 468,
       "latestYear": 2025
     },
     {
@@ -200,24 +128,6 @@
       "latestYear": 2025
     },
     {
-      "institution": "HVL",
-      "institutionCode": "0238",
-      "courseCode": "MAT202",
-      "courseName": "MAT202",
-      "studentCount": 370,
-      "letterGradeCount": 370,
-      "latestYear": 2025
-    },
-    {
-      "institution": "NLA",
-      "institutionCode": "8223",
-      "courseCode": "HSM122",
-      "courseName": "HSM122",
-      "studentCount": 354,
-      "letterGradeCount": 354,
-      "latestYear": 2024
-    },
-    {
       "institution": "HIM",
       "institutionCode": "0232",
       "courseCode": "LOG505",
@@ -225,15 +135,6 @@
       "studentCount": 350,
       "letterGradeCount": 350,
       "latestYear": 2025
-    },
-    {
-      "institution": "NLA",
-      "institutionCode": "8223",
-      "courseCode": "HSM121",
-      "courseName": "HSM121",
-      "studentCount": 296,
-      "letterGradeCount": 296,
-      "latestYear": 2024
     },
     {
       "institution": "INN",
@@ -245,48 +146,12 @@
       "latestYear": 2025
     },
     {
-      "institution": "HIM",
-      "institutionCode": "0232",
-      "courseCode": "MAT110",
-      "courseName": "MAT110",
-      "studentCount": 261,
-      "letterGradeCount": 261,
-      "latestYear": 2025
-    },
-    {
       "institution": "HiØ",
       "institutionCode": "0256",
       "courseCode": "SPL10323",
       "courseName": "SPL10323",
       "studentCount": 256,
       "letterGradeCount": 256,
-      "latestYear": 2025
-    },
-    {
-      "institution": "HIM",
-      "institutionCode": "0232",
-      "courseCode": "LOG206",
-      "courseName": "LOG206",
-      "studentCount": 230,
-      "letterGradeCount": 230,
-      "latestYear": 2025
-    },
-    {
-      "institution": "INN",
-      "institutionCode": "1177",
-      "courseCode": "PSY2304",
-      "courseName": "PSY2304",
-      "studentCount": 216,
-      "letterGradeCount": 216,
-      "latestYear": 2025
-    },
-    {
-      "institution": "INN",
-      "institutionCode": "1177",
-      "courseCode": "SYK1004",
-      "courseName": "SYK1004",
-      "studentCount": 212,
-      "letterGradeCount": 212,
       "latestYear": 2025
     },
     {
@@ -308,12 +173,12 @@
       "latestYear": 2021
     },
     {
-      "institution": "HVO",
-      "institutionCode": "0236",
-      "courseCode": "REL154N",
-      "courseName": "REL154N",
-      "studentCount": 154,
-      "letterGradeCount": 154,
+      "institution": "NIH",
+      "institutionCode": "1260",
+      "courseCode": "IDR109",
+      "courseName": "IDR109",
+      "studentCount": 133,
+      "letterGradeCount": 133,
       "latestYear": 2025
     },
     {
@@ -324,24 +189,6 @@
       "studentCount": 90,
       "letterGradeCount": 90,
       "latestYear": 2020
-    },
-    {
-      "institution": "MF",
-      "institutionCode": "8221",
-      "courseCode": "K1030",
-      "courseName": "K1030",
-      "studentCount": 87,
-      "letterGradeCount": 87,
-      "latestYear": 2021
-    },
-    {
-      "institution": "MF",
-      "institutionCode": "8221",
-      "courseCode": "SAM1050",
-      "courseName": "SAM1050",
-      "studentCount": 78,
-      "letterGradeCount": 78,
-      "latestYear": 2025
     },
     {
       "institution": "AHS",
@@ -362,24 +209,6 @@
       "latestYear": 2025
     },
     {
-      "institution": "AHS",
-      "institutionCode": "8232",
-      "courseCode": "PSY134",
-      "courseName": "PSY134",
-      "studentCount": 65,
-      "letterGradeCount": 65,
-      "latestYear": 2025
-    },
-    {
-      "institution": "AHS",
-      "institutionCode": "8232",
-      "courseCode": "PSY133",
-      "courseName": "PSY133",
-      "studentCount": 63,
-      "letterGradeCount": 63,
-      "latestYear": 2025
-    },
-    {
       "institution": "FIH",
       "institutionCode": "8234",
       "courseCode": "RLE1003",
@@ -387,24 +216,6 @@
       "studentCount": 37,
       "letterGradeCount": 37,
       "latestYear": 2021
-    },
-    {
-      "institution": "FIH",
-      "institutionCode": "8234",
-      "courseCode": "RLE1004",
-      "courseName": "RLE1004",
-      "studentCount": 35,
-      "letterGradeCount": 35,
-      "latestYear": 2021
-    },
-    {
-      "institution": "FIH",
-      "institutionCode": "8234",
-      "courseCode": "RLE1004N",
-      "courseName": "RLE1004N",
-      "studentCount": 33,
-      "letterGradeCount": 33,
-      "latestYear": 2025
     },
     {
       "institution": "AHO",
@@ -418,49 +229,29 @@
   ],
   "topCourseCodes": [
     "BØK34233",
-    "BØK34232",
     "TDT4110",
     "EXPHIL03",
-    "TMA4100",
-    "TMA4105",
     "BCR3103",
-    "ODF1100",
     "SAM2000",
-    "ORL1000",
-    "MET1020",
-    "IN1010",
+    "SYBA1200",
     "BED-2043NETT",
     "EXPHIL-SVSEM",
-    "BED-2061NETT",
     "SAM3",
     "SYK1005",
-    "MET3",
-    "SYK1004",
+    "STAT100",
     "STA100",
     "HSM124",
     "BØA116",
-    "MAT202",
-    "HSM122",
     "LOG505",
-    "HSM121",
     "SYK1002",
-    "MAT110",
     "SPL10323",
-    "LOG206",
-    "PSY2304",
     "REL152N",
     "BHNHB2030",
-    "REL154N",
+    "IDR109",
     "K1010",
-    "K1030",
-    "SAM1050",
     "EXP101",
     "EXMUS10",
-    "PSY134",
-    "PSY133",
     "RLE1003",
-    "RLE1004",
-    "RLE1004N",
     "ARK4006"
   ]
 }

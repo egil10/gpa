@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-25T01:19:28.851Z",
+  "generatedAt": "2025-11-25T01:46:17.906Z",
   "courses": [
     {
       "courseCode": "TDT4110",
@@ -133,47 +133,6 @@
       "averageGrade": 3.26,
       "courseName": "EXPHIL03",
       "normalizedCode": "EXPHIL03"
-    },
-    {
-      "courseCode": "EXPHIL",
-      "year": 2025,
-      "institution": "UiB",
-      "totalStudents": 983,
-      "distributions": [
-        {
-          "grade": "A",
-          "count": 138,
-          "percentage": 14
-        },
-        {
-          "grade": "B",
-          "count": 337,
-          "percentage": 34
-        },
-        {
-          "grade": "C",
-          "count": 343,
-          "percentage": 35
-        },
-        {
-          "grade": "D",
-          "count": 93,
-          "percentage": 9
-        },
-        {
-          "grade": "E",
-          "count": 29,
-          "percentage": 3
-        },
-        {
-          "grade": "F",
-          "count": 43,
-          "percentage": 4
-        }
-      ],
-      "averageGrade": 3.34,
-      "courseName": "EXPHIL",
-      "normalizedCode": "EXPHIL"
     },
     {
       "courseCode": "INF100",
@@ -1329,6 +1288,251 @@
       "averageGrade": 3,
       "courseName": "SAAL1GDG",
       "normalizedCode": "SAAL1GDG"
+    },
+    {
+      "courseCode": "BØK34233",
+      "year": 2025,
+      "institution": "BI",
+      "totalStudents": 3083,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 256,
+          "percentage": 8
+        },
+        {
+          "grade": "B",
+          "count": 360,
+          "percentage": 12
+        },
+        {
+          "grade": "C",
+          "count": 626,
+          "percentage": 20
+        },
+        {
+          "grade": "D",
+          "count": 566,
+          "percentage": 18
+        },
+        {
+          "grade": "E",
+          "count": 670,
+          "percentage": 22
+        },
+        {
+          "grade": "F",
+          "count": 605,
+          "percentage": 20
+        }
+      ],
+      "averageGrade": 2.08,
+      "courseName": "BØK34233",
+      "normalizedCode": "BØK34233"
+    },
+    {
+      "courseCode": "EX",
+      "year": 2025,
+      "institution": "UiA",
+      "totalStudents": 269,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 41,
+          "percentage": 15
+        },
+        {
+          "grade": "B",
+          "count": 71,
+          "percentage": 26
+        },
+        {
+          "grade": "C",
+          "count": 72,
+          "percentage": 27
+        },
+        {
+          "grade": "D",
+          "count": 35,
+          "percentage": 13
+        },
+        {
+          "grade": "E",
+          "count": 9,
+          "percentage": 3
+        },
+        {
+          "grade": "F",
+          "count": 20,
+          "percentage": 7
+        },
+        {
+          "grade": "Bestått",
+          "count": 21,
+          "percentage": 8
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3.15,
+      "courseName": "EX-205",
+      "normalizedCode": "EX"
+    },
+    {
+      "courseCode": "DIPLOM",
+      "year": 2025,
+      "institution": "BAS",
+      "totalStudents": 42,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "B",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "C",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 42,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3,
+      "courseName": "DIPLOM",
+      "normalizedCode": "DIPLOM"
+    },
+    {
+      "courseCode": "HKPRO2",
+      "year": 2013,
+      "institution": "HGUt",
+      "totalStudents": 17,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "B",
+          "count": 3,
+          "percentage": 18
+        },
+        {
+          "grade": "C",
+          "count": 5,
+          "percentage": 29
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 9,
+          "percentage": 53
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3.18,
+      "courseName": "HKPRO2",
+      "normalizedCode": "HKPRO2"
+    },
+    {
+      "courseCode": "DAN3",
+      "year": 2025,
+      "institution": "HFDK",
+      "totalStudents": 9,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "B",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "C",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 9,
+          "percentage": 100
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3,
+      "courseName": "DAN3",
+      "normalizedCode": "DAN3"
     }
   ]
 }
