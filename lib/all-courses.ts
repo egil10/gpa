@@ -51,6 +51,7 @@ export const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string
   LDH: { file: 'ldh-all-courses.json', code: '8202' },
   NLA: { file: 'nla-all-courses.json', code: '8223' },
   Steiner: { file: 'steiner-all-courses.json', code: '8225' },
+  VGS: { file: 'vgs-grade-statistics.json', code: 'VGS' }, // VGS uses grade data file
 };
 
 /**
@@ -170,6 +171,31 @@ export async function loadInstitutionCourses(institution: string): Promise<Cours
   // Start loading
   const loadPromise = (async () => {
     try {
+      // VGS uses grade statistics file instead of course list
+      if (institution === 'VGS') {
+        const { getAllVGSCourses } = await import('./vgs-grade-data');
+        const vgsCourses = await getAllVGSCourses();
+        
+        // Convert VGS courses to CourseInfo format
+        const courses: CourseInfo[] = vgsCourses.map(vgsCourse => {
+          const normalizedCode = normalizeCourseCode(vgsCourse.code);
+          const uniqueKey = `${institution}-${normalizedCode}`;
+          
+          return {
+            code: vgsCourse.code,
+            name: vgsCourse.name,
+            institution,
+            institutionCode: institutionData.code,
+            key: uniqueKey,
+          };
+        });
+
+        // Cache the results
+        courseDataCache.set(institution, courses);
+        return courses;
+      }
+
+      // Regular institutions: Load from course data files
       // Load from public folder - files should be copied there during build
       // The loadCourseData function will try multiple paths automatically
       const fileName = `data/institutions/${institutionData.file}`;

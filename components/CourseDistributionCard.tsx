@@ -20,6 +20,13 @@ const GRADE_COLORS: Record<string, string> = {
   'F': '#ef4444',
   'Bestått': '#000000',
   'Ikke bestått': '#ef4444',
+  // VGS grades (1-6 scale)
+  '1': '#ef4444',
+  '2': '#f87171',
+  '3': '#fca5a5',
+  '4': '#86efac',
+  '5': '#4ade80',
+  '6': '#22c55e',
 };
 
 const CourseDistributionCard = memo(function CourseDistributionCard({ course, institution }: CourseDistributionCardProps) {
@@ -44,6 +51,9 @@ const CourseDistributionCard = memo(function CourseDistributionCard({ course, in
 
   // Memoize chart data calculations
   const chartData = useMemo(() => {
+    // Check if this is VGS data (1-6 scale, but displayed as 6-1)
+    const isVGS = course.distributions.some(d => ['1', '2', '3', '4', '5', '6'].includes(d.grade));
+    
     // Check if either Bestått or Ikke bestått exists with actual data (count > 0)
     // Also check if they exist in the distributions array at all (even with 0 count)
     const hasBestatt = course.distributions.some(d => d.grade === 'Bestått' && d.count > 0);
@@ -57,12 +67,25 @@ const CourseDistributionCard = memo(function CourseDistributionCard({ course, in
       ['A', 'B', 'C', 'D', 'E', 'F'].includes(d.grade) && d.count > 0
     );
     
+    // Use VGS grades or letter grades (VGS: 6-1 highest to lowest, like A-F)
+    const grades = isVGS ? ['6', '5', '4', '3', '2', '1'] : ['A', 'B', 'C', 'D', 'E', 'F'];
     const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
     const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
   
-  // Only include A-F grades if they have data OR if there's no pass/fail data
-  // This prevents showing empty A-F bars when only pass/fail grades exist
-  if (hasLetterGrades || !hasAnyPassFailData) {
+  // Include grades based on type (VGS or university)
+  if (isVGS) {
+    // Always include all VGS grades (1-6)
+    grades.forEach(grade => {
+      const existing = course.distributions.find(d => d.grade === grade);
+      distributionMap.set(grade, {
+        grade,
+        percentage: existing?.percentage || 0,
+        count: existing?.count || 0,
+      });
+    });
+  } else if (hasLetterGrades || !hasAnyPassFailData) {
+    // Only include A-F grades if they have data OR if there's no pass/fail data
+    // This prevents showing empty A-F bars when only pass/fail grades exist
     letterGrades.forEach(grade => {
       const existing = course.distributions.find(d => d.grade === grade);
       distributionMap.set(grade, {
@@ -99,12 +122,19 @@ const CourseDistributionCard = memo(function CourseDistributionCard({ course, in
     });
   }
   
-    // Convert to array: A-F first (if included), then Bestått/Ikke bestått
-    // If only pass/fail data exists, only show pass/fail grades (no empty A-F bars)
+    // Convert to array: grades first (if included), then Bestått/Ikke bestått
+    // If only pass/fail data exists, only show pass/fail grades (no empty grade bars)
     const result: Array<{ grade: string; percentage: number; count: number }> = [];
     
-    // Add A-F grades if they have data OR if there's no pass/fail data
-    if (hasLetterGrades || !hasAnyPassFailData) {
+    // Add grades if they have data OR if there's no pass/fail data
+    if (isVGS) {
+      // VGS: always include all 1-6 grades
+      grades.forEach(g => {
+        const entry = distributionMap.get(g);
+        if (entry) result.push(entry);
+      });
+    } else if (hasLetterGrades || !hasAnyPassFailData) {
+      // University: add A-F grades if they have data OR if there's no pass/fail data
       letterGrades.forEach(g => {
         const entry = distributionMap.get(g);
         if (entry) {
@@ -186,12 +216,23 @@ const CourseDistributionCard = memo(function CourseDistributionCard({ course, in
       </div>
 
       <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>A-er</span>
-          <span className={styles.statValue}>
-            {course.distributions.find(d => d.grade === 'A')?.percentage || 0}%
-          </span>
-        </div>
+        {(() => {
+          // Check if this is VGS data
+          const isVGS = course.distributions.some(d => ['1', '2', '3', '4', '5', '6'].includes(d.grade));
+          const topGradeLabel = isVGS ? '6-ere' : 'A-er';
+          const topGradeValue = isVGS 
+            ? (course.distributions.find(d => d.grade === '6')?.percentage || 0)
+            : (course.distributions.find(d => d.grade === 'A')?.percentage || 0);
+          
+          return (
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>{topGradeLabel}</span>
+              <span className={styles.statValue}>
+                {topGradeValue}%
+              </span>
+            </div>
+          );
+        })()}
         <div className={styles.stat}>
           <span className={styles.statLabel}>Snitt</span>
           <span className={styles.statValue}>

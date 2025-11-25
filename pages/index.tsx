@@ -1451,7 +1451,7 @@ export default function Home() {
   ]);
 
   return (
-    <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner">
+    <Layout title="Hjem" description="Utforsk karakterstatistikk for norske universitetsemner og videregående skoler">
       <div className={styles.hero}>
         <div className="container">
           <div className={styles.heroContent}>

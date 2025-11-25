@@ -21,7 +21,7 @@ export default function Footer() {
           <div className={styles.footerSection}>
             <h4>Data</h4>
             <p>
-              Inneholder data fra{' '}
+              Universitetsdata er fra{' '}
               <a 
                 href="https://dbh.hkdir.no/tall-og-statistikk/statistikk-meny/studenter" 
                 target="_blank" 
@@ -50,6 +50,25 @@ export default function Footer() {
                 Norsk lisens for offentlige data (NLOD)
               </a>
               .
+            </p>
+            <p>
+              VGS-data er fra{' '}
+              <a 
+                href="https://www.udir.no/tall-og-forskning/statistikk/statistikk-videregaaende-skole/karakterer-vgs/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Utdanningsdirektoratet (UDIR)
+              </a>
+              {' '}(
+              <a 
+                href="https://statistikkportalen.udir.no/api/rapportering/rest/v1/Tekst/visTekst/3?dataChanged=2025-11-25_163500" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Lisens
+              </a>
+              ).
             </p>
           </div>
         </div>

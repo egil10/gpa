@@ -3,6 +3,8 @@ import { GradeData, GradeDistribution, CourseStats } from '@/types';
 // Standard grade order: A-F always, then Bestått/Ikke bestått if present
 export const STANDARD_GRADE_ORDER = ['A', 'B', 'C', 'D', 'E', 'F'];
 export const PASS_FAIL_GRADES = ['Bestått', 'Ikke bestått'];
+// VGS grade order: 6-1 scale (highest to lowest for display, like A-F)
+export const VGS_GRADE_ORDER = ['6', '5', '4', '3', '2', '1'];
 
 /**
  * Ensures A-F grades are always present (with 0 values if missing)
@@ -86,10 +88,36 @@ export function aggregateDuplicateEntries(data: GradeData[]): GradeData[] {
   return Array.from(aggregatedMap.values());
 }
 
+/**
+ * Normalize VGS grade distribution (6-1 scale, highest to lowest for display)
+ */
+export function normalizeVGSGradeDistribution(
+  gradeMap: Record<string, { count: number; percentage: number }>,
+  totalStudents: number
+): GradeDistribution[] {
+  const distributions: GradeDistribution[] = [];
+  
+  // Always include 6-1 in order (highest to lowest, like A-F), with 0 if missing
+  for (const grade of VGS_GRADE_ORDER) {
+    const data = gradeMap[grade];
+    distributions.push({
+      grade,
+      count: data?.count || 0,
+      percentage: data?.percentage || 0,
+    });
+  }
+  
+  return distributions;
+}
+
 export function processGradeData(data: GradeData[]): CourseStats | null {
   if (!data || data.length === 0) {
     return null;
   }
+
+  // Check if this is VGS data (1-6 scale)
+  const isVGS = data[0].Institusjonskode === 'VGS';
+  const isVGSGrade = VGS_GRADE_ORDER.includes(data[0].Karakter);
 
   // First, aggregate any duplicate entries
   const aggregatedData = aggregateDuplicateEntries(data);
@@ -122,28 +150,44 @@ export function processGradeData(data: GradeData[]): CourseStats | null {
     gradeMap[grade].percentage = Math.round((gradeMap[grade].count / totalStudents) * 100);
   });
 
-  // Normalize to always include A-F
-  const distributions = normalizeGradeDistribution(gradeMap, totalStudents);
+  // Normalize distribution based on grade system
+  let distributions: GradeDistribution[];
+  if (isVGS || isVGSGrade) {
+    distributions = normalizeVGSGradeDistribution(gradeMap, totalStudents);
+  } else {
+    distributions = normalizeGradeDistribution(gradeMap, totalStudents);
+  }
 
-  // Calculate average grade (A=5, B=4, C=3, D=2, E=1, F=0)
-  const gradeValues: Record<string, number> = {
-    'A': 5,
-    'B': 4,
-    'C': 3,
-    'D': 2,
-    'E': 1,
-    'F': 0,
-    'Bestått': 3,
-    'Ikke bestått': 0,
-  };
+  // Calculate average grade
+  let averageGrade: number;
+  if (isVGS || isVGSGrade) {
+    // VGS: 1-6 scale (direct numeric average)
+    let weightedSum = 0;
+    distributions.forEach((dist) => {
+      const value = VGS_GRADE_ORDER.includes(dist.grade) ? parseInt(dist.grade, 10) : 0;
+      weightedSum += value * dist.count;
+    });
+    averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+  } else {
+    // University: A-F scale (A=5, B=4, C=3, D=2, E=1, F=0)
+    const gradeValues: Record<string, number> = {
+      'A': 5,
+      'B': 4,
+      'C': 3,
+      'D': 2,
+      'E': 1,
+      'F': 0,
+      'Bestått': 3,
+      'Ikke bestått': 0,
+    };
 
-  let weightedSum = 0;
-  distributions.forEach((dist) => {
-    const value = gradeValues[dist.grade] ?? 0;
-    weightedSum += value * dist.count;
-  });
-
-  const averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+    let weightedSum = 0;
+    distributions.forEach((dist) => {
+      const value = gradeValues[dist.grade] ?? 0;
+      weightedSum += value * dist.count;
+    });
+    averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+  }
 
   return {
     courseCode: data[0].Emnekode,

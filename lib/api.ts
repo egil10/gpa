@@ -116,6 +116,7 @@ export const UNIVERSITIES: Record<string, University> = {
   LDH: { code: '8202', name: 'Lovisenberg diakonale høgskole', shortName: 'LDH' },
   NLA: { code: '8223', name: 'NLA Høgskolen', shortName: 'NLA' },
   Steiner: { code: '8225', name: 'Steinerhøyskolen', shortName: 'Steiner' },
+  VGS: { code: 'VGS', name: 'Videregående Skole (VGS)', shortName: 'VGS' },
 };
 
 export type InstitutionLabelFormat = 'short' | 'full' | 'full-short' | 'short-full';
@@ -699,6 +700,18 @@ export async function fetchAllYearsData(
   if (!institution) {
     const uniEntry = Object.entries(UNIVERSITIES).find(([_, uni]) => uni.code === institutionCode);
     institution = uniEntry ? uniEntry[0] : '';
+  }
+
+  // Handle VGS separately (loads from JSON file, not API)
+  if (institution === 'VGS' || institutionCode === 'VGS') {
+    const { fetchVGSGradeData } = await import('./vgs-grade-data');
+    const vgsData = await fetchVGSGradeData(courseCode);
+    if (vgsData && vgsData.length > 0) {
+      console.log(`[fetchAllYearsData] ✅ VGS data loaded for ${courseCode} - returning ${vgsData.length} entries`);
+      return vgsData;
+    }
+    console.log(`[fetchAllYearsData] ⚠️ No VGS data found for ${courseCode}`);
+    return [];
   }
 
   // Try cache first (works on both client and server)

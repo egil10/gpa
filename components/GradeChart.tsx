@@ -10,6 +10,7 @@ import {
   Cell,
 } from 'recharts';
 import { GradeDistribution } from '@/types';
+import { VGS_GRADE_ORDER } from '@/lib/utils';
 import styles from './GradeChart.module.css';
 
 interface GradeChartProps {
@@ -28,6 +29,13 @@ const GRADE_COLORS: Record<string, string> = {
   'F': '#ff0000',
   'Bestått': '#1a1a1a',
   'Ikke bestått': '#ff0000',
+  // VGS grades (1-6 scale)
+  '1': '#ff0000',
+  '2': '#ff4444',
+  '3': '#ff8888',
+  '4': '#88ff88',
+  '5': '#44ff44',
+  '6': '#00ff00',
 };
 
 export default function GradeChart({ data, totalStudents, courseCode, year }: GradeChartProps) {
@@ -39,6 +47,9 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
     );
   }
 
+  // Check if this is VGS data (1-6 scale, but displayed as 6-1)
+  const isVGS = data.some((dist) => ['1', '2', '3', '4', '5', '6'].includes(dist.grade));
+  
   // Filter data: include pass/fail grades if EITHER has data
   // If either Bestått or Ikke bestått exists, we always include BOTH in the chart
   const hasBestatt = data.some((dist) => dist.grade === 'Bestått');
@@ -61,6 +72,16 @@ export default function GradeChart({ data, totalStudents, courseCode, year }: Gr
   } else {
     // If neither has data, filter them out
     chartData = data.filter((dist) => dist.grade !== 'Bestått' && dist.grade !== 'Ikke bestått');
+  }
+  
+  // For VGS, ensure grades are ordered 6-1 (highest to lowest) - sort after filtering
+  if (isVGS) {
+    // Sort VGS grades in 6-1 order (highest to lowest, matching VGS_GRADE_ORDER)
+    const vgsGrades = chartData.filter((dist) => VGS_GRADE_ORDER.includes(dist.grade));
+    const nonVgsGrades = chartData.filter((dist) => !VGS_GRADE_ORDER.includes(dist.grade));
+    // Sort VGS grades according to VGS_GRADE_ORDER (6-1)
+    vgsGrades.sort((a, b) => VGS_GRADE_ORDER.indexOf(a.grade) - VGS_GRADE_ORDER.indexOf(b.grade));
+    chartData = [...vgsGrades, ...nonVgsGrades];
   }
 
   return (

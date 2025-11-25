@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CourseStats } from '@/types';
 import GradeChart from './GradeChart';
-import { normalizeGradeDistribution } from '@/lib/utils';
+import { normalizeGradeDistribution, normalizeVGSGradeDistribution, VGS_GRADE_ORDER } from '@/lib/utils';
 import styles from './MultiYearChart.module.css';
 
 interface MultiYearChartProps {
@@ -38,28 +38,44 @@ export default function MultiYearChart({ allYearsData, courseCode, institution }
       allDistributions[grade].percentage = Math.round((allDistributions[grade].count / totalStudents) * 100);
     });
 
-    // Normalize to always include A-F
-    const distributions = normalizeGradeDistribution(allDistributions, totalStudents);
+    // Check if this is VGS data (1-6 scale) by checking if any grade is 1-6
+    const isVGS = Object.keys(allDistributions).some(grade => VGS_GRADE_ORDER.includes(grade));
+    
+    // Normalize distribution based on grade system
+    const distributions = isVGS 
+      ? normalizeVGSGradeDistribution(allDistributions, totalStudents)
+      : normalizeGradeDistribution(allDistributions, totalStudents);
 
-    // Calculate average grade (A=5, B=4, C=3, D=2, E=1, F=0, Bestått=3, Ikke bestått=0)
-    const gradeValues: Record<string, number> = {
-      'A': 5,
-      'B': 4,
-      'C': 3,
-      'D': 2,
-      'E': 1,
-      'F': 0,
-      'Bestått': 3,
-      'Ikke bestått': 0,
-    };
+    // Calculate average grade
+    let averageGrade: number;
+    if (isVGS) {
+      // VGS: 1-6 scale (direct numeric average)
+      let weightedSum = 0;
+      distributions.forEach((dist) => {
+        const value = VGS_GRADE_ORDER.includes(dist.grade) ? parseInt(dist.grade, 10) : 0;
+        weightedSum += value * dist.count;
+      });
+      averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+    } else {
+      // University: A-F scale (A=5, B=4, C=3, D=2, E=1, F=0, Bestått=3, Ikke bestått=0)
+      const gradeValues: Record<string, number> = {
+        'A': 5,
+        'B': 4,
+        'C': 3,
+        'D': 2,
+        'E': 1,
+        'F': 0,
+        'Bestått': 3,
+        'Ikke bestått': 0,
+      };
 
-    let weightedSum = 0;
-    distributions.forEach((dist) => {
-      const value = gradeValues[dist.grade] ?? 0;
-      weightedSum += value * dist.count;
-    });
-
-    const averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+      let weightedSum = 0;
+      distributions.forEach((dist) => {
+        const value = gradeValues[dist.grade] ?? 0;
+        weightedSum += value * dist.count;
+      });
+      averageGrade = totalStudents > 0 ? weightedSum / totalStudents : 0;
+    }
 
     return {
       courseCode,

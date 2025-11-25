@@ -57,4 +57,14 @@ inspo/
 *.bak
 *.tmp
 
+# VGS data CSV files
+*Karakterer_i_videregaaende_skole.csv
+2025*.csv
+
+# Spreadsheet exports
+*.csv
+*.tsv
+*.xls
+*.xlsx
+
 

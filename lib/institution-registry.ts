@@ -52,6 +52,7 @@ export const ALL_INSTITUTIONS: InstitutionInfo[] = [
   { code: '0217', name: 'Samisk høgskole', shortName: 'SH', type: 'specialized' },
   { code: '0256', name: 'Høgskolen i Østfold', shortName: 'HiØ', type: 'specialized' },
   { code: '0238', name: 'Høgskulen på Vestlandet', shortName: 'HVL', type: 'specialized' },
+  { code: 'VGS', name: 'Videregående Skole (VGS)', shortName: 'VGS', type: 'specialized' },
   
   // Add more institutions as needed - this is a comprehensive list
   // University colleges and private institutions can be added here

@@ -76,7 +76,7 @@ export default function KatalogPage() {
           <div className={styles.header}>
             <h1 className={styles.title}>Emnekatalog</h1>
             <p className={styles.subtitle}>
-              Bla gjennom alle emnekoder fra alle universiteter. Søk etter emnekode eller navn.
+              Bla gjennom alle emnekoder fra alle universiteter og videregående skoler. Søk etter emnekode eller navn.
             </p>
           </div>
 

@@ -249,6 +249,32 @@ export default function SearchPage() {
                   </p>
                 </div>
               </div>
+              
+              {institution === 'VGS' && (
+                <div className={styles.dataSource}>
+                  <p>
+                    <small>
+                      Kilde:{' '}
+                      <a 
+                        href="https://www.udir.no/tall-og-forskning/statistikk/statistikk-videregaaende-skole/karakterer-vgs/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        Utdanningsdirektoratet (UDIR)
+                      </a>
+                      {' '}(
+                      <a 
+                        href="https://statistikkportalen.udir.no/api/rapportering/rest/v1/Tekst/visTekst/3?dataChanged=2025-11-25_163500" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        Lisens
+                      </a>
+                      )
+                    </small>
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
