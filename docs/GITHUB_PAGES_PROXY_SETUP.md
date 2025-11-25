@@ -19,7 +19,7 @@ If you want to keep using GitHub Pages, set up a Cloudflare Worker:
 2. Sign up/login (free)
 3. Click "Create a Worker"
 4. Name it something like `gpa-cors-proxy`
-5. Replace the default code with the contents of `cloudflare-worker-proxy.js` from the repo root
+5. Replace the default code with the contents of `scripts/workers/cloudflare-worker-proxy.js`
 6. Click "Deploy"
 
 ### Step 2: Get Your Worker URL

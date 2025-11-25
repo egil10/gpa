@@ -194,10 +194,17 @@ export async function fetchVGSGradeData(
     
     // Find matching entries - normalize both the search code and stored codes for comparison
     // The data file might have codes with spaces (e.g., "ENG 1007"), so we need to normalize both
-    const matchingEntries = data.gradeData.filter(entry => {
+    let matchingEntries = data.gradeData.filter(entry => {
       const normalizedEntryCode = normalizeCourseCodeAdvanced(entry.courseCode).normalized;
       return normalizedEntryCode === normalizedSearchCode;
     });
+
+    // Privacy filter: According to UDIR publication rules, data with 5 or fewer students
+    // must be screened/hidden to prevent identification of individuals
+    // This is a safety check in case any low-count records made it into the data file
+    matchingEntries = matchingEntries.filter(entry => 
+      entry.totalStudents !== null && entry.totalStudents > 5
+    );
 
     if (matchingEntries.length === 0) {
       return [];
@@ -260,7 +267,14 @@ export async function getAllVGSCourses(): Promise<Array<{
     const data = await loadVGSGradeData();
     const courseMap = new Map<string, { name: string; years: Set<string> }>();
 
+    // Privacy filter: Only include courses with data that has more than 5 students
+    // This ensures we don't list courses that only have low-count data (which would be filtered out anyway)
     for (const entry of data.gradeData) {
+      // Skip entries with 5 or fewer students (privacy requirement)
+      if (entry.totalStudents === null || entry.totalStudents <= 5) {
+        continue;
+      }
+      
       if (!courseMap.has(entry.courseCode)) {
         courseMap.set(entry.courseCode, {
           name: entry.courseName,

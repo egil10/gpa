@@ -478,7 +478,9 @@ gpa/
 ├── types/                          # TypeScript type definitions
 │   ├── gpa.ts                     # GPA calculation types
 │   └── index.ts                   # Shared types
-├── cloudflare-worker-proxy.js     # Cloudflare Worker proxy (alternative)
+├── scripts/
+│   └── workers/
+│       └── cloudflare-worker-proxy.js  # Cloudflare Worker proxy (alternative)
 ├── LICENSE                        # MIT License
 ├── next.config.js                 # Next.js configuration
 ├── next-env.d.ts                  # Next.js type definitions

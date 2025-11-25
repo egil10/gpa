@@ -100,18 +100,35 @@ function resolveDatasetFile(): string {
     return candidate;
   }
 
-  const datasetCandidates = fs
-    .readdirSync(ROOT_DIR)
-    .filter(file =>
-      file.toLowerCase().includes('karakterer_i_videregaaende_skole') &&
-      /\.(csv|tsv|xlsx?)$/i.test(file)
-    )
-    .map(file => path.join(ROOT_DIR, file))
-    .filter(fullPath => fs.statSync(fullPath).isFile())
-    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+  // Check both repo root and data/raw/ directory
+  const searchDirs = [ROOT_DIR, path.join(ROOT_DIR, 'data', 'raw')];
+  const datasetCandidates: string[] = [];
+
+  for (const searchDir of searchDirs) {
+    if (!fs.existsSync(searchDir)) continue;
+    
+    const files = fs.readdirSync(searchDir)
+      .filter(file =>
+        file.toLowerCase().includes('karakterer_i_videregaaende_skole') &&
+        /\.(csv|tsv|xlsx?)$/i.test(file)
+      )
+      .map(file => path.join(searchDir, file))
+      .filter(fullPath => {
+        try {
+          return fs.statSync(fullPath).isFile();
+        } catch {
+          return false;
+        }
+      });
+    
+    datasetCandidates.push(...files);
+  }
+
+  // Sort by modification time (most recent first)
+  datasetCandidates.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
 
   if (datasetCandidates.length === 0) {
-    throw new Error('No Karakterer_i_videregaaende_skole dataset file found in repo root');
+    throw new Error('No Karakterer_i_videregaaende_skole dataset file found in repo root or data/raw/');
   }
 
   return datasetCandidates[0];
@@ -443,6 +460,14 @@ function processLinesChunk(
         return;
       }
 
+      // Privacy filter: According to UDIR publication rules, data with 5 or fewer students
+      // must be screened/hidden to prevent identification of individuals
+      // See: https://statistikkportalen.udir.no/api/rapportering/rest/v1/Tekst/visTekst/3
+      const roundedStudents = Math.round(totalStudents);
+      if (roundedStudents <= 5) {
+        return; // Skip records with 5 or fewer students
+      }
+
       const gradeDistribution = buildGradeDistribution(year, yearColumns, cells);
       if (!gradeDistribution) {
         return;
@@ -453,7 +478,7 @@ function processLinesChunk(
         courseName,
         year,
         averageGrade,
-        totalStudents: Math.round(totalStudents),
+        totalStudents: roundedStudents,
         gradeDistribution,
         level,
         county,
@@ -520,7 +545,18 @@ async function main() {
     const gradeData = await parseVGSGradesCSV();
 
     // Group by course code and year (national level only for now)
-    const nationalData = gradeData.filter(d => d.level === 'Nasjonalt');
+    let nationalData = gradeData.filter(d => d.level === 'Nasjonalt');
+
+    // Apply privacy filter: Remove records with 5 or fewer students
+    // This complies with UDIR publication rules that require screening of data
+    // where the number of individuals is 1, 2, 3, 4, or 5
+    const beforePrivacyFilter = nationalData.length;
+    nationalData = nationalData.filter(d => d.totalStudents > 5);
+    const filteredCount = beforePrivacyFilter - nationalData.length;
+    
+    if (filteredCount > 0) {
+      console.log(`🔒 Privacy filter: Removed ${filteredCount} records with ≤5 students (UDIR publication rules)`);
+    }
 
     console.log(`\n📦 Organizing data...`);
     console.log(`   National level records: ${nationalData.length}`);

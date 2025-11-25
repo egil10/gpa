@@ -251,13 +251,20 @@ async function main() {
       if (combo.averageGrade === null || combo.totalStudents === null || combo.totalStudents === 0) {
         return;
       }
+      // Privacy filter: According to UDIR publication rules, data with 5 or fewer students
+      // must be screened/hidden to prevent identification of individuals
+      // See: https://statistikkportalen.udir.no/api/rapportering/rest/v1/Tekst/visTekst/3
+      const roundedStudents = Math.round(combo.totalStudents);
+      if (roundedStudents <= 5) {
+        return; // Skip records with 5 or fewer students
+      }
       const [yearRaw, examType] = key.split('|');
       gradeData.push({
         courseCode: fagInfo.kode!,
         courseName: fagInfo.navn,
         year: normalizeYear(yearRaw),
         averageGrade: Number(combo.averageGrade.toFixed(2)),
-        totalStudents: Math.round(combo.totalStudents),
+        totalStudents: roundedStudents,
         gradeDistribution: combo.gradeDistribution,
         level: 'Nasjonalt',
         assessmentType: examType,
@@ -269,7 +276,16 @@ async function main() {
     }
   });
 
-  const filteredData = gradeData;
+  // Apply privacy filter: Remove records with 5 or fewer students
+  // This complies with UDIR publication rules that require screening of data
+  // where the number of individuals is 1, 2, 3, 4, or 5
+  const beforePrivacyFilter = gradeData.length;
+  const filteredData = gradeData.filter(entry => entry.totalStudents > 5);
+  const filteredCount = beforePrivacyFilter - filteredData.length;
+  
+  if (filteredCount > 0) {
+    console.log(`🔒 Privacy filter: Removed ${filteredCount} records with ≤5 students (UDIR publication rules)`);
+  }
   console.log(`✅ Finished parsing. Records kept: ${filteredData.length}`);
 
   const uniqueYears = Array.from(new Set(filteredData.map((entry) => entry.year))).sort();
