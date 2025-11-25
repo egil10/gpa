@@ -3,7 +3,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport, courseHasData } from './utils/export-format';
+import { createOptimizedExport, courseHasData, normalizeCourseCodeForStorage } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -49,7 +49,8 @@ async function discoverHiØCourses() {
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
       
       courses.forEach((course: DiscoveredCourse) => {
-        const baseCode = course.courseCode.replace(/-1$/, '');
+        // Normalize course code: remove numeric suffix, then normalize (remove spaces, uppercase)
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix then normalize
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
@@ -68,8 +69,9 @@ async function discoverHiØCourses() {
             existing.courseName = course.courseName;
           }
         } else {
+          // baseCode already normalized
           allCoursesMap.set(baseCode, {
-            courseCode: baseCode,
+            courseCode: baseCode, // Already normalized (spaces removed, uppercase)
             courseName: course.courseName,
             years: [year],
             totalStudents: course.totalStudents,

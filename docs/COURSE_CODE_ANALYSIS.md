@@ -1,11 +1,11 @@
 # Course Code Analysis Report
 
-Generated: 2025-11-25T00:07:01.875Z
+Generated: 2025-11-25T00:32:20.629Z
 
 ## Summary
 
-- **Total courses in data/**: 62 151
-- **Total courses in public/**: 62 151
+- **Total courses in data/**: 61 992
+- **Total courses in public/**: 61 992
 - **Institutions with data/**: 35
 - **Institutions with public/**: 35
 - **Institutions with differences**: 0
@@ -755,29 +755,29 @@ Generated: 2025-11-25T00:07:01.875Z
 ### KHIO
 
 **Data Directory** (khio-all-courses.json):
-- Total courses: 1 992
-- Average length: 6.35 chars
+- Total courses: 1 833
+- Average length: 6.31 chars
 - Length range: 4-9 chars
-- Codes ending with digit: 1981 (99.4%)
+- Codes ending with digit: 1822 (99.4%)
 - **Codes ending with each digit:**
-  - Ends with "0": 130 (6.5%)
-  - Ends with "1": 418 (21.0%)
-  - Ends with "2": 428 (21.5%)
-  - Ends with "3": 276 (13.9%)
-  - Ends with "4": 188 (9.4%)
-  - Ends with "5": 147 (7.4%)
-  - Ends with "6": 117 (5.9%)
-  - Ends with "7": 99 (5.0%)
-  - Ends with "8": 89 (4.5%)
-  - Ends with "9": 89 (4.5%)
-- Codes with dash: 458 (23.0%)
+  - Ends with "0": 130 (7.1%)
+  - Ends with "1": 414 (22.6%)
+  - Ends with "2": 297 (16.2%)
+  - Ends with "3": 258 (14.1%)
+  - Ends with "4": 180 (9.8%)
+  - Ends with "5": 147 (8.0%)
+  - Ends with "6": 117 (6.4%)
+  - Ends with "7": 99 (5.4%)
+  - Ends with "8": 91 (5.0%)
+  - Ends with "9": 89 (4.9%)
+- Codes with dash: 314 (17.1%)
 - Codes with multiple dashes: 8 (0.4%)
 - **Dash count distribution:**
-  - 0 dash(es): 1 534 (77.0%)
-  - 1 dash(es): 450 (22.6%)
+  - 0 dash(es): 1 519 (82.9%)
+  - 1 dash(es): 306 (16.7%)
   - 2 dash(es): 8 (0.4%)
-- Most common lengths: 9 chars (53), 8 chars (244), 7 chars (663), 6 chars (429), 5 chars (597)
-- Top suffixes: "2" (128), "101" (28), "103" (25), "001" (25), "102" (24)
+- Most common lengths: 9 chars (53), 8 chars (243), 7 chars (520), 6 chars (430), 5 chars (581)
+- Top suffixes: "101" (26), "001" (25), "103" (24), "000" (23), "102" (22)
 
 ⚠️ **Unusual Patterns:**
    - Starts with digit: 1DIM000
@@ -790,11 +790,11 @@ Generated: 2025-11-25T00:07:01.875Z
    - Starts with digit: 5KHF000
 
 **Public Directory** (khio-all-courses.json):
-- Total courses: 1 992
-- Average length: 6.35 chars
+- Total courses: 1 833
+- Average length: 6.31 chars
 - Length range: 4-9 chars
-- Codes ending with digit: 1981 (99.4%)
-- Codes with dash: 458 (23.0%)
+- Codes ending with digit: 1822 (99.4%)
+- Codes with dash: 314 (17.1%)
 
 ---
 

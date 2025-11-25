@@ -4,7 +4,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport, courseHasData } from './utils/export-format';
+import { createOptimizedExport, courseHasData, normalizeCourseCodeForStorage } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -60,9 +60,8 @@ async function discoverUiBCourses() {
         // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM", "-MNEKS")
         // Use the FULL course code (after removing only numeric suffixes) as the key
         // This ensures "EXPHIL-HFSEM" and "EXPHIL-MNEKS" are stored separately
-        // Also normalize spaces (remove them) for consistent storage
-        let baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only, preserve meaningful parts
-        baseCode = baseCode.replace(/\s/g, '').trim().toUpperCase(); // Normalize spaces
+        // Normalize spaces and convert to uppercase for consistent storage
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix then normalize
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
