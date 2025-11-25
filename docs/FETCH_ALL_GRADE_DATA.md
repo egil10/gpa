@@ -28,23 +28,132 @@ $env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiO
 
 After testing, fetch for all institutions one by one:
 
+#### Major Universities
+
 ```bash
 # UiO (Universitetet i Oslo) - ~7,000 courses
-npm run fetch-all-grade-data -- --institution=UiO
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiO
 
-# NTNU - ~7,600 courses
-npm run fetch-all-grade-data -- --institution=NTNU
+# NTNU (Norges teknisk-naturvitenskapelige universitet) - ~7,600 courses
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NTNU
 
 # UiB (Universitetet i Bergen) - ~3,300 courses
-npm run fetch-all-grade-data -- --institution=UiB
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiB
 
-# NHH - ~650 courses
-npm run fetch-all-grade-data -- --institution=NHH
+# NHH (Norges handelshøyskole) - ~650 courses
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NHH
 
-# BI - ~1,200 courses
-npm run fetch-all-grade-data -- --institution=BI
+# BI (Handelshøyskolen BI) - ~1,200 courses
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=BI
 
-# Continue for other institutions...
+# OsloMet (OsloMet – storbyuniversitetet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=OsloMet
+
+# Nord (Nord universitet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=Nord
+
+# NMBU (Norges miljø- og biovitenskapelige universitet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NMBU
+
+# UiA (Universitetet i Agder)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiA
+
+# INN (Universitetet i Innlandet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=INN
+
+# UiS (Universitetet i Stavanger)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiS
+
+# USN (Universitetet i Sørøst-Norge)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=USN
+
+# UiT (Universitetet i Tromsø – Norges arktiske universitet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiT
+```
+
+#### Specialized Institutions
+
+```bash
+# NMH (Norges musikkhøgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NMH
+
+# NIH (Norges idrettshøgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NIH
+
+# KHIO (Kunsthøgskolen i Oslo)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=KHIO
+
+# AHO (Arkitektur- og designhøgskolen i Oslo)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=AHO
+```
+
+#### Regional Colleges
+
+```bash
+# HIM (Høgskolen i Molde, vitenskapelig høgskole i logistikk)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HIM
+
+# SH (Samisk høgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=SH
+
+# HiØ (Høgskolen i Østfold)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HiØ
+
+# HVO (Høgskulen i Volda)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HVO
+
+# HVL (Høgskulen på Vestlandet)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HVL
+
+# VID (VID vitenskapelige høgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=VID
+
+# MF (MF vitenskapelig høyskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=MF
+
+# AHS (Ansgar høyskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=AHS
+
+# BD (Barratt Due Musikkinstitutt)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=BD
+
+# BAS (Bergen Arkitekthøgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=BAS
+
+# DMMH (Dronning Mauds Minne Høgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=DMMH
+
+# FIH (Fjellhaug Internasjonale Høgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=FIH
+
+# HGUt (Høgskulen for grøn utvikling)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HGUt
+
+# HFDK (Høyskolen for dansekunst)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HFDK
+
+# HLT (Høyskolen for ledelse og teologi)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HLT
+
+# HK (Høyskolen Kristiania)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=HK
+
+# LDH (Lovisenberg diakonale høgskole)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=LDH
+
+# NLA (NLA Høgskolen)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NLA
+
+# Steiner (Steinerhøyskolen)
+$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=Steiner
+```
+
+#### VGS (Videregående Skole)
+
+```bash
+# VGS (Videregående Skole) - Note: VGS data is loaded from JSON, not API
+# VGS data should already be available from parse-vgs-grades script
+# No need to run fetch-all-grade-data for VGS
 ```
 
 ## 📝 Step-by-Step Instructions
@@ -133,29 +242,15 @@ $env:FETCH_CONCURRENCY=20; npm run fetch-all-grade-data -- --institution=UiO
 
 ### Step 5: Process All Institutions
 
-After successful test, process all institutions:
+After successful test, process all institutions. See the "Fetch All Institutions" section above for the complete list of all institution-specific commands.
 
-```bash
-# Create a script to run all (optional)
-# Or run manually one by one:
-
-# 1. UiO
-$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiO
-
-# 2. NTNU
-$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NTNU
-
-# 3. UiB
-$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=UiB
-
-# 4. NHH
-$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=NHH
-
-# 5. BI
-$env:FETCH_CONCURRENCY=10; npm run fetch-all-grade-data -- --institution=BI
-
-# Continue for other institutions...
-```
+**Recommended order** (by size, smallest to largest for easier testing):
+1. NHH (~650 courses) - Quick test
+2. BI (~1,200 courses)
+3. UiB (~3,300 courses)
+4. UiO (~7,000 courses)
+5. NTNU (~7,600 courses)
+6. Then continue with other institutions
 
 **Total time estimate**: 20-40 hours for all institutions (can run overnight)
 
