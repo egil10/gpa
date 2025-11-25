@@ -1,39 +1,20 @@
 /**
  * Grade data cache system
- * Loads grade data from local cache or fetches and caches it
+ * 
+ * Primary cache source: Optimized cache (public/data/grade-cache-optimized/)
+ * This cache contains ALL fetched course data from fetch-all-grade-data.ts
+ * 
+ * Cache Priority:
+ * 1. Client in-memory cache (fastest)
+ * 2. localStorage (persistent across page loads)
+ * 3. Optimized cache files (public/data/grade-cache-optimized/)
+ * 
+ * If cache miss, data should be fetched via api.ts which will cache it for next time.
  */
 
 import { GradeData } from '@/types';
 import { formatCourseCode } from './api';
 import { loadInstitutionCourses } from './all-courses';
-
-// Cache helper - only loads on server-side to avoid bundling fs module
-function getCachedDataSafe(
-  institutionCode: string,
-  courseCode: string
-): GradeData[] | null {
-  // Only try to use cache on server-side
-  // Check multiple ways to ensure we're on server
-  if (typeof window !== 'undefined' || typeof process === 'undefined' || !process.versions?.node) {
-    return null;
-  }
-
-  try {
-    // Use Function constructor to make require truly dynamic
-    // This prevents webpack from analyzing the require call
-    const requireFunc = new Function('modulePath', 'return require(modulePath)');
-    const cacheModule = requireFunc('./cache');
-    if (cacheModule && typeof cacheModule.getCachedData === 'function') {
-      return cacheModule.getCachedData(institutionCode, courseCode);
-    }
-  } catch (e) {
-    // Cache not available or error loading - silently fail
-    // This is expected on client-side where cache module is ignored by webpack
-    return null;
-  }
-
-  return null;
-}
 
 // Client-side cache (in-memory)
 const clientCache: Map<string, GradeData[]> = new Map();
@@ -56,85 +37,14 @@ export async function courseExistsInData(
 }
 
 /**
- * Load grade data from cache.json (if it exists)
- * Note: Pre-built files (homepage-grade-data.json, homepage-top-courses-data.json) 
- * only contain aggregated stats, not raw GradeData, so they can't be used for cache lookup
- * Suppresses 404 errors - cache.json is optional
- */
-async function loadGradeDataFromCacheFile(
-  institutionCode: string,
-  courseCode: string
-): Promise<GradeData[] | null> {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const basePath = window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
-
-  // Try cache.json (if it exists) - suppress 404 errors as file is optional
-  // Only attempt if we know the file might exist (optional optimization)
-  try {
-    // Fetch with error suppression - 404 is expected and fine
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
-    
-    const response = await fetch(`${basePath}/data/cache.json`, {
-      cache: 'force-cache',
-      signal: controller.signal,
-    }).catch((error) => {
-      // Silently ignore fetch errors (404, network errors, etc.)
-      // This is expected if cache.json doesn't exist
-      return null;
-    });
-    
-    clearTimeout(timeoutId);
-    
-    // Only process if response exists and is OK (200-299)
-    if (!response || !response.ok || response.status === 404) {
-      // 404 is expected if cache.json doesn't exist - silently return null
-      return null;
-    }
-
-    const cacheData = await response.json();
-    
-    // Try multiple key formats for cache lookup
-    const normalizedCode = courseCode.replace(/-[0-9]+$/, '').trim();
-    const cacheKeys = [
-      `${institutionCode}-${courseCode}`,       // Original format
-      `${institutionCode}-${normalizedCode}`,   // Normalized format
-    ];
-
-    // Also try with formatted codes (with -0, -1 suffixes)
-    if (courseCode.includes('-')) {
-      const baseCode = courseCode.split('-')[0];
-      cacheKeys.push(`${institutionCode}-${baseCode}-0`);
-      cacheKeys.push(`${institutionCode}-${baseCode}-1`);
-    }
-
-    for (const cacheKey of cacheKeys) {
-      if (cacheData.courses && cacheData.courses[cacheKey]) {
-        const cached = cacheData.courses[cacheKey];
-        if (cached.data && cached.data.length > 0) {
-          return cached.data;
-        }
-      }
-    }
-  } catch (error) {
-    // Cache file doesn't exist or failed to load - that's ok, we'll fetch from API
-    // Silently fail - this is expected if cache.json doesn't exist
-    // Don't log 404 errors - they're expected
-    if (error instanceof Error && !error.message.includes('404')) {
-      // Only log non-404 errors for debugging
-      console.debug('[Cache] Error loading cache.json:', error.message);
-    }
-  }
-
-  return null;
-}
-
-/**
- * Get grade data from cache (works on both client and server)
- * Priority: 1. Client cache, 2. localStorage, 3. data/cache.json, 4. Server cache
+ * Get grade data from cache
+ * 
+ * Priority order:
+ * 1. Client in-memory cache (fastest, per-session)
+ * 2. localStorage (persistent across page loads)
+ * 3. Optimized cache files (public/data/grade-cache-optimized/)
+ * 
+ * Returns null if no cache hit - caller should then fetch from API via api.ts
  */
 export async function getGradeDataFromCache(
   institutionCode: string,
@@ -182,15 +92,44 @@ export async function getGradeDataFromCache(
       const basePath = window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
       
       // Normalize course code for storage (matches fetch-all-grade-data.ts logic)
-      // Clean the course code: remove spaces, uppercase, remove all non-alphanumeric characters
-      const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
-      const normalizedForStorage = cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase();
+      // The fetch script uses normalizeCourseCodeAdvanced which:
+      // - Removes spaces, uppercases
+      // - Normalizes separators (keeps dashes, replaces _ and . with -)
+      // - Removes trailing "000" if separated by space/dash
+      // - Removes suffixes like -1, -12, -L1, -G, -MB (but keeps meaningful dashes like STK-MAT2011)
       
-      // Try multiple normalized formats
+      // Replicate the normalization logic (can't import from scripts/ in browser)
+      // This matches normalizeCourseCodeAdvanced() from lib/course-code-normalizer.ts
+      const cleaned = courseCode.toUpperCase().trim().replace(/\s+/g, '');
+      
+      // Step 1: Normalize separators (keep dashes, replace _ and . with -)
+      let normalized = cleaned.replace(/[_.]+/g, '-').replace(/-+/g, '-');
+      
+      // Step 2: Remove trailing "000" if present in original (only if it was separated by space or dash)
+      if (/(?:\s|-)0{3}$/i.test(courseCode)) {
+        normalized = normalized.replace(/0{3}$/, '');
+      }
+      
+      // Step 3: Remove suffixes like -1, -12, -L1, -G, -MB, etc. (but keep meaningful dashes like STK-MAT2011)
+      // Only remove simple suffix patterns at the end, not complex course code parts
+      let keepRemoving = true;
+      while (keepRemoving && normalized.length > 4) {
+        keepRemoving = false;
+        const match = normalized.match(/-([A-Z0-9]{1,3})$/);
+        if (match) {
+          const token = match[1];
+          // Only remove if it's a simple suffix: 1-2 digits, single letter+digit, or 1-2 letters
+          if (/^\d{1,2}$/.test(token) || /^[A-Z]\d{1}$/i.test(token) || /^[A-Z]{1,2}$/i.test(token)) {
+            normalized = normalized.slice(0, -(token.length + 1));
+            keepRemoving = true;
+          }
+        }
+      }
+      
+      // Try multiple normalized formats (in order of likelihood)
       const normalizedFormats = [
-        normalizedForStorage, // Most common: all non-alphanumeric removed
-        cleaned.replace(/[^A-Z0-9-]/g, '').replace(/-/g, '').toUpperCase(), // Remove everything except A-Z, 0-9, then remove dashes
-        cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase(), // Remove all non-alphanumeric
+        normalized, // Primary: normalized with dashes kept (e.g., "STK-MAT2011")
+        cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase(), // Fallback: all non-alphanumeric removed (e.g., "STKMAT2011")
       ];
       
       // Remove duplicates
@@ -246,35 +185,9 @@ export async function getGradeDataFromCache(
       // Silently fail - optimized cache is optional
     }
 
-    // 4. Skip cache.json check - it's optional and causes 404 errors
-    // If we need cache.json data, it should be pre-loaded into localStorage during build
-    // This prevents unnecessary 404 errors in console
   }
 
-  // 4. Check server-side cache (wrapped in try-catch for safety)
-  let cached: GradeData[] | null = null;
-  try {
-    cached = getCachedDataSafe(institutionCode, formattedCode);
-  } catch (e) {
-    // Silently fail if cache access fails (expected on client-side)
-    cached = null;
-  }
-
-  if (cached && cached.length > 0) {
-    // Also store in client cache if on client (store in all key formats for faster lookup)
-    if (typeof window !== 'undefined') {
-      cacheKeys.forEach(key => {
-        clientCache.set(key, cached);
-        try {
-          localStorage.setItem(`grade-data-${key}`, JSON.stringify(cached));
-        } catch {
-          // Ignore localStorage errors
-        }
-      });
-    }
-    return cached;
-  }
-
+  // No cache hit - return null so caller can fetch from API
   return null;
 }
 

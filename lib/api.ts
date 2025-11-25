@@ -1,32 +1,5 @@
 import { GradeData, SearchPayload, University, DepartmentFilter, StudyProgramFilter } from '@/types';
 
-// Cache helper - only loads on server-side to avoid bundling fs module
-function getCachedDataSafe(
-  institutionCode: string,
-  courseCode: string
-): GradeData[] | null {
-  // Only try to use cache on server-side
-  // Check multiple ways to ensure we're on server
-  if (typeof window !== 'undefined' || typeof process === 'undefined' || !process.versions?.node) {
-    return null;
-  }
-
-  try {
-    // Use Function constructor to make require truly dynamic
-    // This prevents webpack from analyzing the require call
-    const requireFunc = new Function('modulePath', 'return require(modulePath)');
-    const cacheModule = requireFunc('./cache');
-    if (cacheModule && typeof cacheModule.getCachedData === 'function') {
-      return cacheModule.getCachedData(institutionCode, courseCode);
-    }
-  } catch (e) {
-    // Cache not available or error loading - silently fail
-    // This is expected on client-side where cache module is ignored by webpack
-    return null;
-  }
-
-  return null;
-}
 
 // NSD API URL - CORS issues in production require a proxy
 export const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
@@ -437,7 +410,7 @@ export async function fetchGradeData(
     institution = uniEntry ? uniEntry[0] : '';
   }
 
-  // Try cache first (works on both client and server)
+  // Try optimized cache first (primary cache source)
   if (institution) {
     const { getGradeDataFromCache } = await import('./grade-data-cache');
     const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
@@ -451,26 +424,6 @@ export async function fetchGradeData(
       }
       return aggregated;
     }
-  }
-
-  // Fall back to server-side cache (wrapped in try-catch for safety)
-  let cached: GradeData[] | null = null;
-  try {
-    cached = getCachedDataSafe(institutionCode, courseCode);
-  } catch (e) {
-    // Silently fail if cache access fails (expected on client-side)
-    cached = null;
-  }
-
-  if (cached && cached.length > 0) {
-    // Aggregate duplicates from cache
-    const { aggregateDuplicateEntries } = await import('./utils');
-    let aggregated = aggregateDuplicateEntries(cached);
-    // Filter by year if specified
-    if (year) {
-      aggregated = aggregated.filter(item => parseInt(item.Årstall, 10) === year);
-    }
-    return aggregated;
   }
 
   // Fall back to API if cache miss
@@ -714,8 +667,8 @@ export async function fetchAllYearsData(
     return [];
   }
 
-  // Try cache first (works on both client and server)
-  // This is the PRIMARY cache check - if data is found, return immediately
+  // Try optimized cache first (primary cache source)
+  // If data is found in cache, return immediately without API call
   if (institution) {
     const { getGradeDataFromCache } = await import('./grade-data-cache');
     const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
@@ -725,23 +678,6 @@ export async function fetchAllYearsData(
       console.log(`[fetchAllYearsData] ✅ Cache hit for ${courseCode} (${institution}) - returning ${cached.length} cached entries (NO API CALL)`);
       return aggregateDuplicateEntries(cached);
     }
-  }
-
-  // Fall back to server-side cache (wrapped in try-catch for safety)
-  // This is only checked on server-side, silently skipped on client
-  let cached: GradeData[] | null = null;
-  try {
-    cached = getCachedDataSafe(institutionCode, courseCode);
-  } catch (e) {
-    // Silently fail if cache access fails (expected on client-side)
-    cached = null;
-  }
-
-  if (cached && cached.length > 0) {
-    // Aggregate duplicates from cache and return immediately
-    const { aggregateDuplicateEntries } = await import('./utils');
-    console.log(`[fetchAllYearsData] ✅ Server cache hit for ${courseCode} (${institution}) (NO API CALL)`);
-    return aggregateDuplicateEntries(cached);
   }
 
   // Cache miss - will proceed to API call
