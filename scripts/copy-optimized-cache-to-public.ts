@@ -62,9 +62,10 @@ function main() {
   console.log(`📁 Target: ${TARGET_DIR}\n`);
 
   if (!fs.existsSync(SOURCE_DIR)) {
-    console.error(`❌ Source directory does not exist: ${SOURCE_DIR}`);
+    console.log(`⚠️  Source directory does not exist: ${SOURCE_DIR}`);
+    console.log(`   Skipping optimized cache copy (this is optional).`);
     console.log(`   Run fetch-all-grade-data first to generate the cache.`);
-    process.exit(1);
+    process.exit(0); // Exit with success so build doesn't fail
   }
 
   // Get list of institutions

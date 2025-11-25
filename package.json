@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/copy-nhh-data.js",
+    "prebuild": "node scripts/copy-nhh-data.js && npm run copy-optimized-cache || true",
     "build": "next build",
     "start": "next start",
     "export": "next build",

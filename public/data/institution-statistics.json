@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2025-11-25T22:49:33.826Z",
+    "generatedAt": "2025-11-25T22:52:53.315Z",
     "totalInstitutions": 37
   },
   "institutions": {
@@ -1116,7 +1116,7 @@
           "averageGrade": 3.14
         }
       },
-      "generatedAt": "2025-11-25T22:48:55.845Z"
+      "generatedAt": "2025-11-25T22:51:58.712Z"
     },
     "NTNU": {
       "institution": "NTNU",
@@ -2230,7 +2230,7 @@
           "averageGrade": 3.16
         }
       },
-      "generatedAt": "2025-11-25T22:49:01.782Z"
+      "generatedAt": "2025-11-25T22:52:06.170Z"
     },
     "UiB": {
       "institution": "UiB",
@@ -3344,7 +3344,7 @@
           "averageGrade": 3.08
         }
       },
-      "generatedAt": "2025-11-25T22:49:05.251Z"
+      "generatedAt": "2025-11-25T22:52:09.266Z"
     },
     "NHH": {
       "institution": "NHH",
@@ -4458,7 +4458,7 @@
           "averageGrade": 3.77
         }
       },
-      "generatedAt": "2025-11-25T22:49:06.620Z"
+      "generatedAt": "2025-11-25T22:52:10.777Z"
     },
     "BI": {
       "institution": "BI",
@@ -5572,7 +5572,7 @@
           "averageGrade": 3.08
         }
       },
-      "generatedAt": "2025-11-25T22:49:09.148Z"
+      "generatedAt": "2025-11-25T22:52:12.524Z"
     },
     "OsloMet": {
       "institution": "OsloMet",
@@ -6014,7 +6014,7 @@
           "averageGrade": 2.88
         }
       },
-      "generatedAt": "2025-11-25T22:49:10.968Z"
+      "generatedAt": "2025-11-25T22:52:14.848Z"
     },
     "Nord": {
       "institution": "Nord",
@@ -6552,7 +6552,7 @@
           "averageGrade": 2.97
         }
       },
-      "generatedAt": "2025-11-25T22:49:12.864Z"
+      "generatedAt": "2025-11-25T22:52:20.687Z"
     },
     "NMBU": {
       "institution": "NMBU",
@@ -7186,7 +7186,7 @@
           "averageGrade": 2.93
         }
       },
-      "generatedAt": "2025-11-25T22:49:14.144Z"
+      "generatedAt": "2025-11-25T22:52:22.491Z"
     },
     "UiA": {
       "institution": "UiA",
@@ -8108,7 +8108,7 @@
           "averageGrade": 3.04
         }
       },
-      "generatedAt": "2025-11-25T22:49:16.132Z"
+      "generatedAt": "2025-11-25T22:52:24.857Z"
     },
     "INN": {
       "institution": "INN",
@@ -8214,7 +8214,7 @@
           "averageGrade": 2.99
         }
       },
-      "generatedAt": "2025-11-25T22:49:16.811Z"
+      "generatedAt": "2025-11-25T22:52:25.714Z"
     },
     "UiS": {
       "institution": "UiS",
@@ -9280,7 +9280,7 @@
           "averageGrade": 2.92
         }
       },
-      "generatedAt": "2025-11-25T22:49:19.303Z"
+      "generatedAt": "2025-11-25T22:52:29.138Z"
     },
     "USN": {
       "institution": "USN",
@@ -9722,7 +9722,7 @@
           "averageGrade": 2.67
         }
       },
-      "generatedAt": "2025-11-25T22:49:21.454Z"
+      "generatedAt": "2025-11-25T22:52:31.383Z"
     },
     "UiT": {
       "institution": "UiT",
@@ -10836,7 +10836,7 @@
           "averageGrade": 2.96
         }
       },
-      "generatedAt": "2025-11-25T22:49:23.090Z"
+      "generatedAt": "2025-11-25T22:52:35.678Z"
     },
     "NMH": {
       "institution": "NMH",
@@ -11950,7 +11950,7 @@
           "averageGrade": 3
         }
       },
-      "generatedAt": "2025-11-25T22:49:23.657Z"
+      "generatedAt": "2025-11-25T22:52:36.553Z"
     },
     "NIH": {
       "institution": "NIH",
@@ -12968,7 +12968,7 @@
           "averageGrade": 3.3
         }
       },
-      "generatedAt": "2025-11-25T22:49:24.247Z"
+      "generatedAt": "2025-11-25T22:52:37.313Z"
     },
     "KHIO": {
       "institution": "KHIO",
@@ -13794,7 +13794,7 @@
           "averageGrade": 2.97
         }
       },
-      "generatedAt": "2025-11-25T22:49:24.797Z"
+      "generatedAt": "2025-11-25T22:52:38.110Z"
     },
     "HIM": {
       "institution": "HIM",
@@ -14620,7 +14620,7 @@
           "averageGrade": 2.81
         }
       },
-      "generatedAt": "2025-11-25T22:49:25.454Z"
+      "generatedAt": "2025-11-25T22:52:38.900Z"
     },
     "AHO": {
       "institution": "AHO",
@@ -15686,7 +15686,7 @@
           "averageGrade": 3.16
         }
       },
-      "generatedAt": "2025-11-25T22:49:25.859Z"
+      "generatedAt": "2025-11-25T22:52:39.835Z"
     },
     "SH": {
       "institution": "SH",
@@ -16512,7 +16512,7 @@
           "averageGrade": 3.66
         }
       },
-      "generatedAt": "2025-11-25T22:49:26.075Z"
+      "generatedAt": "2025-11-25T22:52:40.658Z"
     },
     "HiØ": {
       "institution": "HiØ",
@@ -17578,7 +17578,7 @@
           "averageGrade": 2.81
         }
       },
-      "generatedAt": "2025-11-25T22:49:27.526Z"
+      "generatedAt": "2025-11-25T22:52:42.717Z"
     },
     "HVO": {
       "institution": "HVO",
@@ -18692,7 +18692,7 @@
           "averageGrade": 3.15
         }
       },
-      "generatedAt": "2025-11-25T22:49:28.274Z"
+      "generatedAt": "2025-11-25T22:52:44.079Z"
     },
     "HVL": {
       "institution": "HVL",
@@ -19182,7 +19182,7 @@
           "averageGrade": 2.9
         }
       },
-      "generatedAt": "2025-11-25T22:49:29.373Z"
+      "generatedAt": "2025-11-25T22:52:46.639Z"
     },
     "VID": {
       "institution": "VID",
@@ -19720,7 +19720,7 @@
           "averageGrade": 2.91
         }
       },
-      "generatedAt": "2025-11-25T22:49:29.839Z"
+      "generatedAt": "2025-11-25T22:52:47.416Z"
     },
     "MF": {
       "institution": "MF",
@@ -20756,7 +20756,7 @@
           "averageGrade": 2.89
         }
       },
-      "generatedAt": "2025-11-25T22:49:30.329Z"
+      "generatedAt": "2025-11-25T22:52:48.019Z"
     },
     "AHS": {
       "institution": "AHS",
@@ -21476,7 +21476,7 @@
           "averageGrade": 3.06
         }
       },
-      "generatedAt": "2025-11-25T22:49:30.637Z"
+      "generatedAt": "2025-11-25T22:52:48.520Z"
     },
     "BD": {
       "institution": "BD",
@@ -22302,7 +22302,7 @@
           "averageGrade": 3.09
         }
       },
-      "generatedAt": "2025-11-25T22:49:30.868Z"
+      "generatedAt": "2025-11-25T22:52:48.955Z"
     },
     "BAS": {
       "institution": "BAS",
@@ -23128,7 +23128,7 @@
           "averageGrade": 3
         }
       },
-      "generatedAt": "2025-11-25T22:49:31.044Z"
+      "generatedAt": "2025-11-25T22:52:49.323Z"
     },
     "DMMH": {
       "institution": "DMMH",
@@ -23858,7 +23858,7 @@
           "averageGrade": 3.06
         }
       },
-      "generatedAt": "2025-11-25T22:49:31.362Z"
+      "generatedAt": "2025-11-25T22:52:49.857Z"
     },
     "FIH": {
       "institution": "FIH",
@@ -24578,7 +24578,7 @@
           "averageGrade": 3.15
         }
       },
-      "generatedAt": "2025-11-25T22:49:31.630Z"
+      "generatedAt": "2025-11-25T22:52:50.287Z"
     },
     "HGUt": {
       "institution": "HGUt",
@@ -25246,7 +25246,7 @@
           "averageGrade": 3.67
         }
       },
-      "generatedAt": "2025-11-25T22:49:31.823Z"
+      "generatedAt": "2025-11-25T22:52:50.608Z"
     },
     "HFDK": {
       "institution": "HFDK",
@@ -25640,7 +25640,7 @@
           "averageGrade": 3
         }
       },
-      "generatedAt": "2025-11-25T22:49:31.994Z"
+      "generatedAt": "2025-11-25T22:52:50.938Z"
     },
     "HLT": {
       "institution": "HLT",
@@ -26466,7 +26466,7 @@
           "averageGrade": 3.55
         }
       },
-      "generatedAt": "2025-11-25T22:49:32.196Z"
+      "generatedAt": "2025-11-25T22:52:51.323Z"
     },
     "HK": {
       "institution": "HK",
@@ -26908,7 +26908,7 @@
           "averageGrade": 3.17
         }
       },
-      "generatedAt": "2025-11-25T22:49:32.792Z"
+      "generatedAt": "2025-11-25T22:52:52.284Z"
     },
     "LDH": {
       "institution": "LDH",
@@ -27782,7 +27782,7 @@
           "averageGrade": 3.08
         }
       },
-      "generatedAt": "2025-11-25T22:49:33.060Z"
+      "generatedAt": "2025-11-25T22:52:52.581Z"
     },
     "NLA": {
       "institution": "NLA",
@@ -28608,7 +28608,7 @@
           "averageGrade": 2.84
         }
       },
-      "generatedAt": "2025-11-25T22:49:33.567Z"
+      "generatedAt": "2025-11-25T22:52:53.058Z"
     },
     "Steiner": {
       "institution": "Steiner",
@@ -29434,7 +29434,7 @@
           "averageGrade": 2.66
         }
       },
-      "generatedAt": "2025-11-25T22:49:33.778Z"
+      "generatedAt": "2025-11-25T22:52:53.249Z"
     },
     "VGS": {
       "institution": "VGS",
@@ -29862,7 +29862,7 @@
           "averageGrade": 4.46
         }
       },
-      "generatedAt": "2025-11-25T22:49:33.824Z"
+      "generatedAt": "2025-11-25T22:52:53.309Z"
     }
   }
 }
