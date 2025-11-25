@@ -4,7 +4,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport, courseHasData } from './utils/export-format';
+import { createOptimizedExport, courseHasData, normalizeCourseCodeForStorage } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -55,7 +55,8 @@ async function discoverUSNCourses() {
       // Merge into master map
       // USN uses format COURSECODE-1 (with dash), same as UiO/NTNU/OsloMet/Nord/NMBU/UiA/INN/UiS
       courses.forEach(course => {
-        const baseCode = course.courseCode.replace(/-1$/, ''); // Remove API suffix only
+        // Remove numeric API suffix (like -1, -2, -0) and normalize spaces
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, ''));
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {

@@ -603,14 +603,20 @@ export async function fetchGradeData(
           }
           
           // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+          // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
           // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
           if (itemCode.startsWith(normalizedBase)) {
             const nextChar = itemCode[normalizedBase.length];
             // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
-            // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
             if (nextChar === undefined || /[0-9]/.test(nextChar)) {
               return true;
             }
+            // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
+            // This handles UiB courses like "ECON116-1" when searching for "ECON116"
+            if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
+              return true;
+            }
+            // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
           }
           
           return false;
@@ -956,14 +962,20 @@ export async function fetchAllYearsData(
           }
           
           // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+          // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
           // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
           if (itemCode.startsWith(normalizedBase)) {
             const nextChar = itemCode[normalizedBase.length];
             // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
-            // Reject if next character is a dash (variant like "EXPHIL-HFSEM")
             if (nextChar === undefined || /[0-9]/.test(nextChar)) {
               return true;
             }
+            // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
+            // This handles UiB courses like "ECON116-1" when searching for "ECON116"
+            if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
+              return true;
+            }
+            // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
           }
           
           return false;

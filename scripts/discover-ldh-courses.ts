@@ -3,7 +3,7 @@
  */
 
 import { getAllCoursesForInstitution, DiscoveredCourse } from '../lib/hierarchy-discovery';
-import { createOptimizedExport, courseHasData } from './utils/export-format';
+import { createOptimizedExport, courseHasData, normalizeCourseCodeForStorage } from './utils/export-format';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -49,7 +49,8 @@ async function discoverLDHCourses() {
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
       
       courses.forEach((course: DiscoveredCourse) => {
-        const baseCode = course.courseCode.replace(/-1$/, '');
+        // Remove numeric API suffix (like -1, -2, -0) and normalize spaces
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, ''));
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
