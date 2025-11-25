@@ -226,6 +226,36 @@ async function fetchCourseGradeData(
             formatCourseCode(cleaned, institution), // Then with -1 suffix (e.g., "12400-1")
             `${cleaned}-1`, // Also try explicit -1
         );
+    } else if (institution === 'SH') {
+        // SH (Samisk høgskole): Course codes have various formats
+        // Examples: "ALDU-FA2PRO", "ARB180", "FIL100-1", "SAM103.1RUO", "V5DUO-1140"
+        // Try as-is first (most likely to work)
+        codeFormats.push(cleaned);
+        
+        // If code already has a dash (like "FIL100-1", "ALDU-FA2PRO"), try variations
+        if (cleaned.includes('-')) {
+            const parts = cleaned.split('-');
+            // Try with -1 suffix (e.g., "ALDU-FA2PRO-1")
+            codeFormats.push(`${cleaned}-1`);
+            // Try just first part (e.g., "ALDU-FA2PRO" -> "ALDU")
+            if (parts.length > 1) {
+                codeFormats.push(parts[0]);
+                codeFormats.push(`${parts[0]}-1`);
+            }
+        } else {
+            // No dash: try with -1 suffix
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
+        
+        // If code has a period (like "SAM103.1RUO"), try without period
+        if (cleaned.includes('.')) {
+            const withoutPeriod = cleaned.replace(/\./g, '');
+            codeFormats.push(withoutPeriod);
+            codeFormats.push(`${withoutPeriod}-1`);
+        }
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
@@ -441,9 +471,23 @@ async function fetchCourseGradeData(
 
 // Load courses for an institution
 function loadInstitutionCourses(institution: string): OptimizedCourse[] {
+    // Normalize institution name for file lookup
+    // Handle special characters: "HiØ" -> "hio", "HGUt" -> "hgut", etc.
     const institutionLower = institution.toLowerCase();
+    // Replace special Norwegian characters with ASCII equivalents for filename matching
+    const normalized = institutionLower
+        .replace(/ø/g, 'o')
+        .replace(/å/g, 'a')
+        .replace(/æ/g, 'ae')
+        .replace(/Ø/g, 'o')
+        .replace(/Å/g, 'a')
+        .replace(/Æ/g, 'ae');
+    
+    // Try both normalized and original lowercase (in case file uses special chars)
     const possibleFiles = [
+        path.join(INSTITUTIONS_DIR, `${normalized}-all-courses.json`),
         path.join(INSTITUTIONS_DIR, `${institutionLower}-all-courses.json`),
+        path.join(PUBLIC_INSTITUTIONS_DIR, `${normalized}-all-courses.json`),
         path.join(PUBLIC_INSTITUTIONS_DIR, `${institutionLower}-all-courses.json`),
     ];
 
