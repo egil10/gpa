@@ -24,7 +24,7 @@ function getCachedDataSafe(
     // This is expected on client-side where cache module is ignored by webpack
     return null;
   }
-  
+
   return null;
 }
 
@@ -224,7 +224,7 @@ export function createSearchPayload(
     begrensning: '1000',
     kodetekst: 'N',
     desimal_separator: '.',
-    groupBy: courseCode 
+    groupBy: courseCode
       ? ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall']
       : ['Institusjonskode', 'Emnekode', 'Karakter', 'Årstall'],
     sortBy: ['Emnekode', 'Karakter'],
@@ -257,7 +257,7 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       if (response.status === 204) {
         return []; // Return empty array instead of throwing
       }
-      
+
       if (!response.ok) {
         throw new Error('No data found');
       }
@@ -374,7 +374,7 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     if (response.status === 204) {
       return []; // Return empty array instead of throwing
     }
-    
+
     if (!response.ok) {
       throw new Error(`Proxy ${proxyIndex} returned ${response.status}`);
     }
@@ -394,7 +394,7 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     return data;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     // Don't retry on rate limit errors - throw immediately
     if (errorMessage.includes('Rate limited') || errorMessage.includes('429')) {
       throw new Error(
@@ -409,18 +409,18 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
       // Silently try next proxy - don't spam console
       return fetchWithProxy(payload, proxyIndex + 1, false);
     }
-    
+
     // All proxies failed - provide helpful error message
     const helpfulError = isGitHubPages
       ? `Kunne ikke hente data fra NSD API på grunn av CORS-restriksjoner. ` +
-        `Offentlige CORS-proxies er ustabile. ` +
-        `For å løse dette permanent, deploy api/proxy.js til Vercel (gratis). ` +
-        `Se dokumentasjonen: https://github.com/egil10/gpa/blob/main/docs/CORS_SOLUTION.md`
+      `Offentlige CORS-proxies er ustabile. ` +
+      `For å løse dette permanent, deploy api/proxy.js til Vercel (gratis). ` +
+      `Se dokumentasjonen: https://github.com/egil10/gpa/blob/main/docs/CORS_SOLUTION.md`
       : `Kunne ikke hente data fra NSD API. ` +
-        `Dette skyldes CORS-restriksjoner. ` +
-        `Alle proxy-tjenester mislyktes. ` +
-        `Original feil: ${errorMessage}`;
-    
+      `Dette skyldes CORS-restriksjoner. ` +
+      `Alle proxy-tjenester mislyktes. ` +
+      `Original feil: ${errorMessage}`;
+
     throw new Error(helpfulError);
   }
 }
@@ -437,7 +437,7 @@ export async function fetchGradeData(
     const uniEntry = Object.entries(UNIVERSITIES).find(([_, uni]) => uni.code === institutionCode);
     institution = uniEntry ? uniEntry[0] : '';
   }
-  
+
   // Try cache first (works on both client and server)
   if (institution) {
     const { getGradeDataFromCache } = await import('./grade-data-cache');
@@ -453,7 +453,7 @@ export async function fetchGradeData(
       return aggregated;
     }
   }
-  
+
   // Fall back to server-side cache (wrapped in try-catch for safety)
   let cached: GradeData[] | null = null;
   try {
@@ -462,7 +462,7 @@ export async function fetchGradeData(
     // Silently fail if cache access fails (expected on client-side)
     cached = null;
   }
-  
+
   if (cached && cached.length > 0) {
     // Aggregate duplicates from cache
     const { aggregateDuplicateEntries } = await import('./utils');
@@ -481,24 +481,24 @@ export async function fetchGradeData(
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
     const isJUSCourse = courseCode.toUpperCase().startsWith('JUS');
-    
+
     // For JUS courses, try without -1 first (they're stored as JUS346, not JUS346-1)
     // But also try -0 suffix (found in fallback for JUS242-0)
     // For other courses, try with -1 first, then -0
     const formatsToTry = isJUSCourse
       ? [
-          cleaned,                  // JUS: without suffix first
-          `${cleaned}-0`,           // Then with -0 (found in fallback)
-          `${cleaned}-1`,           // Then with -1
-          formatCourseCode(cleaned, institution),
-        ]
+        cleaned,                  // JUS: without suffix first
+        `${cleaned}-0`,           // Then with -0 (found in fallback)
+        `${cleaned}-1`,           // Then with -1
+        formatCourseCode(cleaned, institution),
+      ]
       : [
-          `${cleaned}-1`,           // Other courses: with -1 first
-          `${cleaned}-0`,           // Then with -0
-          cleaned,                  // Without any suffix
-          formatCourseCode(cleaned, institution), // formatCourseCode result
-        ];
-    
+        `${cleaned}-0`,           // UiB standard: -0 suffix first (most common)
+        cleaned,                  // Then without any suffix
+        `${cleaned}-1`,           // Then with -1 as fallback
+        formatCourseCode(cleaned, institution), // formatCourseCode result
+      ];
+
     // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
     // This avoids the expensive "query all courses" fallback
     if (!normalizedBase.includes('-')) {
@@ -509,35 +509,35 @@ export async function fetchGradeData(
         formatsToTry.push(`${normalizedBase}-${variant}-1`);
       }
     }
-    
+
     // Remove duplicates
     const uniqueFormats = Array.from(new Set(formatsToTry));
-    
+
     // Try each format
     for (const formattedCode of uniqueFormats) {
       // For JUS courses, try with study program filter first
       if (isJUSCourse) {
         try {
           const payload = createSearchPayload(
-            institutionCode, 
-            formattedCode, 
-            year, 
+            institutionCode,
+            formattedCode,
+            year,
             departmentFilter,
             { studiumCode: 'jus' }
           );
           const data = await fetchWithProxy(payload);
-          
+
           if (data && data.length > 0) {
             // Check if we got matching data
             const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
             const matching = data.filter(item => {
               const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
               const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
-              return normalizedItemCode === normalizedBase || 
-                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
-                     (isJUSCourse && itemCode.startsWith(courseCode.toUpperCase().replace(/\s/g, '')));
+              return normalizedItemCode === normalizedBase ||
+                itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                (isJUSCourse && itemCode.startsWith(courseCode.toUpperCase().replace(/\s/g, '')));
             });
-            
+
             if (matching.length > 0) {
               return matching;
             }
@@ -546,23 +546,23 @@ export async function fetchGradeData(
           // Continue to try without study program filter
         }
       }
-      
+
       // Try without study program filter (or if JUS course with filter didn't work)
       try {
         const payload = createSearchPayload(institutionCode, formattedCode, year, departmentFilter);
         const data = await fetchWithProxy(payload);
-        
+
         if (data && data.length > 0) {
           // Found data with this format - aggregate and return
           const { aggregateDuplicateEntries } = await import('./utils');
           let aggregated = aggregateDuplicateEntries(data);
-          
+
           // Cache the fetched data (after aggregation)
           if (institution && aggregated.length > 0) {
             const { storeGradeDataInCache } = await import('./grade-data-cache');
             storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
           }
-          
+
           return aggregated;
         }
       } catch (error) {
@@ -570,7 +570,7 @@ export async function fetchGradeData(
         continue;
       }
     }
-    
+
     // LAST RESORT: If all direct queries failed, try querying all courses for the institution and filtering
     // WARNING: This is VERY SLOW for UiB (7255 courses) - only use as last resort
     // Skip this expensive fallback if we've already tried many formats
@@ -578,115 +578,115 @@ export async function fetchGradeData(
       try {
         const payloadAllCourses = createSearchPayload(institutionCode, undefined, year, departmentFilter);
         const allData = await fetchWithProxy(payloadAllCourses);
-        
+
         if (allData && allData.length > 0) {
-        // Find courses that match the normalized code (consistent with how we store codes)
-        // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
-        // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
-        // Only match if the codes are exactly equal after normalization
-        // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
-        const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
-        const matchingData = allData.filter(item => {
-          const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
-          
-          // Exact match after normalization
-          if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
-            return true;
-          }
-          
-          // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
-          // only match if the item code starts with the exact search code
-          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
-          if (normalizedBase.includes('-')) {
-            return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
-          }
-          
-          // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
-          // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
-          // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
-          if (itemCode.startsWith(normalizedBase)) {
-            const nextChar = itemCode[normalizedBase.length];
-            // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
-            if (nextChar === undefined || /[0-9]/.test(nextChar)) {
-              return true;
-            }
-            // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
-            // This handles UiB courses like "ECON116-1" when searching for "ECON116"
-            if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
-              return true;
-            }
-            // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
-          }
-          
-          return false;
-        });
-        
-        if (matchingData.length > 0) {
-          // Aggregate and return matching data
-          const { aggregateDuplicateEntries } = await import('./utils');
-          let aggregated = aggregateDuplicateEntries(matchingData);
-          
-          // Cache the fetched data (after aggregation)
-          if (institution && aggregated.length > 0) {
-            const { storeGradeDataInCache } = await import('./grade-data-cache');
-            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
-          }
-          
-          return aggregated;
-        }
-        
-        // If no exact match found and search code has no dash, try to find variants
-        // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
-        // This handles cases where the base course code exists but has no data, only variants do
-        if (!normalizedBase.includes('-')) {
-          const variantMatches = allData.filter(item => {
+          // Find courses that match the normalized code (consistent with how we store codes)
+          // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+          // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
+          // Only match if the codes are exactly equal after normalization
+          // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
+          const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
+          const matchingData = allData.filter(item => {
             const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
-            // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
-            return normalizedItemCode.startsWith(normalizedBase + '-');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
+
+            // Exact match after normalization
+            if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
+              return true;
+            }
+
+            // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
+            // only match if the item code starts with the exact search code
+            // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+            if (normalizedBase.includes('-')) {
+              return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
+            }
+
+            // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+            // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
+            // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+            if (itemCode.startsWith(normalizedBase)) {
+              const nextChar = itemCode[normalizedBase.length];
+              // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+              if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+                return true;
+              }
+              // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
+              // This handles UiB courses like "ECON116-1" when searching for "ECON116"
+              if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
+                return true;
+              }
+              // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
+            }
+
+            return false;
           });
-          
-          if (variantMatches.length > 0) {
-            // Found variants - aggregate their data
+
+          if (matchingData.length > 0) {
+            // Aggregate and return matching data
             const { aggregateDuplicateEntries } = await import('./utils');
-            let aggregated = aggregateDuplicateEntries(variantMatches);
-            
+            let aggregated = aggregateDuplicateEntries(matchingData);
+
             // Cache the fetched data (after aggregation)
             if (institution && aggregated.length > 0) {
               const { storeGradeDataInCache } = await import('./grade-data-cache');
               storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
             }
-            
+
             return aggregated;
           }
+
+          // If no exact match found and search code has no dash, try to find variants
+          // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+          // This handles cases where the base course code exists but has no data, only variants do
+          if (!normalizedBase.includes('-')) {
+            const variantMatches = allData.filter(item => {
+              const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+              const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+              // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
+              return normalizedItemCode.startsWith(normalizedBase + '-');
+            });
+
+            if (variantMatches.length > 0) {
+              // Found variants - aggregate their data
+              const { aggregateDuplicateEntries } = await import('./utils');
+              let aggregated = aggregateDuplicateEntries(variantMatches);
+
+              // Cache the fetched data (after aggregation)
+              if (institution && aggregated.length > 0) {
+                const { storeGradeDataInCache } = await import('./grade-data-cache');
+                storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+              }
+
+              return aggregated;
+            }
+          }
         }
-      }
       } catch (error) {
         // If this fallback also fails, continue to return empty array below
       }
     }
-    
+
     // All attempts failed - return empty array
     return [];
   }
-  
+
   // For non-UiB institutions, use standard format
   const payload = createSearchPayload(institutionCode, courseCode, year, departmentFilter);
   let data = await fetchWithProxy(payload);
-  
+
   // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
   if (data.length > 0) {
     const { aggregateDuplicateEntries } = await import('./utils');
     data = aggregateDuplicateEntries(data);
   }
-  
+
   // Cache the fetched data (after aggregation)
   if (institution && data.length > 0) {
     const { storeGradeDataInCache } = await import('./grade-data-cache');
     storeGradeDataInCache(institutionCode, courseCode, institution, data);
   }
-  
+
   return data;
 }
 
@@ -702,7 +702,7 @@ export async function fetchAllYearsData(
     const uniEntry = Object.entries(UNIVERSITIES).find(([_, uni]) => uni.code === institutionCode);
     institution = uniEntry ? uniEntry[0] : '';
   }
-  
+
   // Try cache first (works on both client and server)
   if (institution) {
     const { getGradeDataFromCache } = await import('./grade-data-cache');
@@ -713,7 +713,7 @@ export async function fetchAllYearsData(
       return aggregateDuplicateEntries(cached);
     }
   }
-  
+
   // Fall back to server-side cache (wrapped in try-catch for safety)
   let cached: GradeData[] | null = null;
   try {
@@ -722,13 +722,13 @@ export async function fetchAllYearsData(
     // Silently fail if cache access fails (expected on client-side)
     cached = null;
   }
-  
+
   if (cached && cached.length > 0) {
     // Aggregate duplicates from cache
     const { aggregateDuplicateEntries } = await import('./utils');
     return aggregateDuplicateEntries(cached);
   }
-  
+
   // For BI, try multiple formats since course codes might already end with digits
   // Some courses like "MET29107" already end with digits and should be used as-is
   // Others might need a "1" suffix appended
@@ -739,37 +739,37 @@ export async function fetchAllYearsData(
       `${cleaned}1`, // Try with "1" suffix (standard BI format)
       formatCourseCode(cleaned, institution), // Use formatCourseCode result
     ];
-    
+
     // Remove duplicates
     const uniqueFormats = Array.from(new Set(formatsToTry));
-    
+
     // Try each format
     for (const formattedCode of uniqueFormats) {
       try {
         const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
         const data = await fetchWithProxy(payload);
-        
+
         if (data && data.length > 0) {
           // Filter to ensure we only return data for the specific course we're looking for
           const matching = data.filter(item => {
             const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
             // Match if codes match exactly, or if normalized codes match
-            return itemCode === cleaned || 
-                   itemCode === formattedCode.toUpperCase() ||
-                   itemCode.replace(/1$/, '') === cleaned.replace(/1$/, ''); // Remove trailing "1" for comparison
+            return itemCode === cleaned ||
+              itemCode === formattedCode.toUpperCase() ||
+              itemCode.replace(/1$/, '') === cleaned.replace(/1$/, ''); // Remove trailing "1" for comparison
           });
-          
+
           if (matching.length > 0) {
             console.log(`[fetchAllYearsData] Found BI course data: ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
             const { aggregateDuplicateEntries } = await import('./utils');
             let aggregated = aggregateDuplicateEntries(matching);
-            
+
             // Cache the fetched data (after aggregation)
             if (institution && aggregated.length > 0) {
               const { storeGradeDataInCache } = await import('./grade-data-cache');
               storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
             }
-            
+
             return aggregated;
           }
         }
@@ -779,38 +779,38 @@ export async function fetchAllYearsData(
         continue;
       }
     }
-    
+
     // If all formats failed, return empty array
     return [];
   }
-  
+
   // For UiB, try multiple formats since course codes can have different formats
   // Some courses use "INF100" (no suffix), others use "EXPHIL-HFEKS-0" (with suffix)
   if (institution === 'UiB') {
     const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
     const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix
     const isJUSCourse = courseCode.toUpperCase().startsWith('JUS');
-    
+
     // For JUS courses, try multiple formats more aggressively
     // JUS courses can appear in various formats in the API
     // They're stored in our data as "JUS2311" but might need different formats for API
     const formatsToTry = isJUSCourse
       ? [
-          cleaned,                  // JUS: without suffix first (e.g., "JUS2311")
-          `${cleaned}-0`,           // Then with -0 (e.g., "JUS2311-0")
-          `${cleaned}-1`,           // Then with -1 (e.g., "JUS2311-1")
-          formatCourseCode(cleaned, institution), // formatCourseCode result
-          // Also try with spaces (some APIs use "JUS 2311")
-          cleaned.replace(/([A-Z]+)(\d+)/, '$1 $2'), // "JUS2311" -> "JUS 2311"
-          cleaned.replace(/([A-Z]+)(\d+)/, '$1-$2'),  // "JUS2311" -> "JUS-2311"
-        ]
+        cleaned,                  // JUS: without suffix first (e.g., "JUS2311")
+        `${cleaned}-0`,           // Then with -0 (e.g., "JUS2311-0")
+        `${cleaned}-1`,           // Then with -1 (e.g., "JUS2311-1")
+        formatCourseCode(cleaned, institution), // formatCourseCode result
+        // Also try with spaces (some APIs use "JUS 2311")
+        cleaned.replace(/([A-Z]+)(\d+)/, '$1 $2'), // "JUS2311" -> "JUS 2311"
+        cleaned.replace(/([A-Z]+)(\d+)/, '$1-$2'),  // "JUS2311" -> "JUS-2311"
+      ]
       : [
-          `${cleaned}-1`,           // Other courses: with -1 first
-          `${cleaned}-0`,           // Then with -0
-          cleaned,                  // Without any suffix
-          formatCourseCode(cleaned, institution), // formatCourseCode result
-        ];
-    
+        `${cleaned}-0`,           // UiB standard: -0 suffix first (most common)
+        cleaned,                  // Then without any suffix
+        `${cleaned}-1`,           // Then with -1 as fallback
+        formatCourseCode(cleaned, institution), // formatCourseCode result
+      ];
+
     // If the code has no dash, also try common variant patterns (e.g., "EXPHIL" -> "EXPHIL-HFSEM", "EXPHIL-MNEKS")
     // This avoids the expensive "query all courses" fallback
     if (!normalizedBase.includes('-')) {
@@ -821,28 +821,28 @@ export async function fetchAllYearsData(
         formatsToTry.push(`${normalizedBase}-${variant}-1`);
       }
     }
-    
+
     // Remove duplicates
     const uniqueFormats = Array.from(new Set(formatsToTry));
-    
+
     // Try each format
     for (const formattedCode of uniqueFormats) {
       // For JUS courses, try with study program filter first (try multiple variations)
       if (isJUSCourse) {
         const studyProgramCodes = ['jus', 'JUS', 'Jus']; // Try different case variations
         let foundWithFilter = false;
-        
+
         for (const studiumCode of studyProgramCodes) {
           try {
             const payload = createSearchPayload(
-              institutionCode, 
-              formattedCode, 
-              undefined, 
+              institutionCode,
+              formattedCode,
+              undefined,
               departmentFilter,
               { studiumCode }
             );
             const data = await fetchWithProxy(payload);
-            
+
             if (data && data.length > 0) {
               // Check if we got matching data - be more lenient with matching for JUS courses
               const normalizedBase = courseCode.toUpperCase().replace(/\s/g, '').replace(/-[0-9]+$/, '');
@@ -850,23 +850,23 @@ export async function fetchAllYearsData(
                 const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
                 const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
                 // More lenient matching for JUS courses - match if normalized codes match or if item code starts with our base
-                return normalizedItemCode === normalizedBase || 
-                       itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
-                       itemCode === formattedCode.toUpperCase() ||
-                       (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
+                return normalizedItemCode === normalizedBase ||
+                  itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                  itemCode === formattedCode.toUpperCase() ||
+                  (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
               });
-              
+
               if (matching.length > 0) {
                 console.log(`[fetchAllYearsData] Found JUS course data with study program filter (${studiumCode}): ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
                 const { aggregateDuplicateEntries } = await import('./utils');
                 const aggregated = aggregateDuplicateEntries(matching);
-                
+
                 // Cache the fetched data
                 if (institution && aggregated.length > 0) {
                   const { storeGradeDataInCache } = await import('./grade-data-cache');
                   storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
                 }
-                
+
                 return aggregated;
               } else {
                 console.debug(`[fetchAllYearsData] Study program filter (${studiumCode}) returned ${data.length} entries for ${formattedCode}, but none matched course code ${courseCode}`);
@@ -879,12 +879,12 @@ export async function fetchAllYearsData(
           }
         }
       }
-      
+
       // Try without study program filter (or if JUS course with filter didn't work)
       try {
         const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
         const data = await fetchWithProxy(payload);
-        
+
         if (data && data.length > 0) {
           // Filter to ensure we only return data for the specific course we're looking for
           // This is important because the API might return data for multiple courses if the format doesn't match exactly
@@ -895,28 +895,28 @@ export async function fetchAllYearsData(
             // Match if normalized codes match, or if item code matches the formatted code we searched for
             // For JUS courses, be more lenient - match if the base code matches (e.g., "JUS233" matches "JUS233-1", "JUS233-0", etc.)
             if (isJUSCourse) {
-              return normalizedItemCode === normalizedBase || 
-                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
-                     itemCode === formattedCode.toUpperCase() ||
-                     (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
+              return normalizedItemCode === normalizedBase ||
+                itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                itemCode === formattedCode.toUpperCase() ||
+                (normalizedItemCode.startsWith(normalizedBase) && normalizedItemCode.length <= normalizedBase.length + 3);
             } else {
-              return normalizedItemCode === normalizedBase || 
-                     itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
-                     itemCode === formattedCode.toUpperCase();
+              return normalizedItemCode === normalizedBase ||
+                itemCode === courseCode.toUpperCase().replace(/\s/g, '') ||
+                itemCode === formattedCode.toUpperCase();
             }
           });
-          
+
           if (matching.length > 0) {
             console.log(`[fetchAllYearsData] Found course data without study program filter: ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
             const { aggregateDuplicateEntries } = await import('./utils');
             let aggregated = aggregateDuplicateEntries(matching);
-            
+
             // Cache the fetched data (after aggregation)
             if (institution && aggregated.length > 0) {
               const { storeGradeDataInCache } = await import('./grade-data-cache');
               storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
             }
-            
+
             return aggregated;
           } else {
             console.debug(`[fetchAllYearsData] API returned ${data.length} entries for ${formattedCode}, but none matched course code ${courseCode}`);
@@ -928,7 +928,7 @@ export async function fetchAllYearsData(
         continue;
       }
     }
-    
+
     // LAST RESORT: If all direct queries failed, try querying all courses for the institution and filtering
     // WARNING: This is VERY SLOW for UiB (7255 courses) - only use as last resort
     // Skip this expensive fallback if we've already tried many formats
@@ -936,116 +936,116 @@ export async function fetchAllYearsData(
       try {
         const payloadAllCourses = createSearchPayload(institutionCode, undefined, undefined, departmentFilter);
         const allData = await fetchWithProxy(payloadAllCourses);
-      
-      if (allData && allData.length > 0) {
-        // Find courses that match the normalized code (consistent with how we store codes)
-        // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
-        // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
-        // Only match if the codes are exactly equal after normalization, or if the search code
-        // is a prefix of the item code (e.g., "EXPHIL-HFSEM" matches "EXPHIL-HFSEM")
-        // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
-        const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
-        const matchingData = allData.filter(item => {
-          const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-          const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
-          
-          // Exact match after normalization
-          if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
-            return true;
-          }
-          
-          // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
-          // only match if the item code starts with the exact search code
-          // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
-          if (normalizedBase.includes('-')) {
-            return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
-          }
-          
-          // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
-          // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
-          // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
-          if (itemCode.startsWith(normalizedBase)) {
-            const nextChar = itemCode[normalizedBase.length];
-            // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
-            if (nextChar === undefined || /[0-9]/.test(nextChar)) {
-              return true;
-            }
-            // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
-            // This handles UiB courses like "ECON116-1" when searching for "ECON116"
-            if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
-              return true;
-            }
-            // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
-          }
-          
-          return false;
-        });
-        
-        if (matchingData.length > 0) {
-          // Aggregate and return matching data
-          const { aggregateDuplicateEntries } = await import('./utils');
-          let aggregated = aggregateDuplicateEntries(matchingData);
-          
-          // Cache the fetched data (after aggregation)
-          if (institution && aggregated.length > 0) {
-            const { storeGradeDataInCache } = await import('./grade-data-cache');
-            storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
-          }
-          
-          return aggregated;
-        }
-        
-        // If no exact match found and search code has no dash, try to find variants
-        // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
-        // This handles cases where the base course code exists but has no data, only variants do
-        if (!normalizedBase.includes('-')) {
-          const variantMatches = allData.filter(item => {
+
+        if (allData && allData.length > 0) {
+          // Find courses that match the normalized code (consistent with how we store codes)
+          // For UiB, we need to be careful: "EXPHIL" should NOT match "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+          // But "EXPHIL" SHOULD match "EXPHIL2000" (numeric suffix without dash)
+          // Only match if the codes are exactly equal after normalization, or if the search code
+          // is a prefix of the item code (e.g., "EXPHIL-HFSEM" matches "EXPHIL-HFSEM")
+          // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM")
+          const normalizedBase = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for matching
+          const matchingData = allData.filter(item => {
             const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
-            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
-            // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
-            return normalizedItemCode.startsWith(normalizedBase + '-');
+            const normalizedItemCode = itemCode.replace(/-[0-9]+$/, ''); // Consistent normalization
+
+            // Exact match after normalization
+            if (normalizedItemCode === normalizedBase || itemCode === cleaned) {
+              return true;
+            }
+
+            // For UiB: if the search code contains a dash (e.g., "EXPHIL-HFSEM"), 
+            // only match if the item code starts with the exact search code
+            // This prevents "EXPHIL" from matching "EXPHIL-HFSEM"
+            if (normalizedBase.includes('-')) {
+              return normalizedItemCode.startsWith(normalizedBase + '-') || normalizedItemCode === normalizedBase;
+            }
+
+            // If search code has no dash, allow prefix matching for numeric suffixes (e.g., "EXPHIL" matches "EXPHIL2000")
+            // Also allow numeric suffixes after a dash (e.g., "ECON116" matches "ECON116-1", "ECON116-0")
+            // But NOT for dash-separated variants (e.g., "EXPHIL" does NOT match "EXPHIL-HFSEM")
+            if (itemCode.startsWith(normalizedBase)) {
+              const nextChar = itemCode[normalizedBase.length];
+              // Allow if next character is a digit (numeric suffix) or doesn't exist (exact match)
+              if (nextChar === undefined || /[0-9]/.test(nextChar)) {
+                return true;
+              }
+              // Allow if next characters form a numeric suffix after dash (e.g., "-1", "-0", "-2")
+              // This handles UiB courses like "ECON116-1" when searching for "ECON116"
+              if (nextChar === '-' && /^-[0-9]+/.test(itemCode.substring(normalizedBase.length))) {
+                return true;
+              }
+              // Reject if next character is a dash followed by letters (variant like "EXPHIL-HFSEM")
+            }
+
+            return false;
           });
-          
-          if (variantMatches.length > 0) {
-            // Found variants - aggregate their data
+
+          if (matchingData.length > 0) {
+            // Aggregate and return matching data
             const { aggregateDuplicateEntries } = await import('./utils');
-            let aggregated = aggregateDuplicateEntries(variantMatches);
-            
+            let aggregated = aggregateDuplicateEntries(matchingData);
+
             // Cache the fetched data (after aggregation)
             if (institution && aggregated.length > 0) {
               const { storeGradeDataInCache } = await import('./grade-data-cache');
               storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
             }
-            
+
             return aggregated;
           }
+
+          // If no exact match found and search code has no dash, try to find variants
+          // For example, if searching for "EXPHIL" (no data), find "EXPHIL-HFSEM", "EXPHIL-MNEKS", etc.
+          // This handles cases where the base course code exists but has no data, only variants do
+          if (!normalizedBase.includes('-')) {
+            const variantMatches = allData.filter(item => {
+              const itemCode = (item.Emnekode || '').toUpperCase().replace(/\s/g, '');
+              const normalizedItemCode = itemCode.replace(/-[0-9]+$/, '');
+              // Match variants like "EXPHIL-HFSEM" when searching for "EXPHIL"
+              return normalizedItemCode.startsWith(normalizedBase + '-');
+            });
+
+            if (variantMatches.length > 0) {
+              // Found variants - aggregate their data
+              const { aggregateDuplicateEntries } = await import('./utils');
+              let aggregated = aggregateDuplicateEntries(variantMatches);
+
+              // Cache the fetched data (after aggregation)
+              if (institution && aggregated.length > 0) {
+                const { storeGradeDataInCache } = await import('./grade-data-cache');
+                storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+              }
+
+              return aggregated;
+            }
+          }
         }
-      }
       } catch (error) {
         // If this fallback also fails, continue to return empty array below
       }
     }
-    
+
     // All attempts failed - return empty array
     return [];
   }
-  
+
   // For non-UiB institutions, use standard format
   const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
   let data = await fetchWithProxy(payload);
-  
+
   // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
   if (data.length > 0) {
     const { aggregateDuplicateEntries } = await import('./utils');
     data = aggregateDuplicateEntries(data);
   }
-  
+
   // Cache the fetched data (after aggregation)
   if (institution && data.length > 0) {
     const { storeGradeDataInCache } = await import('./grade-data-cache');
     storeGradeDataInCache(institutionCode, courseCode, institution, data);
   }
-  
+
   return data;
 }
 
