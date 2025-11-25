@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/components/Layout';
-import { loadAllCourses } from '@/lib/all-courses';
+import { loadAllCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
 import { CourseInfo } from '@/lib/courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { Search, Filter } from 'lucide-react';
@@ -87,7 +87,7 @@ export default function KatalogPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Emnekode"
+                placeholder="Søk etter emnekode"
                 className={styles.searchInput}
                 autoFocus
               />
@@ -132,7 +132,7 @@ export default function KatalogPage() {
                   return (
                     <div key={`${course.institution}-${course.code}`} className={styles.courseItem}>
                       <div className={styles.courseInstitution}>{institutionName}</div>
-                      <div className={styles.courseCode}>{course.code}</div>
+                      <div className={styles.courseCode}>{stripCourseCodeSuffix(course.code)}</div>
                     </div>
                   );
                 })}

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
-import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, getPopularCourses, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
+import { isCourseUnavailable } from '@/lib/course-availability';
 import styles from './CourseAutocomplete.module.css';
 
 interface CourseAutocompleteProps {
@@ -62,29 +63,35 @@ export default function CourseAutocomplete({
     }
   }, [institution]);
 
-  // Search with debouncing
+  // Search with debouncing and caching
   const performSearch = useCallback((searchQuery: string) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
+    const trimmedQuery = searchQuery.trim();
+
     debounceRef.current = setTimeout(async () => {
-      if (searchQuery.trim().length === 0) {
+      if (trimmedQuery.length === 0) {
         // Show popular courses when input is empty
         const popular = await getPopularCoursesList();
-        setSuggestions(popular);
-        setShowSuggestions(popular.length > 0);
+        const filtered = popular.filter(c => !isCourseUnavailable(c.code, c.institution));
+        setSuggestions(filtered);
+        setShowSuggestions(filtered.length > 0);
       } else {
         try {
-          const results = await searchAllCourses(searchQuery, institution, 3);
-          setSuggestions(results.slice(0, 3));
+          const results = await searchAllCourses(trimmedQuery, institution, 3);
+          const filtered = results.filter(c => !isCourseUnavailable(c.code, c.institution));
+          setSuggestions(filtered.slice(0, 3));
           
-          // Hide suggestions if query exactly matches a suggestion
-          const exactMatch = results.find(
-            course => course.code.toUpperCase() === searchQuery.toUpperCase().trim()
-          );
+          // Hide suggestions if query exactly matches a suggestion (normalized comparison)
+          const normalizedQuery = stripCourseCodeSuffix(trimmedQuery);
+          const exactMatch = filtered.find(course => {
+            const normalizedCode = stripCourseCodeSuffix(course.code);
+            return normalizedCode === normalizedQuery;
+          });
           
-          setShowSuggestions(results.length > 0 && !exactMatch);
+          setShowSuggestions(filtered.length > 0 && !exactMatch);
         } catch (error) {
           console.error('Search error:', error);
           setSuggestions([]);
@@ -116,8 +123,10 @@ export default function CourseAutocomplete({
   };
 
   const handleSelectCourse = (course: CourseInfo) => {
-    setQuery(course.code);
-    onChange(course.code);
+    // Always use the normalized course code (uppercase, no suffixes)
+    const displayCode = stripCourseCodeSuffix(course.code);
+    setQuery(displayCode);
+    onChange(displayCode);
     setSelectedCourse(course);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -226,7 +235,7 @@ export default function CourseAutocomplete({
               onClick={() => handleSelectCourse(course)}
               onMouseEnter={() => setSelectedIndex(index)}
             >
-              <div className={styles.suggestionCode}>{course.code}</div>
+              <div className={styles.suggestionCode}>{stripCourseCodeSuffix(course.code)}</div>
               {course.name && course.name !== course.code && (
                 <div className={styles.suggestionName}>{course.name}</div>
               )}

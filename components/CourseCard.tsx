@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CourseStats } from '@/types';
+import { stripCourseCodeSuffix } from '@/lib/all-courses';
 import styles from './CourseCard.module.css';
 
 interface CourseCardProps {
@@ -13,11 +14,13 @@ export default function CourseCard({ course, institution }: CourseCardProps) {
     dist.percentage > max.percentage ? dist : max
   );
 
+  const displayCode = stripCourseCodeSuffix(course.courseCode);
+  
   return (
-    <Link href={`/sok?code=${encodeURIComponent(course.courseCode)}&year=${course.year}&uni=${institution}`}>
+    <Link href={`/sok?code=${encodeURIComponent(displayCode)}&year=${course.year}&uni=${institution}`}>
       <div className={`${styles.card} hover-lift`}>
         <div className={styles.header}>
-          <h3 className={styles.courseCode}>{course.courseCode}</h3>
+          <h3 className={styles.courseCode}>{displayCode}</h3>
           <span className={styles.year}>{course.year}</span>
         </div>
         <div className={styles.stats}>

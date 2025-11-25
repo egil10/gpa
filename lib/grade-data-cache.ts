@@ -56,25 +56,77 @@ export async function courseExistsInData(
 }
 
 /**
- * Load grade data from data/cache.json (pre-populated with top courses)
+ * Load grade data from cache.json (if it exists)
+ * Note: Pre-built files (homepage-grade-data.json, homepage-top-courses-data.json) 
+ * only contain aggregated stats, not raw GradeData, so they can't be used for cache lookup
+ * Suppresses 404 errors - cache.json is optional
  */
-async function loadGradeDataFromCache(
+async function loadGradeDataFromCacheFile(
   institutionCode: string,
   courseCode: string
 ): Promise<GradeData[] | null> {
-  try {
-    const response = await fetch('/data/cache.json');
-    if (response.ok) {
-      const cacheData = await response.json();
-      const cacheKey = `${institutionCode}-${courseCode}`;
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
+  const basePath = window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
+
+  // Try cache.json (if it exists) - suppress 404 errors as file is optional
+  // Only attempt if we know the file might exist (optional optimization)
+  try {
+    // Fetch with error suppression - 404 is expected and fine
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
+    
+    const response = await fetch(`${basePath}/data/cache.json`, {
+      cache: 'force-cache',
+      signal: controller.signal,
+    }).catch((error) => {
+      // Silently ignore fetch errors (404, network errors, etc.)
+      // This is expected if cache.json doesn't exist
+      return null;
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Only process if response exists and is OK (200-299)
+    if (!response || !response.ok || response.status === 404) {
+      // 404 is expected if cache.json doesn't exist - silently return null
+      return null;
+    }
+
+    const cacheData = await response.json();
+    
+    // Try multiple key formats for cache lookup
+    const normalizedCode = courseCode.replace(/-[0-9]+$/, '').trim();
+    const cacheKeys = [
+      `${institutionCode}-${courseCode}`,       // Original format
+      `${institutionCode}-${normalizedCode}`,   // Normalized format
+    ];
+
+    // Also try with formatted codes (with -0, -1 suffixes)
+    if (courseCode.includes('-')) {
+      const baseCode = courseCode.split('-')[0];
+      cacheKeys.push(`${institutionCode}-${baseCode}-0`);
+      cacheKeys.push(`${institutionCode}-${baseCode}-1`);
+    }
+
+    for (const cacheKey of cacheKeys) {
       if (cacheData.courses && cacheData.courses[cacheKey]) {
-        return cacheData.courses[cacheKey].data || null;
+        const cached = cacheData.courses[cacheKey];
+        if (cached.data && cached.data.length > 0) {
+          return cached.data;
+        }
       }
     }
   } catch (error) {
-    // Cache file doesn't exist or failed to load
-    return null;
+    // Cache file doesn't exist or failed to load - that's ok, we'll fetch from API
+    // Silently fail - this is expected if cache.json doesn't exist
+    // Don't log 404 errors - they're expected
+    if (error instanceof Error && !error.message.includes('404')) {
+      // Only log non-404 errors for debugging
+      console.debug('[Cache] Error loading cache.json:', error.message);
+    }
   }
 
   return null;
@@ -89,39 +141,45 @@ export async function getGradeDataFromCache(
   courseCode: string,
   institution: string
 ): Promise<GradeData[] | null> {
-  const formattedCode = formatCourseCode(courseCode, institution);
-  const cacheKey = `${institutionCode}-${formattedCode}`;
+  // Normalize course code - try multiple formats to match cached data
+  const normalizedCode = courseCode.replace(/-[0-9]+$/, '').trim().toUpperCase();
+  const formattedCode = formatCourseCode(normalizedCode, institution);
+  
+  // Try multiple cache key formats (with and without formatting)
+  const cacheKeys = [
+    `${institutionCode}-${formattedCode}`,  // Formatted: "1120-EXPHIL-HFEKS-0"
+    `${institutionCode}-${normalizedCode}`,  // Normalized: "1120-EXPHIL-HFEKS"
+    `${institutionCode}-${courseCode}`,      // Original: "1120-EXPHIL-HFEKS-0" (if passed as-is)
+  ];
 
   // 1. Check client-side in-memory cache first
   if (typeof window !== 'undefined') {
-    if (clientCache.has(cacheKey)) {
-      return clientCache.get(cacheKey)!;
-    }
-
-    // 2. Try to load from localStorage as fallback
-    try {
-      const stored = localStorage.getItem(`grade-data-${cacheKey}`);
-      if (stored) {
-        const data = JSON.parse(stored) as GradeData[];
-        clientCache.set(cacheKey, data);
-        return data;
+    for (const cacheKey of cacheKeys) {
+      if (clientCache.has(cacheKey)) {
+        console.log(`[Cache] ✅ Found in-memory cache: ${cacheKey}`);
+        return clientCache.get(cacheKey)!;
       }
-    } catch {
-      // Ignore localStorage errors
     }
 
-    // 3. Try to load from data/cache.json (pre-populated with top courses)
-    const cachedData = await loadGradeDataFromCache(institutionCode, courseCode);
-    if (cachedData && cachedData.length > 0) {
-      // Cache in memory and localStorage for faster subsequent access
-      clientCache.set(cacheKey, cachedData);
+    // 2. Try to load from localStorage (check this BEFORE cache.json to avoid 404s)
+    for (const cacheKey of cacheKeys) {
       try {
-        localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(cachedData));
+        const stored = localStorage.getItem(`grade-data-${cacheKey}`);
+        if (stored) {
+          const data = JSON.parse(stored) as GradeData[];
+          // Store in all cache key formats for faster lookup next time
+          cacheKeys.forEach(key => clientCache.set(key, data));
+          console.log(`[Cache] ✅ Found in localStorage: ${cacheKey} (${data.length} entries)`);
+          return data;
+        }
       } catch {
         // Ignore localStorage errors
       }
-      return cachedData;
     }
+
+    // 3. Skip cache.json check - it's optional and causes 404 errors
+    // If we need cache.json data, it should be pre-loaded into localStorage during build
+    // This prevents unnecessary 404 errors in console
   }
 
   // 4. Check server-side cache (wrapped in try-catch for safety)
@@ -134,14 +192,16 @@ export async function getGradeDataFromCache(
   }
 
   if (cached && cached.length > 0) {
-    // Also store in client cache if on client
+    // Also store in client cache if on client (store in all key formats for faster lookup)
     if (typeof window !== 'undefined') {
-      clientCache.set(cacheKey, cached);
-      try {
-        localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(cached));
-      } catch {
-        // Ignore localStorage errors
-      }
+      cacheKeys.forEach(key => {
+        clientCache.set(key, cached);
+        try {
+          localStorage.setItem(`grade-data-${key}`, JSON.stringify(cached));
+        } catch {
+          // Ignore localStorage errors
+        }
+      });
     }
     return cached;
   }
@@ -158,17 +218,52 @@ export function storeGradeDataInCache(
   institution: string,
   data: GradeData[]
 ): void {
-  const formattedCode = formatCourseCode(courseCode, institution);
-  const cacheKey = `${institutionCode}-${formattedCode}`;
+  if (!data || data.length === 0) {
+    return; // Don't cache empty data
+  }
+
+  // Normalize course code and create multiple cache keys for better lookup
+  const normalizedCode = courseCode.replace(/-[0-9]+$/, '').trim().toUpperCase();
+  const formattedCode = formatCourseCode(normalizedCode, institution);
+  
+  // Store in multiple formats for better cache hit rate
+  const cacheKeys = [
+    `${institutionCode}-${formattedCode}`,  // Formatted: "1120-EXPHIL-HFEKS-0"
+    `${institutionCode}-${normalizedCode}`,  // Normalized: "1120-EXPHIL-HFEKS"
+    `${institutionCode}-${courseCode}`,      // Original format
+  ];
 
   // Store in client cache
   if (typeof window !== 'undefined') {
-    clientCache.set(cacheKey, data);
-    try {
-      localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(data));
-    } catch {
-      // Ignore localStorage errors (quota exceeded, etc.)
-    }
+    // Store in all key formats for maximum cache hit rate
+    cacheKeys.forEach(cacheKey => {
+      clientCache.set(cacheKey, data);
+      try {
+        localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(data));
+      } catch (error) {
+        // If localStorage is full, try to clear old entries
+        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+          try {
+            // Clear oldest entries (simple strategy: clear entries older than 7 days)
+            const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith('grade-data-')) {
+                // Try to store new data, clear old if needed
+                if (i < localStorage.length - 10) {
+                  localStorage.removeItem(key);
+                }
+              }
+            }
+            // Try again
+            localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(data));
+          } catch {
+            // Still failed - just use in-memory cache
+          }
+        }
+      }
+    });
+    console.log(`[Cache] 💾 Stored in cache: ${normalizedCode} (${data.length} entries)`);
   }
 }
 

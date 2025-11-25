@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { CourseInfo, getCoursesForInstitution } from '@/lib/courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
-import { getAvailableInstitutions, loadInstitutionCourses, loadAllCourses } from '@/lib/all-courses';
+import { getAvailableInstitutions, loadInstitutionCourses, loadAllCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
 import styles from './CourseExplorer.module.css';
 
 interface CourseExplorerProps {
@@ -158,7 +158,7 @@ export default function CourseExplorer({ onCourseSelect, selectedInstitution }: 
                   onClick={() => handleCourseClick(course)}
                   title={`${course.name} – ${formatInstitutionLabel(course.institution, 'short-full')}`}
                 >
-                  <div className={styles.courseCode}>{course.code}</div>
+                  <div className={styles.courseCode}>{stripCourseCodeSuffix(course.code)}</div>
                   {course.name && course.name !== course.code && (
                     <div className={styles.courseName}>{course.name}</div>
                   )}

@@ -316,13 +316,11 @@ export async function fetchWithProxy(payload: SearchPayload, proxyIndex = 0, use
     const vercelProxyUrl = getVercelProxyUrl();
     if (vercelProxyUrl) {
       try {
-        console.log('[Proxy] Attempting Vercel/Next.js API proxy at:', vercelProxyUrl);
-        console.log('[Proxy] Hostname:', isBrowser ? window.location.hostname : 'server-side');
-        console.log('[Proxy] Is GitHub Pages:', isGitHubPages);
-        console.log('[Proxy] Is Vercel:', isVercel);
-        console.log('[Proxy] Full URL will be:', isBrowser ? `${window.location.origin}${vercelProxyUrl}` : vercelProxyUrl);
+        // Reduce console noise - only log once per unique request
+        const requestId = JSON.stringify(payload).substring(0, 50); // Use payload as request ID
+        console.log(`[Proxy] Attempting Vercel proxy (request: ${requestId.substring(0, 30)}...)`);
         const result = await tryProxyUrl(vercelProxyUrl, 'Vercel proxy');
-        console.log('[Proxy] ✅ Vercel proxy succeeded!');
+        console.log(`[Proxy] ✅ Vercel proxy succeeded (request: ${requestId.substring(0, 30)}...)`);
         return result;
       } catch (error) {
         // Log the error for debugging, then fall back to public proxies
@@ -704,17 +702,20 @@ export async function fetchAllYearsData(
   }
 
   // Try cache first (works on both client and server)
+  // This is the PRIMARY cache check - if data is found, return immediately
   if (institution) {
     const { getGradeDataFromCache } = await import('./grade-data-cache');
     const cached = await getGradeDataFromCache(institutionCode, courseCode, institution);
     if (cached && cached.length > 0) {
-      // Aggregate duplicates from cache
+      // Aggregate duplicates from cache and return immediately
       const { aggregateDuplicateEntries } = await import('./utils');
+      console.log(`[fetchAllYearsData] ✅ Cache hit for ${courseCode} (${institution}) - returning ${cached.length} cached entries (NO API CALL)`);
       return aggregateDuplicateEntries(cached);
     }
   }
 
   // Fall back to server-side cache (wrapped in try-catch for safety)
+  // This is only checked on server-side, silently skipped on client
   let cached: GradeData[] | null = null;
   try {
     cached = getCachedDataSafe(institutionCode, courseCode);
@@ -724,10 +725,14 @@ export async function fetchAllYearsData(
   }
 
   if (cached && cached.length > 0) {
-    // Aggregate duplicates from cache
+    // Aggregate duplicates from cache and return immediately
     const { aggregateDuplicateEntries } = await import('./utils');
+    console.log(`[fetchAllYearsData] ✅ Server cache hit for ${courseCode} (${institution}) (NO API CALL)`);
     return aggregateDuplicateEntries(cached);
   }
+
+  // Cache miss - will proceed to API call
+  console.log(`[fetchAllYearsData] ❌ Cache miss for ${courseCode} (${institution}) - will make ONE API call...`);
 
   // For BI, try multiple formats since course codes might already end with digits
   // Some courses like "MET29107" already end with digits and should be used as-is
@@ -1031,8 +1036,11 @@ export async function fetchAllYearsData(
   }
 
   // For non-UiB institutions, use standard format
+  // Make a SINGLE API call - this should only be called once per course
+  console.log(`[fetchAllYearsData] Making SINGLE API call for ${courseCode} (${institution})...`);
   const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
   let data = await fetchWithProxy(payload);
+  console.log(`[fetchAllYearsData] API call completed for ${courseCode} (${institution}) - got ${data?.length || 0} entries`);
 
   // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
   if (data.length > 0) {

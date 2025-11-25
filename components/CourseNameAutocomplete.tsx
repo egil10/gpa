@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 import { CourseInfo, POPULAR_COURSES } from '@/lib/courses';
 import { formatInstitutionLabel } from '@/lib/api';
-import { searchAllCourses, getPopularCourses, preloadInstitutionCourses } from '@/lib/all-courses';
+import { searchAllCourses, getPopularCourses, preloadInstitutionCourses, stripCourseCodeSuffix } from '@/lib/all-courses';
 import { isCourseUnavailable } from '@/lib/course-availability';
 import styles from './CourseNameAutocomplete.module.css';
 
@@ -108,7 +108,8 @@ export default function CourseNameAutocomplete({
   };
 
   const handleSelectCourse = (course: CourseInfo) => {
-    const displayValue = course.code.toUpperCase();
+    // Always use the normalized course code (uppercase, no suffixes)
+    const displayValue = stripCourseCodeSuffix(course.code);
     setQuery(displayValue);
     onChange(displayValue);
     setShowSuggestions(false);
@@ -239,7 +240,7 @@ export default function CourseNameAutocomplete({
               aria-selected={index === selectedIndex}
             >
               <div className={styles.suggestionMeta}>
-                <span className={styles.suggestionCode}>{course.code}</span>
+                <span className={styles.suggestionCode}>{stripCourseCodeSuffix(course.code)}</span>
                 <span className={styles.suggestionInstitution}>
                   {formatInstitutionLabel(course.institution, 'short-full')}
                 </span>

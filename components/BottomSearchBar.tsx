@@ -488,7 +488,7 @@ export default function BottomSearchBar({
                       onMouseEnter={() => setSelectedIndex(index)}
                     >
                       <div className={styles.suggestionContent}>
-                        <div className={styles.suggestionCode}>{course.code}</div>
+                        <div className={styles.suggestionCode}>{stripCourseCodeSuffix(course.code)}</div>
                         {course.name && course.name !== course.code && (
                           <div className={styles.suggestionName}>{course.name}</div>
                         )}

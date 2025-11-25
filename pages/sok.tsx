@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
@@ -8,6 +8,7 @@ import { markCourseAsUnavailable } from '@/lib/course-availability';
 import { processMultiYearData } from '@/lib/utils';
 import { CourseStats } from '@/types';
 import { stripCourseCodeSuffix, getCourseByCode } from '@/lib/all-courses';
+import { getGradeDataFromCache } from '@/lib/grade-data-cache';
 import styles from '@/styles/Search.module.css';
 
 export default function SearchPage() {
@@ -17,6 +18,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allYearsStats, setAllYearsStats] = useState<Record<number, CourseStats>>({});
+  const loadingRef = useRef<string | null>(null); // Track what's currently loading
 
   // Handle URL query parameters
   useEffect(() => {
@@ -58,15 +60,26 @@ export default function SearchPage() {
   // Auto-load data if query params are present
   useEffect(() => {
     if (router.isReady && router.query.code && courseCode && institution) {
+      // Create a unique key for this course/institution combo to prevent duplicate loads
+      const loadKey = `${institution}-${courseCode}`;
+      
+      // Skip if already loading this exact course
+      if (loadingRef.current === loadKey) {
+        return;
+      }
+
       // Wait for state to update from URL params, then validate and load
       const timer = setTimeout(async () => {
         const uniData = UNIVERSITIES[institution];
         if (!uniData) {
           setError('Ugyldig institusjon');
           setLoading(false);
+          loadingRef.current = null;
           return;
         }
 
+        // Mark as loading
+        loadingRef.current = loadKey;
         setLoading(true);
         setError(null);
         setAllYearsStats({});
@@ -99,35 +112,72 @@ export default function SearchPage() {
           return;
         }
 
-        // STEP 2: Fetch grade data (only if course exists)
-        fetchAllYearsData(uniData.code, formattedCode, undefined, institution)
-          .then(data => {
-            if (data && data.length > 0) {
-              console.log(`[Search] Fetched ${data.length} data entries for ${courseCode}`);
-              const multiYearData = processMultiYearData(data);
-              console.log(`[Search] Processed ${Object.keys(multiYearData).length} years:`, Object.keys(multiYearData));
-              if (Object.keys(multiYearData).length > 0) {
-                setAllYearsStats(multiYearData);
-                setLoading(false);
-                setError(null);
-              } else {
-                setError('Ingen data funnet for dette emnet');
-                markCourseAsUnavailable(normalizedCode, institution);
-                setLoading(false);
-              }
+        // STEP 2: Check cache first, then fetch grade data if needed
+        // Try cache first for instant loading (skip API calls if cached)
+        try {
+          const cachedData = await getGradeDataFromCache(uniData.code, normalizedCode, institution);
+          if (cachedData && cachedData.length > 0) {
+            console.log(`[Search] ✅ Loaded ${cachedData.length} entries from cache for ${courseCode} - no API calls needed!`);
+            const multiYearData = processMultiYearData(cachedData);
+            if (Object.keys(multiYearData).length > 0) {
+              setAllYearsStats(multiYearData);
+              setLoading(false);
+              setError(null);
+              loadingRef.current = null; // Clear loading ref
+              return; // Exit early - data loaded from cache, skip API
+            }
+          }
+        } catch (cacheError) {
+          // Cache check failed - continue to API fetch
+          console.debug('[Search] Cache check failed, proceeding to API:', cacheError);
+        }
+
+        // STEP 3: Fetch from API if not in cache (only ONE call)
+        // fetchAllYearsData will check cache internally and store results automatically
+        console.log(`[Search] Cache miss for ${courseCode} - making single API request (will be cached for next time)...`);
+        
+        try {
+          const data = await fetchAllYearsData(uniData.code, normalizedCode, undefined, institution);
+          
+          // Check if we're still loading the same course (prevent race conditions)
+          if (loadingRef.current !== loadKey) {
+            return; // Different course is loading now, ignore this result
+          }
+
+          if (data && data.length > 0) {
+            console.log(`[Search] ✅ Fetched ${data.length} data entries from API for ${courseCode}`);
+            const multiYearData = processMultiYearData(data);
+            console.log(`[Search] Processed ${Object.keys(multiYearData).length} years:`, Object.keys(multiYearData));
+            if (Object.keys(multiYearData).length > 0) {
+              setAllYearsStats(multiYearData);
+              setLoading(false);
+              setError(null);
             } else {
               setError('Ingen data funnet for dette emnet');
               markCourseAsUnavailable(normalizedCode, institution);
               setLoading(false);
             }
-          })
-          .catch(err => {
-            console.error(`[Search] Error fetching data for ${courseCode}:`, err);
-            setError('Kunne ikke laste data. Vennligst prøv igjen.');
+          } else {
+            setError('Ingen data funnet for dette emnet');
+            markCourseAsUnavailable(normalizedCode, institution);
             setLoading(false);
-          });
+          }
+        } catch (err) {
+          // Check if we're still loading the same course
+          if (loadingRef.current !== loadKey) {
+            return; // Different course is loading now, ignore this error
+          }
+          console.error(`[Search] Error fetching data for ${courseCode}:`, err);
+          setError('Kunne ikke laste data. Vennligst prøv igjen.');
+          setLoading(false);
+        } finally {
+          loadingRef.current = null; // Clear loading ref
+        }
       }, 100);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        // Don't clear loadingRef here - let the async function handle it
+      };
     }
   }, [router.isReady, router.query.code, courseCode, institution]);
 
