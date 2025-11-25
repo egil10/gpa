@@ -163,8 +163,8 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
           c.id === courseId
             ? {
                 ...c,
-                name: vgsCourse.name,
-                credits: c.credits || 1, // Default 1 credit for VGS courses
+                name: vgsCourse.code ? `${vgsCourse.code} - ${vgsCourse.name}` : vgsCourse.name,
+                credits: c.credits || (vgsCourse.credits || 1), // Use course credits if available, default 1
               }
             : c
         )

@@ -156,6 +156,27 @@
   color: var(--text-secondary);
 }
 
+.courseCode {
+  font-family: var(--font-inter);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-right: 0.25rem;
+}
+
+.courseName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.courseCategory {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.125rem;
+}
+
 .suggestions::-webkit-scrollbar {
   width: 8px;
 }

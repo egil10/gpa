@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BookOpen, X } from 'lucide-react';
-import { searchVGSCourses, VGSCourse } from '@/lib/vgs-courses';
+import { searchVGSCourses, getAllVGSCoursesList, VGSCourse } from '@/lib/vgs-courses';
 import styles from './CourseNameAutocomplete.module.css';
 
 interface VGSCourseAutocompleteProps {
@@ -35,16 +35,20 @@ export default function VGSCourseAutocomplete({
   }, [value]);
 
   // Get popular courses for empty query
-  const getPopularCourses = useCallback(() => {
-    return [
-      { name: 'Matematikk 1T (teoretisk)', category: 'fellesfag' as const },
-      { name: 'Norsk', category: 'fellesfag' as const },
-      { name: 'Engelsk', category: 'fellesfag' as const },
-      { name: 'Naturfag', category: 'fellesfag' as const },
-      { name: 'Matematikk R1', category: 'realfag' as const },
-      { name: 'Fysikk', category: 'realfag' as const },
-      { name: 'Kjemi', category: 'realfag' as const },
-    ].slice(0, 6);
+  const getPopularCourses = useCallback(async () => {
+    try {
+      const allCourses = await getAllVGSCoursesList();
+      // Return courses with most years (most data available)
+      const sorted = [...allCourses].sort((a, b) => {
+        const aYears = a.years?.length || 0;
+        const bYears = b.years?.length || 0;
+        return bYears - aYears;
+      });
+      return sorted.slice(0, 6);
+    } catch (error) {
+      console.error('Error loading popular VGS courses:', error);
+      return [];
+    }
   }, []);
 
   // Search with debouncing
@@ -53,15 +57,21 @@ export default function VGSCourseAutocomplete({
       clearTimeout(debounceRef.current);
     }
 
-    debounceRef.current = setTimeout(() => {
+    debounceRef.current = setTimeout(async () => {
       if (searchQuery.trim().length === 0) {
-        const popular = getPopularCourses();
+        const popular = await getPopularCourses();
         setSuggestions(popular.slice(0, 3));
         setShowSuggestions(popular.length > 0);
       } else {
-        const results = searchVGSCourses(searchQuery);
-        setSuggestions(results.slice(0, 3));
-        setShowSuggestions(results.length > 0);
+        try {
+          const results = await searchVGSCourses(searchQuery);
+          setSuggestions(results.slice(0, 3));
+          setShowSuggestions(results.length > 0);
+        } catch (error) {
+          console.error('Error searching VGS courses:', error);
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
       }
       setSelectedIndex(-1);
     }, 200);
@@ -75,8 +85,10 @@ export default function VGSCourseAutocomplete({
   };
 
   const handleSelectCourse = (course: VGSCourse) => {
-    setQuery(course.name);
-    onChange(course.name);
+    // Use course code if available, otherwise use name
+    const displayValue = course.code ? `${course.code} - ${course.name}` : course.name;
+    setQuery(displayValue);
+    onChange(displayValue);
     setShowSuggestions(false);
     if (onCourseSelect) {
       onCourseSelect(course);
@@ -121,9 +133,9 @@ export default function VGSCourseAutocomplete({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = async () => {
     if (query.trim().length === 0) {
-      const popular = getPopularCourses();
+      const popular = await getPopularCourses();
       setSuggestions(popular);
       setShowSuggestions(popular.length > 0);
     } else {
@@ -197,9 +209,14 @@ export default function VGSCourseAutocomplete({
               }`}
             >
               <div className={styles.suggestionContent}>
-                <span className={styles.courseName}>{course.name}</span>
+                <span className={styles.courseName}>
+                  {course.code && <span className={styles.courseCode}>{course.code}</span>}
+                  {course.code && ' - '}
+                  {course.name}
+                </span>
                 <span className={styles.courseCategory}>
-                  {getCategoryLabel(course.category)}
+                  {course.category && getCategoryLabel(course.category)}
+                  {course.years && course.years.length > 0 && ` • ${course.years.length} år`}
                   {course.level && ` • ${course.level}`}
                 </span>
               </div>
