@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-25T01:34:25.020Z",
+  "generatedAt": "2025-11-25T02:20:21.282Z",
   "courses": [
     {
       "institution": "BI",
@@ -68,7 +68,7 @@
       "institution": "UiB",
       "institutionCode": "1120",
       "courseCode": "EXPHIL-SVSEM",
-      "courseName": "EXPHIL-SVSEM",
+      "courseName": "Examen philosophicum",
       "studentCount": 591,
       "letterGradeCount": 591,
       "latestYear": 2024

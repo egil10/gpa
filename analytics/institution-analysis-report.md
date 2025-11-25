@@ -1,16 +1,16 @@
 # Comprehensive Institution Analysis Report
 
-**Generated:** 2025-11-25T01:28:34.928Z
+**Generated:** 2025-11-25T02:16:47.190Z
 
 ## Summary
 
 - **Total Institutions:** 36
-- **Total Stored Courses:** 65 006
+- **Total Stored Courses:** 64 405
 - **Total API Courses (2024):** 29 946
 - **Institutions with Issues:** 7 / 36
 - **Total Codes with Spaces:** 0
 - **Total Duplicates:** 0
-- **Total Missing from Stored:** 10271
+- **Total Missing from Stored:** 10162
 
 ## Institution Overview
 
@@ -23,19 +23,19 @@
 | vid | 974 | 478 | 0 | 0 | 175 | ⚠️ 1 |
 | sh | 315 | 86 | 0 | 0 | 59 | ⚠️ 1 |
 | ldh | 285 | 62 | 0 | 0 | 59 | ⚠️ 1 |
-| ntnu | 8 243 | 4 770 | 0 | 0 | 1323 | ✅ 0 |
-| uio | 7 110 | 3 208 | 0 | 0 | 850 | ✅ 0 |
-| uit | 5 004 | 2 350 | 0 | 0 | 2210 | ✅ 0 |
-| uis | 3 633 | 1 472 | 0 | 0 | 381 | ✅ 0 |
-| uia | 3 375 | 1 644 | 0 | 0 | 842 | ✅ 0 |
+| ntnu | 8 266 | 4 770 | 0 | 0 | 1106 | ✅ 0 |
+| uio | 7 048 | 3 208 | 0 | 0 | 851 | ✅ 0 |
+| uit | 4 842 | 2 350 | 0 | 0 | 2296 | ✅ 0 |
+| uis | 3 333 | 1 472 | 0 | 0 | 390 | ✅ 0 |
+| uia | 3 323 | 1 644 | 0 | 0 | 858 | ✅ 0 |
 | hio | 3 305 | 706 | 0 | 0 | 189 | ✅ 0 |
 | bi | 2 932 | 951 | 0 | 0 | 451 | ✅ 0 |
 | hvl | 2 833 | 1 654 | 0 | 0 | 417 | ✅ 0 |
-| nord | 2 530 | 1 293 | 0 | 0 | 372 | ✅ 0 |
-| oslomet | 2 462 | 1 715 | 0 | 0 | 410 | ✅ 0 |
+| nord | 2 500 | 1 293 | 0 | 0 | 373 | ✅ 0 |
+| oslomet | 2 485 | 1 715 | 0 | 0 | 407 | ✅ 0 |
 | khio | 1 833 | 317 | 0 | 0 | 19 | ✅ 0 |
-| nhh | 1 501 | 377 | 0 | 0 | 34 | ✅ 0 |
-| nmbu | 1 478 | 978 | 0 | 0 | 176 | ✅ 0 |
+| nhh | 1 517 | 377 | 0 | 0 | 24 | ✅ 0 |
+| nmbu | 1 421 | 978 | 0 | 0 | 184 | ✅ 0 |
 | him | 1 341 | 361 | 0 | 0 | 110 | ✅ 0 |
 | hvo | 1 211 | 495 | 0 | 0 | 127 | ✅ 0 |
 | nla | 841 | 455 | 0 | 0 | 129 | ✅ 0 |
@@ -158,53 +158,53 @@
 
 ### ntnu
 
-- **Stored Courses:** 8 243
+- **Stored Courses:** 8 266
 - **API Courses (2024):** 4 770
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 1323
-- **Missing in API:** 4796
+- **Missing in Stored:** 1106
+- **Missing in API:** 4586
 - **Format Mismatches:** 3447
 
 ### uio
 
-- **Stored Courses:** 7 110
+- **Stored Courses:** 7 048
 - **API Courses (2024):** 3 208
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 850
-- **Missing in API:** 4702
-- **Format Mismatches:** 2297
+- **Missing in Stored:** 851
+- **Missing in API:** 4692
+- **Format Mismatches:** 2312
 
 ### uit
 
-- **Stored Courses:** 5 004
+- **Stored Courses:** 4 842
 - **API Courses (2024):** 2 350
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 2210
-- **Missing in API:** 1234
+- **Missing in Stored:** 2296
+- **Missing in API:** 1156
 - **Format Mismatches:** 0
 
 ### uis
 
-- **Stored Courses:** 3 633
+- **Stored Courses:** 3 333
 - **API Courses (2024):** 1 472
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 381
-- **Missing in API:** 2325
-- **Format Mismatches:** 996
+- **Missing in Stored:** 390
+- **Missing in API:** 2256
+- **Format Mismatches:** 1017
 
 ### uia
 
-- **Stored Courses:** 3 375
+- **Stored Courses:** 3 323
 - **API Courses (2024):** 1 644
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 842
-- **Missing in API:** 1440
-- **Format Mismatches:** 471
+- **Missing in Stored:** 858
+- **Missing in API:** 1414
+- **Format Mismatches:** 468
 
 ### hio
 
@@ -238,22 +238,22 @@
 
 ### nord
 
-- **Stored Courses:** 2 530
+- **Stored Courses:** 2 500
 - **API Courses (2024):** 1 293
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 372
-- **Missing in API:** 1568
-- **Format Mismatches:** 904
+- **Missing in Stored:** 373
+- **Missing in API:** 1562
+- **Format Mismatches:** 919
 
 ### oslomet
 
-- **Stored Courses:** 2 462
+- **Stored Courses:** 2 485
 - **API Courses (2024):** 1 715
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 410
-- **Missing in API:** 1157
+- **Missing in Stored:** 407
+- **Missing in API:** 1174
 - **Format Mismatches:** 1305
 
 ### khio
@@ -268,23 +268,23 @@
 
 ### nhh
 
-- **Stored Courses:** 1 501
+- **Stored Courses:** 1 517
 - **API Courses (2024):** 377
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 34
-- **Missing in API:** 1158
+- **Missing in Stored:** 24
+- **Missing in API:** 1164
 - **Format Mismatches:** 343
 
 ### nmbu
 
-- **Stored Courses:** 1 478
+- **Stored Courses:** 1 421
 - **API Courses (2024):** 978
 - **Codes with Spaces:** 0
 - **Duplicates:** 0
-- **Missing in Stored:** 176
-- **Missing in API:** 627
-- **Format Mismatches:** 670
+- **Missing in Stored:** 184
+- **Missing in API:** 625
+- **Format Mismatches:** 673
 
 ### him
 

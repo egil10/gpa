@@ -1,14 +1,14 @@
 # Course Data Analytics Report
 
-Generated: 2025-11-25T01:28:36.621Z
+Generated: 2025-11-25T02:16:48.580Z
 
 ---
 
 ## Global Overview
 
 - **Total Institutions**: 36
-- **Total Courses**: 65 006
-- **Total Students (Last Year)**: 1 806 576
+- **Total Courses**: 64 405
+- **Total Students (Last Year)**: 1 790 475
 - **Year Range**: 2004 - 2025
 
 ## Institutions by Course Count
@@ -17,12 +17,12 @@ Generated: 2025-11-25T01:28:36.621Z
 
 | Rank | Institution | Courses | With Student Count | Without Student Count |
 |------|-------------|---------|-------------------|---------------------|
-| 1 | NTNU | 8 243 | 8 243 | 0 |
-| 2 | UiO | 7 110 | 7 110 | 0 |
-| 3 | UiT | 5 004 | 5 004 | 0 |
+| 1 | NTNU | 8 266 | 8 266 | 0 |
+| 2 | UiO | 7 048 | 7 048 | 0 |
+| 3 | UiT | 4 842 | 4 842 | 0 |
 | 4 | UiB | 4 263 | 4 263 | 0 |
-| 5 | UiS | 3 633 | 3 633 | 0 |
-| 6 | UiA | 3 375 | 3 375 | 0 |
+| 5 | UiS | 3 333 | 3 333 | 0 |
+| 6 | UiA | 3 323 | 3 323 | 0 |
 | 7 | HiØ | 3 305 | 3 305 | 0 |
 | 8 | BI | 2 932 | 2 932 | 0 |
 | 9 | USN | 2 860 | 2 860 | 0 |
@@ -49,16 +49,16 @@ Generated: 2025-11-25T01:28:36.621Z
 
 | Rank | Institution | Total Students | Avg per Course | Max Course | Min Course |
 |------|-------------|----------------|----------------|------------|------------|
-| 1 | NTNU | 251 747 | 31 | 2 977 | 3 |
+| 1 | NTNU | 251 876 | 30 | 2 977 | 3 |
 | 2 | BI | 194 105 | 66 | 3 083 | 3 |
-| 3 | UiO | 163 687 | 23 | 1 434 | 3 |
+| 3 | UiO | 161 951 | 23 | 1 434 | 3 |
 | 4 | UiB | 105 541 | 25 | 837 | 3 |
-| 5 | UiT | 99 698 | 20 | 600 | 3 |
-| 6 | OsloMet | 99 153 | 40 | 1 902 | 3 |
-| 7 | UiA | 93 565 | 28 | 477 | 3 |
+| 5 | OsloMet | 99 474 | 40 | 1 902 | 3 |
+| 6 | UiT | 97 425 | 20 | 600 | 3 |
+| 7 | UiA | 91 983 | 28 | 477 | 3 |
 | 8 | USN | 88 227 | 31 | 808 | 3 |
 | 9 | HVL | 87 884 | 31 | 594 | 3 |
-| 10 | UiS | 84 558 | 23 | 464 | 3 |
+| 10 | HiØ | 81 795 | 25 | 261 | 3 |
 
 ### Bottom 10 Institutions (Fewest Students)
 
@@ -101,48 +101,48 @@ Generated: 2025-11-25T01:28:36.621Z
 | 1 | UiT | `STATSVHF-350-H03` | 16 |
 | 2 | NMBU | `VETFORSK411-H19` | 15 |
 | 3 | HiØ | `LUPRAKSIS163-S3` | 15 |
-| 4 | UiO | `GEO-DEEP9500-3` | 14 |
-| 5 | UiA | `PRA027SBPEDF-G` | 14 |
-| 6 | HVO | `MGL5-10FOUNO-2` | 14 |
-| 7 | HVL | `PRAKSB4202-UTV` | 14 |
-| 8 | VID | `MASOSDEL-418-D` | 14 |
-| 9 | DMMH | `FØRPED02-EM4-2` | 14 |
+| 4 | UiA | `PRA027SBPEDF-G` | 14 |
+| 5 | HVO | `MGL5-10FOUNO-2` | 14 |
+| 6 | HVL | `PRAKSB4202-UTV` | 14 |
+| 7 | VID | `MASOSDEL-418-D` | 14 |
+| 8 | DMMH | `FØRPED02-EM4-2` | 14 |
+| 9 | NTNU | `194LVUT8010-A` | 13 |
 | 10 | UiS | `LU-PRA10SBP-A` | 13 |
 | 11 | MF | `NT503FDID-04V` | 13 |
-| 12 | NTNU | `PHAAR/AVHAND` | 12 |
+| 12 | UiO | `NORINT0130BK` | 12 |
 | 13 | UiB | `TPBAVOK/AL05` | 12 |
 | 14 | NHH | `EXECUTIVE685` | 12 |
-| 15 | Nord | `NOR25-102KFK` | 12 |
-| 16 | INN | `BERKRIS1001S` | 12 |
-| 17 | USN | `VTHA-TOV4100` | 12 |
-| 18 | NMH | `UVSTRYKFOR21` | 12 |
-| 19 | HIM | `EUV-OFFAN002` | 12 |
-| 20 | AHO | `V07SELVPROGU` | 12 |
+| 15 | OsloMet | `MALK4000-403` | 12 |
+| 16 | Nord | `NOR25-102KFK` | 12 |
+| 17 | INN | `BERKRIS1001S` | 12 |
+| 18 | USN | `VTHA-TOV4100` | 12 |
+| 19 | NMH | `UVSTRYKFOR21` | 12 |
+| 20 | HIM | `EUV-OFFAN002` | 12 |
 
 ### Shortest Course Codes
 
 | Rank | Institution | Course Code | Length |
 |------|-------------|-------------|--------|
 | 1 | NHH | `T1` | 2 |
-| 2 | OsloMet | `VU` | 2 |
-| 3 | BD | `SL` | 2 |
-| 4 | HGUt | `RL` | 2 |
-| 5 | NTNU | `VID` | 3 |
-| 6 | USN | `LSM` | 3 |
-| 7 | AHO | `DIP` | 3 |
-| 8 | SH | `PPO` | 3 |
-| 9 | HiØ | `HMS` | 3 |
-| 10 | VID | `OIP` | 3 |
-| 11 | BAS | `MK3` | 3 |
-| 12 | LDH | `VIP` | 3 |
-| 13 | NLA | `BLB` | 3 |
-| 14 | Steiner | `NHB` | 3 |
-| 15 | UiO | `REPY` | 4 |
-| 16 | UiB | `Z-K2` | 4 |
-| 17 | Nord | `6IUB` | 4 |
-| 18 | UiT | `RREV` | 4 |
-| 19 | NMH | `US36` | 4 |
-| 20 | KHIO | `OLST` | 4 |
+| 2 | BD | `SL` | 2 |
+| 3 | HGUt | `RL` | 2 |
+| 4 | OsloMet | `OAL` | 3 |
+| 5 | USN | `LSM` | 3 |
+| 6 | AHO | `DIP` | 3 |
+| 7 | SH | `PPO` | 3 |
+| 8 | HiØ | `HMS` | 3 |
+| 9 | VID | `OIP` | 3 |
+| 10 | BAS | `MK3` | 3 |
+| 11 | LDH | `VIP` | 3 |
+| 12 | NLA | `BLB` | 3 |
+| 13 | Steiner | `NHB` | 3 |
+| 14 | UiO | `VUET` | 4 |
+| 15 | UiB | `Z-K2` | 4 |
+| 16 | Nord | `6IUB` | 4 |
+| 17 | UiT | `RREV` | 4 |
+| 18 | NMH | `US36` | 4 |
+| 19 | KHIO | `OLST` | 4 |
+| 20 | HVO | `SOS2` | 4 |
 
 ## Data Quality Issues
 
@@ -150,21 +150,21 @@ Generated: 2025-11-25T01:28:36.621Z
 
 | Institution | Issues Count |
 |-------------|-------------|
-| UiO | 455 |
-| NTNU | 298 |
+| UiO | 458 |
+| NTNU | 299 |
 | UiT | 246 |
 | UiB | 227 |
 | UiA | 116 |
 | NHH | 89 |
+| UiS | 82 |
 | BI | 75 |
-| UiS | 69 |
 | HiØ | 63 |
-| NMBU | 57 |
+| NMBU | 60 |
 | NMH | 49 |
 | KHIO | 46 |
 | HVO | 33 |
 | USN | 28 |
-| OsloMet | 24 |
+| OsloMet | 23 |
 | Nord | 19 |
 | HVL | 16 |
 | MF | 16 |
@@ -761,10 +761,10 @@ Generated: 2025-11-25T01:28:36.621Z
 ### NHH
 
 - **Institution Code**: 1240
-- **Total Courses**: 1 501
-- **Courses with Student Count**: 1 501
+- **Total Courses**: 1 517
+- **Courses with Student Count**: 1 517
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 55 749
+- **Total Students (Last Year)**: 55 797
 - **Average Students per Course**: 37
 - **Min Students**: 3
 - **Max Students**: 547
@@ -864,10 +864,10 @@ Generated: 2025-11-25T01:28:36.621Z
 ### NMBU
 
 - **Institution Code**: 1173
-- **Total Courses**: 1 478
-- **Courses with Student Count**: 1 478
+- **Total Courses**: 1 421
+- **Courses with Student Count**: 1 421
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 46 973
+- **Total Students (Last Year)**: 45 817
 - **Average Students per Course**: 32
 - **Min Students**: 3
 - **Max Students**: 898
@@ -878,7 +878,7 @@ Generated: 2025-11-25T01:28:36.621Z
 - **Longest Course Code**: `VETFORSK411-H19` (15 chars)
 - **Shortest Course Code**: `M0-EI` (5 chars)
 
-**Unusual Patterns (57):**
+**Unusual Patterns (60):**
 
 - AOS234: Large gap in years (2018 to 2023)
 - APL260: Large gap in years (2019 to 2025)
@@ -900,7 +900,7 @@ Generated: 2025-11-25T01:28:36.621Z
 - EDS380: Large gap in years (2016 to 2023)
 - EDS381: Large gap in years (2018 to 2022)
 - EDS387: Large gap in years (2019 to 2022)
-- ... and 37 more
+- ... and 40 more
 
 ### NMH
 
@@ -946,10 +946,10 @@ Generated: 2025-11-25T01:28:36.621Z
 ### Nord
 
 - **Institution Code**: 1174
-- **Total Courses**: 2 530
-- **Courses with Student Count**: 2 530
+- **Total Courses**: 2 500
+- **Courses with Student Count**: 2 500
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 62 605
+- **Total Students (Last Year)**: 62 149
 - **Average Students per Course**: 25
 - **Min Students**: 3
 - **Max Students**: 468
@@ -985,21 +985,21 @@ Generated: 2025-11-25T01:28:36.621Z
 ### NTNU
 
 - **Institution Code**: 1150
-- **Total Courses**: 8 243
-- **Courses with Student Count**: 8 243
+- **Total Courses**: 8 266
+- **Courses with Student Count**: 8 266
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 251 747
-- **Average Students per Course**: 31
+- **Total Students (Last Year)**: 251 876
+- **Average Students per Course**: 30
 - **Min Students**: 3
 - **Max Students**: 2 977
 - **Year Range**: 2004 - 2025
 - **Average Years per Course**: 6
 - **Min Years**: 1
 - **Max Years**: 22
-- **Longest Course Code**: `PHAAR/AVHAND` (12 chars)
-- **Shortest Course Code**: `VID` (3 chars)
+- **Longest Course Code**: `194LVUT8010-A` (13 chars)
+- **Shortest Course Code**: `K1215` (5 chars)
 
-**Unusual Patterns (298):**
+**Unusual Patterns (299):**
 
 - AB323: Large gap in years (2018 to 2022)
 - AG336: Large gap in years (2008 to 2011)
@@ -1021,15 +1021,15 @@ Generated: 2025-11-25T01:28:36.621Z
 - BA6054: Large gap in years (2017 to 2021)
 - BA6059: Large gap in years (2021 to 2025)
 - BA6066: Large gap in years (2017 to 2020)
-- ... and 278 more
+- ... and 279 more
 
 ### OsloMet
 
 - **Institution Code**: 1175
-- **Total Courses**: 2 462
-- **Courses with Student Count**: 2 462
+- **Total Courses**: 2 485
+- **Courses with Student Count**: 2 485
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 99 153
+- **Total Students (Last Year)**: 99 474
 - **Average Students per Course**: 40
 - **Min Students**: 3
 - **Max Students**: 1 902
@@ -1037,10 +1037,10 @@ Generated: 2025-11-25T01:28:36.621Z
 - **Average Years per Course**: 4
 - **Min Years**: 1
 - **Max Years**: 8
-- **Longest Course Code**: `SYKPPRA70IB` (11 chars)
-- **Shortest Course Code**: `VU` (2 chars)
+- **Longest Course Code**: `MALK4000-403` (12 chars)
+- **Shortest Course Code**: `OAL` (3 chars)
 
-**Unusual Patterns (24):**
+**Unusual Patterns (23):**
 
 - ATEKO6200: Large gap in years (2018 to 2021)
 - BLD1200: Large gap in years (2020 to 2023)
@@ -1062,7 +1062,7 @@ Generated: 2025-11-25T01:28:36.621Z
 - PHBA8230: Large gap in years (2018 to 2022)
 - PHUV9320: Large gap in years (2022 to 2025)
 - PHVIT9540: Large gap in years (2020 to 2023)
-- ... and 4 more
+- ... and 3 more
 
 ### SH
 
@@ -1118,10 +1118,10 @@ Generated: 2025-11-25T01:28:36.621Z
 ### UiA
 
 - **Institution Code**: 1171
-- **Total Courses**: 3 375
-- **Courses with Student Count**: 3 375
+- **Total Courses**: 3 323
+- **Courses with Student Count**: 3 323
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 93 565
+- **Total Students (Last Year)**: 91 983
 - **Average Students per Course**: 28
 - **Min Students**: 3
 - **Max Students**: 477
@@ -1136,9 +1136,10 @@ Generated: 2025-11-25T01:28:36.621Z
 
 - AS-101: Large gap in years (2015 to 2020)
 - BE-905: Large gap in years (2019 to 2022)
+- EN-123: Large gap in years (2015 to 2023)
 - EN-154: Large gap in years (2022 to 2025)
 - EN-409: Large gap in years (2008 to 2011)
-- EN-412-2: Large gap in years (2012 to 2019)
+- EN-412: Large gap in years (2012 to 2019)
 - EN-414: Large gap in years (2009 to 2012)
 - EN-432: Large gap in years (2015 to 2018)
 - ENE504-G: Large gap in years (2020 to 2024)
@@ -1153,7 +1154,6 @@ Generated: 2025-11-25T01:28:36.621Z
 - HEL603: Large gap in years (2014 to 2017)
 - HEL608: Large gap in years (2016 to 2019)
 - HEL609: Large gap in years (2016 to 2019)
-- HI-600: Large gap in years (2017 to 2024)
 - ... and 96 more
 
 ### UiB
@@ -1200,10 +1200,10 @@ Generated: 2025-11-25T01:28:36.621Z
 ### UiO
 
 - **Institution Code**: 1110
-- **Total Courses**: 7 110
-- **Courses with Student Count**: 7 110
+- **Total Courses**: 7 048
+- **Courses with Student Count**: 7 048
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 163 687
+- **Total Students (Last Year)**: 161 951
 - **Average Students per Course**: 23
 - **Min Students**: 3
 - **Max Students**: 1 434
@@ -1211,16 +1211,17 @@ Generated: 2025-11-25T01:28:36.621Z
 - **Average Years per Course**: 6
 - **Min Years**: 1
 - **Max Years**: 22
-- **Longest Course Code**: `GEO-DEEP9500-3` (14 chars)
-- **Shortest Course Code**: `REPY` (4 chars)
+- **Longest Course Code**: `NORINT0130BK` (12 chars)
+- **Shortest Course Code**: `VUET` (4 chars)
 
-**Unusual Patterns (455):**
+**Unusual Patterns (458):**
 
 - AB-329: Large gap in years (2013 to 2019)
 - AST9310: Large gap in years (2013 to 2020)
 - BIO4240: Large gap in years (2014 to 2018)
 - BIO4250: Large gap in years (2005 to 2008)
 - BIO4260: Large gap in years (2013 to 2016)
+- BIO5930L: Large gap in years (2010 to 2014)
 - BIO9041SP: Large gap in years (2009 to 2012)
 - BIO9260: Large gap in years (2013 to 2016)
 - BIOS4218: Large gap in years (2019 to 2022)
@@ -1235,57 +1236,56 @@ Generated: 2025-11-25T01:28:36.621Z
 - ECON9715: Large gap in years (2019 to 2024)
 - ENERGI9010: Large gap in years (2017 to 2020)
 - ENG1506: Large gap in years (2006 to 2016)
-- ENG2151: Large gap in years (2016 to 2019)
-- ... and 435 more
+- ... and 438 more
 
 ### UiS
 
 - **Institution Code**: 1160
-- **Total Courses**: 3 633
-- **Courses with Student Count**: 3 633
+- **Total Courses**: 3 333
+- **Courses with Student Count**: 3 333
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 84 558
+- **Total Students (Last Year)**: 75 162
 - **Average Students per Course**: 23
 - **Min Students**: 3
 - **Max Students**: 464
 - **Year Range**: 2005 - 2025
-- **Average Years per Course**: 4
+- **Average Years per Course**: 5
 - **Min Years**: 1
 - **Max Years**: 21
 - **Longest Course Code**: `LU-PRA10SBP-A` (13 chars)
 - **Shortest Course Code**: `TN910` (5 chars)
 
-**Unusual Patterns (69):**
+**Unusual Patterns (82):**
 
+- ALU370: Large gap in years (2006 to 2012)
 - BAM4386: Large gap in years (2020 to 2023)
+- BFD102: Large gap in years (2006 to 2010)
 - BFD110: Large gap in years (2005 to 2008)
 - BFD140: Large gap in years (2007 to 2010)
-- BFD150-2: Large gap in years (2009 to 2012)
+- BFD150: Large gap in years (2006 to 2009)
+- BFD160: Large gap in years (2006 to 2009)
+- BFD200: Large gap in years (2005 to 2008)
+- BFD220: Large gap in years (2005 to 2009)
 - BFD230: Large gap in years (2006 to 2010)
+- BFDP20: Large gap in years (2008 to 2011)
 - BFDP40: Large gap in years (2006 to 2010)
-- BFDP45: Large gap in years (2007 to 2011)
 - BFØ301: Large gap in years (2005 to 2011)
 - BFØ340: Large gap in years (2006 to 2009)
+- BHO250: Large gap in years (2009 to 2014)
 - BHO325: Large gap in years (2006 to 2011)
 - BIO700: Large gap in years (2019 to 2022)
 - BIO905: Large gap in years (2022 to 2025)
 - BRE360: Large gap in years (2010 to 2013)
 - BYG240: Large gap in years (2018 to 2021)
-- DHV310: Large gap in years (2020 to 2023)
-- DHV340: Large gap in years (2019 to 2022)
-- DLV110: Large gap in years (2009 to 2013)
-- DOF250: Large gap in years (2010 to 2013)
-- DOF502: Large gap in years (2006 to 2011)
-- DSP122: Large gap in years (2007 to 2011)
-- ... and 49 more
+- ... and 62 more
 
 ### UiT
 
 - **Institution Code**: 1130
-- **Total Courses**: 5 004
-- **Courses with Student Count**: 5 004
+- **Total Courses**: 4 842
+- **Courses with Student Count**: 4 842
 - **Courses without Student Count**: 0
-- **Total Students (Last Year)**: 99 698
+- **Total Students (Last Year)**: 97 425
 - **Average Students per Course**: 20
 - **Min Students**: 3
 - **Max Students**: 600
