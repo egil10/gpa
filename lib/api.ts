@@ -723,6 +723,61 @@ export async function fetchAllYearsData(
     return aggregateDuplicateEntries(cached);
   }
   
+  // For BI, try multiple formats since course codes might already end with digits
+  // Some courses like "MET29107" already end with digits and should be used as-is
+  // Others might need a "1" suffix appended
+  if (institution === 'BI') {
+    const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+    const formatsToTry = [
+      cleaned, // Try as-is first (for codes like "MET29107" that already end with digits)
+      `${cleaned}1`, // Try with "1" suffix (standard BI format)
+      formatCourseCode(cleaned, institution), // Use formatCourseCode result
+    ];
+    
+    // Remove duplicates
+    const uniqueFormats = Array.from(new Set(formatsToTry));
+    
+    // Try each format
+    for (const formattedCode of uniqueFormats) {
+      try {
+        const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
+        const data = await fetchWithProxy(payload);
+        
+        if (data && data.length > 0) {
+          // Filter to ensure we only return data for the specific course we're looking for
+          const matching = data.filter(item => {
+            const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+            // Match if codes match exactly, or if normalized codes match
+            return itemCode === cleaned || 
+                   itemCode === formattedCode.toUpperCase() ||
+                   itemCode.replace(/1$/, '') === cleaned.replace(/1$/, ''); // Remove trailing "1" for comparison
+          });
+          
+          if (matching.length > 0) {
+            console.log(`[fetchAllYearsData] Found BI course data: ${formattedCode} (${matching.length} entries, filtered from ${data.length})`);
+            const { aggregateDuplicateEntries } = await import('./utils');
+            let aggregated = aggregateDuplicateEntries(matching);
+            
+            // Cache the fetched data (after aggregation)
+            if (institution && aggregated.length > 0) {
+              const { storeGradeDataInCache } = await import('./grade-data-cache');
+              storeGradeDataInCache(institutionCode, courseCode, institution, aggregated);
+            }
+            
+            return aggregated;
+          }
+        }
+      } catch (error) {
+        // Continue to next format
+        console.debug(`[fetchAllYearsData] Error fetching BI course ${formattedCode}:`, error);
+        continue;
+      }
+    }
+    
+    // If all formats failed, return empty array
+    return [];
+  }
+  
   // For UiB, try multiple formats since course codes can have different formats
   // Some courses use "INF100" (no suffix), others use "EXPHIL-HFEKS-0" (with suffix)
   if (institution === 'UiB') {
@@ -1074,6 +1129,12 @@ export function formatCourseCode(courseCode: string, institution: string): strin
   // BI uses format: COURSECODE1 (no dash)
   // Others use format: COURSECODE-1 (with dash)
   if (institution === 'BI') {
+    // For BI, if the code already ends with a digit, use it as-is
+    // The discovery script stores codes like "MET29107" which already end with digits
+    // Only add "1" if the code doesn't already end with a digit
+    if (/\d$/.test(cleaned)) {
+      return cleaned; // Already ends with digit, use as-is
+    }
     return `${cleaned}1`;
   }
   return `${cleaned}-1`;

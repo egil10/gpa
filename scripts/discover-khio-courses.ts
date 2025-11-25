@@ -49,7 +49,9 @@ async function discoverKHIOCourses() {
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
       
       courses.forEach((course: DiscoveredCourse) => {
-        const baseCode = course.courseCode.replace(/-1$/, '');
+        // Normalize course code: remove numeric suffix, spaces, and convert to uppercase
+        let baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric suffix
+        baseCode = baseCode.replace(/\s/g, '').trim().toUpperCase(); // Normalize spaces
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
@@ -68,8 +70,9 @@ async function discoverKHIOCourses() {
             existing.courseName = course.courseName;
           }
         } else {
+          // baseCode already normalized
           allCoursesMap.set(baseCode, {
-            courseCode: baseCode,
+            courseCode: baseCode, // Already normalized (spaces removed, uppercase)
             courseName: course.courseName,
             years: [year],
             totalStudents: course.totalStudents,

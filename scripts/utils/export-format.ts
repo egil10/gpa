@@ -2,6 +2,20 @@
  * Shared utilities for exporting course data in optimized format
  */
 
+/**
+ * Normalize course code by removing spaces and converting to uppercase
+ * This ensures consistent storage and matching across all discovery scripts
+ * Spaces in course codes cause issues with URL encoding, API calls, and matching
+ * 
+ * Examples:
+ *   "BAKU 1" -> "BAKU1"
+ *   "1DIM 000" -> "1DIM000"
+ *   "HK IKT" -> "HKIKT"
+ */
+export function normalizeCourseCodeForStorage(code: string): string {
+  return code.replace(/\s/g, '').trim().toUpperCase();
+}
+
 export interface OptimizedCourse {
   c: string; // courseCode
   n?: string; // courseName (optional)
@@ -29,7 +43,7 @@ export interface FullCourseExport {
  */
 export function optimizeCourse(course: FullCourseExport): OptimizedCourse {
   const optimized: OptimizedCourse = {
-    c: course.courseCode,
+    c: normalizeCourseCodeForStorage(course.courseCode), // Normalize code (remove spaces)
     y: [...course.years].sort((a, b) => b - a), // Most recent first
   };
   

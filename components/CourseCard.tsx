@@ -14,7 +14,7 @@ export default function CourseCard({ course, institution }: CourseCardProps) {
   );
 
   return (
-    <Link href={`/sok?code=${course.courseCode}&year=${course.year}&uni=${institution}`}>
+    <Link href={`/sok?code=${encodeURIComponent(course.courseCode)}&year=${course.year}&uni=${institution}`}>
       <div className={`${styles.card} hover-lift`}>
         <div className={styles.header}>
           <h3 className={styles.courseCode}>{course.courseCode}</h3>

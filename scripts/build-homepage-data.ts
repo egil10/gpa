@@ -43,8 +43,8 @@ const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', 'homepage-top-cou
 const MAX_PER_INSTITUTION = 3; // Top 3 courses per institution
 const MIN_YEAR = 2020; // Exclude courses with data older than this year
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
-const MAX_CANDIDATES_TO_CHECK = 15; // Check top 15 courses per institution to find ones with A-F data
-const EARLY_STOP_THRESHOLD = 5; // Stop early once we have this many courses with A-F grades
+const MAX_CANDIDATES_TO_CHECK = 3; // Check top 3 courses per institution to find ones with A-F data
+const EARLY_STOP_THRESHOLD = 3; // Stop early once we have this many courses with A-F grades
 
 function loadOptimizedCourses(filePath: string): OptimizedCourse[] {
   if (!fs.existsSync(filePath)) {
@@ -633,8 +633,7 @@ async function main() {
 
     console.log(`\n📊 Processing ${institution} (${uni.name})...`);
     // Check a reasonable batch of courses to find the best ones by A-F grade count
-    // For UiB, check slightly more courses since many only have pass/fail data
-    const checkLimit = institution === 'UiB' ? Math.max(MAX_CANDIDATES_TO_CHECK * 2, 30) : MAX_CANDIDATES_TO_CHECK;
+    const checkLimit = MAX_CANDIDATES_TO_CHECK;
     const coursesToCheck = allCourses.slice(0, Math.min(checkLimit, allCourses.length));
     console.log(`   Checking up to ${coursesToCheck.length} courses for A-F grade data (will sort by A-F grade count)...`);
     console.log(`   Early stopping: will stop after finding ${EARLY_STOP_THRESHOLD} courses with A-F grades`);
@@ -672,9 +671,8 @@ async function main() {
         });
         console.log(`      ✅ ${course.courseCode} has A-F grade data (${validation.letterGradeCount} students with A-F grades, ${validation.studentCount} total)`);
         
-        // Early stopping: if we have enough candidates and we've checked at least 10 courses,
-        // we can stop (we only need top 3, so 5 candidates is plenty)
-        if (coursesWithData.length >= EARLY_STOP_THRESHOLD && i >= 9) {
+        // Early stopping: if we have enough candidates (3), we can stop
+        if (coursesWithData.length >= EARLY_STOP_THRESHOLD) {
           console.log(`   ⏩ Early stopping: Found ${coursesWithData.length} courses with A-F grades (only need top ${MAX_PER_INSTITUTION})`);
           break;
         }

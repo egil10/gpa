@@ -59,14 +59,24 @@ const courseDataCache: Map<string, CourseInfo[]> = new Map();
 const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
 /**
+ * Normalize course code by removing spaces and trimming
+ * This is used for consistent storage and matching
+ */
+export function normalizeCourseCode(code: string): string {
+  return code.replace(/\s/g, '').trim().toUpperCase();
+}
+
+/**
  * Strip numeric suffix from course code (e.g., "IN2010-1" -> "IN2010", "INF100-0" -> "INF100")
  * Removes API artifacts like "-0", "-1", "-2" but preserves meaningful variants like "-HFSEM", "-MNEKS"
+ * Also normalizes spaces (removes them) for consistent matching
  * 
  * Handles different formats consistently across institutions:
  * - Standard format: "IN2010-1" -> "IN2010" (removes numeric suffix)
  * - UiB variants: "INF100-0" -> "INF100" (removes numeric suffix)
  * - Meaningful variants: "EXPHIL-HFSEM" -> "EXPHIL-HFSEM" (preserves non-numeric suffix)
  * - Courses with dashes: "STK-MAT2011" -> "STK-MAT2011" (preserves dashes that aren't numeric suffixes)
+ * - Courses with spaces: "BAKU 1" -> "BAKU1" (removes spaces)
  * 
  * Examples:
  *   "IN2010-1" -> "IN2010" (removes numeric API suffix)
@@ -75,14 +85,18 @@ const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
  *   "EXPHIL-HFEKS-0" -> "EXPHIL-HFEKS" (removes numeric suffix, preserves meaningful part)
  *   "STK-MAT2011" -> "STK-MAT2011" (preserves - dash and trailing 1)
  *   "FYS-STK3155" -> "FYS-STK3155" (preserves - dash)
+ *   "BAKU 1" -> "BAKU1" (removes space)
+ *   "1DIM 000" -> "1DIM000" (removes space)
  * 
  * Note: This matches how the discovery scripts should store course codes
  */
 export function stripCourseCodeSuffix(code: string, institution?: string): string {
+  // First normalize spaces (remove them) and trim
+  const normalized = normalizeCourseCode(code);
   // Remove numeric suffixes (dash followed by one or more digits at the end)
   // This removes API artifacts like "-0", "-1", "-2", etc.
   // But preserves meaningful suffixes like "-HFSEM", "-MNEKS", "-MOSEM"
-  return code.replace(/-[0-9]+$/, '').trim();
+  return normalized.replace(/-[0-9]+$/, '');
 }
 
 /**
@@ -217,6 +231,8 @@ function searchCoursesFromList(
   query: string,
   limit: number
 ): CourseInfo[] {
+  // Normalize query to handle spaces
+  const normalizedQuery = normalizeCourseCode(stripCourseCodeSuffix(query));
   // Strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
   // Only strip -1 suffix, don't strip standalone 1 as it might be part of the code (e.g., STK-MAT2011)
   const normalizedQuery = stripCourseCodeSuffix(query.trim().toUpperCase());
@@ -242,7 +258,9 @@ function searchCoursesFromList(
   const institutionMatches: CourseInfo[] = [];
 
   for (const course of courses) {
-    const codeUpper = course.code.toUpperCase();
+    // Normalize course code for comparison (handles spaces)
+    const normalizedCourseCode = stripCourseCodeSuffix(course.code);
+    const codeUpper = normalizedCourseCode; // Already normalized (uppercase, spaces removed)
     const nameUpper = course.name.toUpperCase();
     const institution = UNIVERSITIES[course.institution];
     const institutionShortUpper = (institution?.shortName || '').toUpperCase();
@@ -331,7 +349,8 @@ export async function getCourseByCode(
   institution?: string
 ): Promise<CourseInfo | null> {
   // Strip suffix from code for matching (user might type "IN2010-1" but we store "IN2010")
-  const normalizedCode = stripCourseCodeSuffix(code.trim().toUpperCase(), institution);
+  // Also normalizes spaces for consistent matching
+  const normalizedCode = stripCourseCodeSuffix(code, institution);
   console.log(`[getCourseByCode] Searching for code: "${code}" -> normalized: "${normalizedCode}" (institution: ${institution})`);
   
   if (institution) {
@@ -347,16 +366,17 @@ export async function getCourseByCode(
       if (c.key && c.key === uniqueKey) {
         return true;
       }
-      // Fallback to code match if key is not available
-      return c.code.toUpperCase() === normalizedCode;
+      // Normalize stored code for comparison (handles spaces)
+      const normalizedStoredCode = stripCourseCodeSuffix(c.code, institution);
+      return normalizedStoredCode === normalizedCode;
     });
     
     // If not found, try case-insensitive match and also check if code matches after normalization
     if (!found) {
       found = courses.find(c => {
-        const courseCodeUpper = c.code.toUpperCase().trim();
-        const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper, institution);
-        return normalizedCourseCode === normalizedCode || courseCodeUpper === normalizedCode;
+        // Normalize both codes for comparison (handles spaces and case)
+        const normalizedCourseCode = stripCourseCodeSuffix(c.code, institution);
+        return normalizedCourseCode === normalizedCode;
       });
     }
     

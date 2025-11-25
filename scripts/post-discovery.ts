@@ -38,6 +38,11 @@ const buildSteps: BuildStep[] = [
     description: 'Copy all institution data files to public folder',
   },
   {
+    name: 'Normalize Codes',
+    command: 'npm run normalize-codes',
+    description: 'Normalize course codes (remove spaces)',
+  },
+  {
     name: 'Homepage Data',
     command: 'npm run build-home-data',
     description: 'Build homepage top courses data',

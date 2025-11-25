@@ -60,7 +60,9 @@ async function discoverUiBCourses() {
         // Remove numeric suffixes (e.g., "-0", "-1", "-2") but preserve meaningful variants (e.g., "-HFSEM", "-MNEKS")
         // Use the FULL course code (after removing only numeric suffixes) as the key
         // This ensures "EXPHIL-HFSEM" and "EXPHIL-MNEKS" are stored separately
-        const baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only, preserve meaningful parts
+        // Also normalize spaces (remove them) for consistent storage
+        let baseCode = course.courseCode.replace(/-[0-9]+$/, ''); // Remove numeric API suffix only, preserve meaningful parts
+        baseCode = baseCode.replace(/\s/g, '').trim().toUpperCase(); // Normalize spaces
         const existing = allCoursesMap.get(baseCode);
         
         if (existing) {
@@ -82,9 +84,9 @@ async function discoverUiBCourses() {
           existing.lastYear = existing.years[0]; // Most recent year
           existing.lastYearStudents = existing.studentCountByYear[existing.lastYear] || 0;
         } else {
-          // Create new entry
+          // Create new entry (baseCode already normalized)
           allCoursesMap.set(baseCode, {
-            courseCode: baseCode,
+            courseCode: baseCode, // Already normalized (spaces removed, uppercase)
             courseName: course.courseName, // Store course name if available
             years: [year],
             totalStudents: course.totalStudents,

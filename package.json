@@ -56,7 +56,9 @@
     "build-homepage-grade-data": "tsx scripts/build-homepage-grade-data.ts",
     "build-hardcoded-28": "tsx scripts/build-hardcoded-28.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts",
-    "analytics": "tsx scripts/analytics/generate-analytics.ts"
+    "analytics": "tsx scripts/analytics/generate-analytics.ts",
+    "analyze-codes": "tsx scripts/analyze-course-codes.ts",
+    "normalize-codes": "tsx scripts/normalize-course-codes.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
