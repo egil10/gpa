@@ -537,6 +537,11 @@ export default function Home() {
   // 2. Clearing would lose data if user switches back to "all"
   // 3. The safety check in filteredAndSortedCourses ensures institution matches
 
+  // Compute total number of hardcoded courses dynamically from loaded data
+  const HARDCODED_28_TOTAL = useMemo(() => {
+    return hardcoded28Data?.courses.length ?? 0;
+  }, [hardcoded28Data]);
+
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
     // In default view (all institutions, no search), prioritize hardcoded 28 courses
