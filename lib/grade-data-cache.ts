@@ -31,7 +31,7 @@ function getCachedDataSafe(
     // This is expected on client-side where cache module is ignored by webpack
     return null;
   }
-  
+
   return null;
 }
 
@@ -56,7 +56,33 @@ export async function courseExistsInData(
 }
 
 /**
+ * Load grade data from data/cache.json (pre-populated with top courses)
+ */
+async function loadGradeDataFromCache(
+  institutionCode: string,
+  courseCode: string
+): Promise<GradeData[] | null> {
+  try {
+    const response = await fetch('/data/cache.json');
+    if (response.ok) {
+      const cacheData = await response.json();
+      const cacheKey = `${institutionCode}-${courseCode}`;
+
+      if (cacheData.courses && cacheData.courses[cacheKey]) {
+        return cacheData.courses[cacheKey].data || null;
+      }
+    }
+  } catch (error) {
+    // Cache file doesn't exist or failed to load
+    return null;
+  }
+
+  return null;
+}
+
+/**
  * Get grade data from cache (works on both client and server)
+ * Priority: 1. Client cache, 2. localStorage, 3. data/cache.json, 4. Server cache
  */
 export async function getGradeDataFromCache(
   institutionCode: string,
@@ -65,14 +91,14 @@ export async function getGradeDataFromCache(
 ): Promise<GradeData[] | null> {
   const formattedCode = formatCourseCode(courseCode, institution);
   const cacheKey = `${institutionCode}-${formattedCode}`;
-  
-  // Check client-side cache first
+
+  // 1. Check client-side in-memory cache first
   if (typeof window !== 'undefined') {
     if (clientCache.has(cacheKey)) {
       return clientCache.get(cacheKey)!;
     }
-    
-    // Try to load from localStorage as fallback
+
+    // 2. Try to load from localStorage as fallback
     try {
       const stored = localStorage.getItem(`grade-data-${cacheKey}`);
       if (stored) {
@@ -83,9 +109,22 @@ export async function getGradeDataFromCache(
     } catch {
       // Ignore localStorage errors
     }
+
+    // 3. Try to load from data/cache.json (pre-populated with top courses)
+    const cachedData = await loadGradeDataFromCache(institutionCode, courseCode);
+    if (cachedData && cachedData.length > 0) {
+      // Cache in memory and localStorage for faster subsequent access
+      clientCache.set(cacheKey, cachedData);
+      try {
+        localStorage.setItem(`grade-data-${cacheKey}`, JSON.stringify(cachedData));
+      } catch {
+        // Ignore localStorage errors
+      }
+      return cachedData;
+    }
   }
-  
-  // Check server-side cache (wrapped in try-catch for safety)
+
+  // 4. Check server-side cache (wrapped in try-catch for safety)
   let cached: GradeData[] | null = null;
   try {
     cached = getCachedDataSafe(institutionCode, formattedCode);
@@ -93,7 +132,7 @@ export async function getGradeDataFromCache(
     // Silently fail if cache access fails (expected on client-side)
     cached = null;
   }
-  
+
   if (cached && cached.length > 0) {
     // Also store in client cache if on client
     if (typeof window !== 'undefined') {
@@ -106,7 +145,7 @@ export async function getGradeDataFromCache(
     }
     return cached;
   }
-  
+
   return null;
 }
 
@@ -121,7 +160,7 @@ export function storeGradeDataInCache(
 ): void {
   const formattedCode = formatCourseCode(courseCode, institution);
   const cacheKey = `${institutionCode}-${formattedCode}`;
-  
+
   // Store in client cache
   if (typeof window !== 'undefined') {
     clientCache.set(cacheKey, data);
@@ -143,9 +182,9 @@ export function clearCourseCache(
 ): void {
   const formattedCode = formatCourseCode(courseCode, institution);
   const cacheKey = `${institutionCode}-${formattedCode}`;
-  
+
   clientCache.delete(cacheKey);
-  
+
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(`grade-data-${cacheKey}`);
@@ -154,4 +193,3 @@ export function clearCourseCache(
     }
   }
 }
-

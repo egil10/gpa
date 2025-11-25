@@ -56,6 +56,8 @@
     "fix-all-duplicates": "tsx scripts/fix-all-duplicates.ts",
     "build-home-data": "tsx scripts/build-homepage-data.ts",
     "build-homepage-grade-data": "tsx scripts/build-homepage-grade-data.ts",
+    "build-grade-cache": "tsx scripts/build-grade-cache.ts",
+    "populate-cache": "tsx scripts/populate-cache.ts",
     "build-hardcoded-28": "tsx scripts/build-hardcoded-28.ts",
     "optimize-courses": "tsx scripts/optimize-course-json.ts",
     "analytics": "tsx scripts/analytics/generate-analytics.ts",
