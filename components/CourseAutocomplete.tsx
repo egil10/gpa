@@ -81,7 +81,19 @@ export default function CourseAutocomplete({
       } else {
         try {
           const results = await searchAllCourses(trimmedQuery, institution, 3);
-          const filtered = results.filter(c => !isCourseUnavailable(c.code, c.institution));
+          // Filter out unavailable courses and short/generic codes (likely department prefixes)
+          const filtered = results.filter(c => {
+            // Exclude unavailable courses
+            if (isCourseUnavailable(c.code, c.institution)) {
+              return false;
+            }
+            // Exclude codes that are too short or generic (3 chars or less after removing non-alphanumeric)
+            const cleanedCode = stripCourseCodeSuffix(c.code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (cleanedCode.length <= 3) {
+              return false;
+            }
+            return true;
+          });
           setSuggestions(filtered.slice(0, 3));
           
           // Hide suggestions if query exactly matches a suggestion (normalized comparison)

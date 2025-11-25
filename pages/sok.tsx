@@ -88,6 +88,16 @@ export default function SearchPage() {
         let normalizedCode = stripCourseCodeSuffix(courseCode, institution);
         let formattedCode = formatCourseCode(normalizedCode, institution);
 
+        // Pre-validation: Filter out codes that are too short or generic (likely department prefixes)
+        const cleanedForValidation = normalizedCode.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (cleanedForValidation.length <= 3) {
+          console.warn(`[Search] ❌ Course code too short or generic: ${courseCode} (likely a department prefix)`);
+          setError('Emnekoden er for kort eller generisk. Prøv å søke etter et spesifikt emnekode (f.eks. "MAT1100" i stedet for "MAT")');
+          setLoading(false);
+          loadingRef.current = null;
+          return;
+        }
+
         try {
           console.log(`[Search] Validating course: ${courseCode} (${institution})`);
           const course = await getCourseByCode(courseCode, institution);
@@ -97,18 +107,30 @@ export default function SearchPage() {
             // Use the actual course code from the found course
             normalizedCode = stripCourseCodeSuffix(course.code, institution);
             formattedCode = formatCourseCode(normalizedCode, institution);
+            
+            // Additional validation: Check if the found course code is also too short/generic
+            const foundCodeCleaned = normalizedCode.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (foundCodeCleaned.length <= 3) {
+              console.warn(`[Search] ❌ Found course code is too short/generic: ${normalizedCode}`);
+              setError('Emnekoden er for kort eller generisk. Prøv å søke etter et spesifikt emnekode.');
+              setLoading(false);
+              loadingRef.current = null;
+              return;
+            }
           } else {
             // Course doesn't exist in our data - provide immediate feedback
             console.warn(`[Search] ❌ Course not found in data: ${courseCode} (${institution})`);
             setError('Ingen data funnet for dette emnet');
             setLoading(false);
             markCourseAsUnavailable(normalizedCode, institution);
+            loadingRef.current = null;
             return; // Don't make API call
           }
         } catch (err) {
           console.error(`[Search] Error validating course:`, err);
           setError('Feil ved validering av emne');
           setLoading(false);
+          loadingRef.current = null;
           return;
         }
 
