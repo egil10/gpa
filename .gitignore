@@ -51,6 +51,10 @@ inspo/
 # Uncomment the line below if you don't want to commit cache.json
 # data/cache.json
 
+# Optimized grade cache (generated files - can be regenerated)
+data/grade-cache-optimized/
+public/data/grade-cache-optimized/
+
 # Backup and compressed files
 *.backup
 *.gz

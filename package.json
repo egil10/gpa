@@ -70,7 +70,8 @@
     "parse-vgs-grades": "tsx scripts/parse-vgs-grade-statistics.ts",
     "fetch-vgs-grades-api": "tsx scripts/fetch-vgs-grades-from-api.ts",
     "build-institution-statistics": "tsx scripts/build-institution-statistics.ts",
-    "fetch-all-grade-data": "tsx scripts/fetch-all-grade-data.ts"
+    "fetch-all-grade-data": "tsx scripts/fetch-all-grade-data.ts",
+    "copy-optimized-cache": "tsx scripts/copy-optimized-cache-to-public.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",

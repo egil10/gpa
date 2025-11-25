@@ -177,7 +177,75 @@ export async function getGradeDataFromCache(
       }
     }
 
-    // 3. Skip cache.json check - it's optional and causes 404 errors
+    // 3. Try loading from optimized cache (new format, fastest!)
+    try {
+      const basePath = window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
+      
+      // Normalize course code for storage (matches fetch-all-grade-data.ts logic)
+      // Remove spaces, uppercase, remove all non-alphanumeric characters
+      const normalizedForStorage = cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase();
+      
+      // Try multiple normalized formats
+      const normalizedFormats = [
+        normalizedForStorage, // Most common: all non-alphanumeric removed
+        cleaned.replace(/[^A-Z0-9-]/g, '').replace(/-/g, '').toUpperCase(), // Remove everything except A-Z, 0-9, then remove dashes
+        cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase(), // Remove all non-alphanumeric
+      ];
+      
+      // Remove duplicates
+      const uniqueFormats = Array.from(new Set(normalizedFormats));
+      
+      for (const normalized of uniqueFormats) {
+        const cacheFile = `${basePath}/data/grade-cache-optimized/${institution}/${normalized}.json`;
+        
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+          
+          const response = await fetch(cacheFile, {
+            cache: 'force-cache',
+            signal: controller.signal,
+          }).catch(() => null);
+          
+          clearTimeout(timeoutId);
+          
+          if (response && response.ok) {
+            const cached: { i: string; c: string; d: Array<{ y: number; g: string; c: number }> } = await response.json();
+            
+            // Convert optimized format to GradeData
+            if (cached.d && Array.isArray(cached.d) && cached.d.length > 0) {
+              const gradeData: GradeData[] = cached.d.map(item => ({
+                Institusjonskode: cached.i,
+                Emnekode: cached.c,
+                Karakter: item.g,
+                Årstall: String(item.y),
+                'Antall kandidater totalt': String(item.c),
+              } as GradeData));
+              
+              // Store in client cache for faster lookup next time
+              cacheKeys.forEach(key => {
+                clientCache.set(key, gradeData);
+                try {
+                  localStorage.setItem(`grade-data-${key}`, JSON.stringify(gradeData));
+                } catch {
+                  // Ignore localStorage errors
+                }
+              });
+              
+              console.log(`[Cache] ✅ Found in optimized cache: ${institution}/${normalized}.json (${gradeData.length} entries)`);
+              return gradeData;
+            }
+          }
+        } catch (error) {
+          // Try next format
+          continue;
+        }
+      }
+    } catch (error) {
+      // Silently fail - optimized cache is optional
+    }
+
+    // 4. Skip cache.json check - it's optional and causes 404 errors
     // If we need cache.json data, it should be pre-loaded into localStorage during build
     // This prevents unnecessary 404 errors in console
   }
