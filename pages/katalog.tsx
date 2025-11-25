@@ -90,6 +90,12 @@ export default function KatalogPage() {
                 placeholder="Søk etter emnekode"
                 className={styles.searchInput}
                 autoFocus
+                autoComplete="off"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck="false"
+                enterKeyHint="search"
+                inputMode="text"
               />
             </div>
             <div className={styles.institutionFilter}>

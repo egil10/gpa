@@ -33,7 +33,11 @@ export default function Layout({ children, title, description }: LayoutProps) {
       </Head>
       <div className="min-h-screen bg-white flex flex-col">
         <HomeButton />
-        <main className="flex-1 relative z-10 pb-32" style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))' }}>
+        <main className="flex-1 relative z-10 pb-32" style={{ 
+          paddingBottom: 'calc(8rem + env(safe-area-inset-bottom))',
+          paddingLeft: 'env(safe-area-inset-left)',
+          paddingRight: 'env(safe-area-inset-right)'
+        }}>
           {children}
         </main>
         <Footer />

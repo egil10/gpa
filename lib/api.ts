@@ -785,7 +785,14 @@ export async function fetchAllYearsData(
       }
     }
 
-    // If all formats failed, return empty array
+    // If all formats failed - mark as unavailable and return empty array
+    if (institution && typeof window !== 'undefined') {
+      const { markCourseAsUnavailable } = await import('./course-availability');
+      const { stripCourseCodeSuffix } = await import('./all-courses');
+      const normalizedCode = stripCourseCodeSuffix(courseCode, institution);
+      markCourseAsUnavailable(normalizedCode, institution);
+      console.log(`[fetchAllYearsData] ⚠️ Marked ${normalizedCode} (${institution}) as unavailable - all BI format attempts failed`);
+    }
     return [];
   }
 
@@ -1031,15 +1038,108 @@ export async function fetchAllYearsData(
       }
     }
 
-    // All attempts failed - return empty array
+    // All attempts failed - mark as unavailable and return empty array
+    if (institution && typeof window !== 'undefined') {
+      const { markCourseAsUnavailable } = await import('./course-availability');
+      const { stripCourseCodeSuffix } = await import('./all-courses');
+      const normalizedCode = stripCourseCodeSuffix(courseCode, institution);
+      markCourseAsUnavailable(normalizedCode, institution);
+      console.log(`[fetchAllYearsData] ⚠️ Marked ${normalizedCode} (${institution}) as unavailable - all UiB format attempts failed`);
+    }
     return [];
   }
 
-  // For non-UiB institutions, use standard format
-  // Make a SINGLE API call - this should only be called once per course
-  console.log(`[fetchAllYearsData] Making SINGLE API call for ${courseCode} (${institution})...`);
-  const payload = createSearchPayload(institutionCode, courseCode, undefined, departmentFilter);
-  let data = await fetchWithProxy(payload);
+  // For non-UiB, non-BI institutions, try multiple format variations
+  // Some institutions (like NHH, UiO) may use different formats
+  const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
+  const formatsToTry: string[] = [];
+  
+  // For NHH, try format variations specific to NHH
+  if (institution === 'NHH') {
+    // NHH courses might be stored as "SAM12" but API might need different formats
+    if (cleaned.match(/^[A-Z]+\d+$/)) {
+      // Pattern like "SAM12" -> try multiple formats
+      const match = cleaned.match(/^([A-Z]+)(\d+)$/);
+      if (match) {
+        const [, letters, numbers] = match;
+        // Try original format first, then variations
+        formatsToTry.push(cleaned);                    // "SAM12" (original)
+        formatsToTry.push(`${letters} ${numbers}`);    // "SAM 12" (with space)
+        formatsToTry.push(`${letters}-${numbers}`);    // "SAM-12" (with dash)
+        formatsToTry.push(`${cleaned}-1`);             // "SAM12-1" (with -1 suffix)
+        formatsToTry.push(`${letters}-${numbers}-1`);  // "SAM-12-1" (with dash and -1)
+      } else {
+        formatsToTry.push(cleaned);
+      }
+    } else {
+      formatsToTry.push(cleaned);
+    }
+    // Also try formatCourseCode result
+    const formatted = formatCourseCode(cleaned, institution);
+    if (!formatsToTry.includes(formatted)) {
+      formatsToTry.push(formatted);
+    }
+  } else if (institution === 'UiO') {
+    // UiO courses might have format variations
+    formatsToTry.push(cleaned);                        // Original format first
+    if (!cleaned.includes('-')) {
+      formatsToTry.push(`${cleaned}-1`);               // With -1 suffix
+    }
+    const formatted = formatCourseCode(cleaned, institution);
+    if (!formatsToTry.includes(formatted)) {
+      formatsToTry.push(formatted);
+    }
+  } else {
+    // For other institutions (NTNU, etc.), try standard formats
+    formatsToTry.push(cleaned);                        // Original format first
+    const formatted = formatCourseCode(cleaned, institution);
+    if (formatted !== cleaned && !formatsToTry.includes(formatted)) {
+      formatsToTry.push(formatted);                    // formatCourseCode result (usually adds -1)
+    }
+    // Try with -1 suffix if not already included
+    if (!cleaned.includes('-') && !formatsToTry.includes(`${cleaned}-1`)) {
+      formatsToTry.push(`${cleaned}-1`);
+    }
+  }
+  
+  // Remove duplicates and try each format
+  const uniqueFormats = Array.from(new Set(formatsToTry));
+  console.log(`[fetchAllYearsData] Trying ${uniqueFormats.length} format(s) for ${courseCode} (${institution}):`, uniqueFormats);
+  
+  let data: GradeData[] = [];
+  
+  for (const formattedCode of uniqueFormats) {
+    try {
+      console.log(`[fetchAllYearsData] Trying format: ${formattedCode} (${institution})...`);
+      const payload = createSearchPayload(institutionCode, formattedCode, undefined, departmentFilter);
+      data = await fetchWithProxy(payload);
+      
+      if (data && data.length > 0) {
+        // Filter to ensure we only return data for the specific course we're looking for
+        const matching = data.filter(item => {
+          const itemCode = item.Emnekode?.toUpperCase().replace(/\s/g, '') || '';
+          const normalizedInput = cleaned.replace(/-[0-9]+$/, ''); // Remove numeric suffix for comparison
+          const normalizedItem = itemCode.replace(/-[0-9]+$/, '');
+          return itemCode === formattedCode.toUpperCase() || 
+                 normalizedItem === normalizedInput ||
+                 itemCode === cleaned;
+        });
+        
+        if (matching.length > 0) {
+          console.log(`[fetchAllYearsData] ✅ Found data using format ${formattedCode} (${matching.length} entries)`);
+          data = matching;
+          break; // Found data, stop trying other formats
+        } else if (data.length > 0) {
+          console.log(`[fetchAllYearsData] ⚠️ Format ${formattedCode} returned ${data.length} entries, but none matched course code ${courseCode}`);
+        }
+      }
+    } catch (error) {
+      // Continue to next format
+      console.debug(`[fetchAllYearsData] Error with format ${formattedCode}:`, error);
+      continue;
+    }
+  }
+  
   console.log(`[fetchAllYearsData] API call completed for ${courseCode} (${institution}) - got ${data?.length || 0} entries`);
 
   // Aggregate duplicate entries (e.g., UiB courses with multiple instances)
@@ -1052,6 +1152,14 @@ export async function fetchAllYearsData(
   if (institution && data.length > 0) {
     const { storeGradeDataInCache } = await import('./grade-data-cache');
     storeGradeDataInCache(institutionCode, courseCode, institution, data);
+  } else if (institution && data.length === 0 && typeof window !== 'undefined') {
+    // Mark course as unavailable if API returned no data (only on client-side)
+    // This prevents users from searching for courses with no grade data
+    const { markCourseAsUnavailable } = await import('./course-availability');
+    const { stripCourseCodeSuffix } = await import('./all-courses');
+    const normalizedCode = stripCourseCodeSuffix(courseCode, institution);
+    markCourseAsUnavailable(normalizedCode, institution);
+    console.log(`[fetchAllYearsData] ⚠️ Marked ${normalizedCode} (${institution}) as unavailable - API returned 0 entries`);
   }
 
   return data;

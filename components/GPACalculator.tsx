@@ -484,6 +484,7 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
                     <label>{system === 'university' ? 'Emnekode' : 'Fagnavn'}</label>
                     {system === 'university' ? (
                       <CourseNameAutocomplete
+                        simple={true}
                         value={course.name}
                         onChange={(name) => updateCourse(course.id, 'name', name)}
                         onCourseSelect={(courseInfo) => handleCourseNameSelect(course.id, courseInfo)}

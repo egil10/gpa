@@ -220,13 +220,17 @@ export async function searchAllCourses(
   
   // Empty query returns popular courses (not cached)
   if (!normalizedQuery) {
+    const { isCourseUnavailable } = await import('./course-availability');
+    let results: CourseInfo[];
     if (institution) {
       const courses = await loadInstitutionCourses(institution);
-      return searchCoursesFromList(courses, query, limit);
+      results = searchCoursesFromList(courses, query, limit);
     } else {
       const allCourses = await loadAllCourses();
-      return searchCoursesFromList(allCourses, query, limit);
+      results = searchCoursesFromList(allCourses, query, limit);
     }
+    // Filter out unavailable courses
+    return results.filter(course => !isCourseUnavailable(course.code, course.institution));
   }
 
   // Check negative cache first (for "not found" results)
@@ -237,7 +241,10 @@ export async function searchAllCourses(
   // Check cache for positive results
   const cached = getCachedSearchResults(normalizedQuery, institution);
   if (cached !== null) {
-    return cached.slice(0, limit);
+    // Filter out unavailable courses from cached results
+    const { isCourseUnavailable } = await import('./course-availability');
+    const filtered = cached.filter(course => !isCourseUnavailable(course.code, course.institution));
+    return filtered.slice(0, limit);
   }
 
   // Perform actual search
@@ -251,6 +258,10 @@ export async function searchAllCourses(
     const allCourses = await loadAllCourses();
     results = searchCoursesFromList(allCourses, normalizedQuery, limit);
   }
+
+  // Filter out unavailable courses (courses with no grade data)
+  const { isCourseUnavailable } = await import('./course-availability');
+  results = results.filter(course => !isCourseUnavailable(course.code, course.institution));
 
   // Cache the results (or negative result)
   if (results.length > 0) {
@@ -448,6 +459,13 @@ export async function getCourseByCode(
     }
 
     if (found) {
+      // Check if course is unavailable (no grade data)
+      const { isCourseUnavailable } = await import('./course-availability');
+      if (isCourseUnavailable(found.code, found.institution)) {
+        // Course exists but has no data - cache negative result and return null
+        cacheNegativeResult(normalizedCode, institution);
+        return null;
+      }
       // Cache this positive result
       cacheSearchResults(normalizedCode, [found], institution);
       return found;
@@ -468,6 +486,13 @@ export async function getCourseByCode(
     
     if (matches.length > 0) {
       const result = matches[0];
+      // Check if course is unavailable (no grade data)
+      const { isCourseUnavailable } = await import('./course-availability');
+      if (isCourseUnavailable(result.code, result.institution)) {
+        // Course exists but has no data - return null instead
+        cacheNegativeResult(normalizedCode, institution);
+        return null;
+      }
       // Cache this positive result
       cacheSearchResults(normalizedCode, [result], institution);
       return result;

@@ -128,34 +128,81 @@
 @media (max-width: 768px) {
   .footer {
     padding: var(--space-xl) 0 var(--space-md);
-    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--space-md) + 5rem + env(safe-area-inset-bottom));
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
   }
   
   .footerContent {
     grid-template-columns: 1fr;
     gap: var(--space-lg);
-    /* Account for safe area */
-    padding-left: max(calc(var(--space-lg) + env(safe-area-inset-left)), var(--space-md));
-    padding-right: max(calc(var(--space-lg) + env(safe-area-inset-right)), var(--space-md));
+    padding: 0;
+  }
+  
+  .footerSection {
+    padding: 0;
   }
   
   .footerBottom {
     flex-direction: column;
     text-align: center;
-    gap: var(--space-sm);
-    padding-left: max(calc(var(--space-lg) + env(safe-area-inset-left)), var(--space-md));
-    padding-right: max(calc(var(--space-lg) + env(safe-area-inset-right)), var(--space-md));
+    gap: var(--space-md);
+    padding: 0;
   }
   
   .footerLinks {
     flex-wrap: wrap;
     justify-content: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
+    width: 100%;
   }
   
   .footerLink,
   .githubLink {
-    min-width: auto;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0.625rem 0.875rem;
+    touch-action: manipulation;
+    flex: 1 1 auto;
+    justify-content: center;
+    font-size: var(--text-xs);
+  }
+  
+  .footerBottom p {
+    font-size: var(--text-xs);
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: var(--space-lg) 0 var(--space-sm);
+    padding-bottom: calc(var(--space-sm) + 5rem + env(safe-area-inset-bottom));
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+  
+  .footerContent {
+    gap: var(--space-md);
+  }
+  
+  .footerSection h4 {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-sm);
+  }
+  
+  .footerSection p {
+    font-size: var(--text-xs);
+    line-height: 1.5;
+  }
+  
+  .footerLinks {
+    gap: var(--space-xs);
+  }
+  
+  .footerLink,
+  .githubLink {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
   }
 }

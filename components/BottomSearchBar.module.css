@@ -330,51 +330,91 @@
 @media (max-width: 768px) {
   .searchBarContainer {
     padding: 0 var(--space-sm);
-    padding-bottom: var(--space-sm);
+    padding-bottom: var(--space-md);
     /* iOS safe area support */
-    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
     padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
     padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+    max-width: 100%;
   }
   
   .inputContainer {
-    min-height: 3.5rem;
-    padding: 0.625rem 1rem;
+    min-height: 3.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1.5rem;
   }
   
   .input {
     font-size: 16px; /* Prevents zoom on iOS */
     min-height: 2.25rem;
+    padding: 0.5rem 0.75rem;
   }
 
   .clearButton,
   .submitButton {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3rem;
+    height: 3rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .suggestions {
-    max-height: 16rem;
-    top: calc(100% + 0.25rem);
+    max-height: min(60vh, 20rem);
+    top: calc(100% + 0.5rem);
+    border-radius: 1rem;
     /* Better mobile scrolling */
     -webkit-overflow-scrolling: touch;
     /* Account for safe area */
     margin-left: calc(-1 * env(safe-area-inset-left));
     margin-right: calc(-1 * env(safe-area-inset-right));
     width: calc(100% + env(safe-area-inset-left) + env(safe-area-inset-right));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  .suggestionItem {
+    min-height: 56px;
+    padding: 0.875rem 1.125rem;
+    font-size: var(--text-base);
+  }
+  
+  .suggestionCode {
+    font-size: var(--text-base);
+  }
+  
+  .suggestionName {
+    font-size: var(--text-sm);
+  }
+
+  .notFoundMessage {
+    top: calc(100% + 0.5rem);
+    padding: 1rem 1.25rem;
+    font-size: var(--text-base);
+    border-radius: 1rem;
+    margin-left: calc(-1 * env(safe-area-inset-left));
+    margin-right: calc(-1 * env(safe-area-inset-right));
+    width: calc(100% + env(safe-area-inset-left) + env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 480px) {
+  .inputContainer {
+    min-height: 3.5rem;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .input {
+    font-size: 16px;
+    padding: 0.5rem 0.5rem;
+  }
+  
+  .clearButton,
+  .submitButton {
+    width: 2.75rem;
+    height: 2.75rem;
   }
   
   .suggestionItem {
     min-height: 52px;
     padding: 0.75rem 1rem;
-  }
-
-  .notFoundMessage {
-    top: calc(100% + 0.25rem);
-    padding: 0.75rem 1rem;
-    font-size: 0.8125rem;
-    margin-left: calc(-1 * env(safe-area-inset-left));
-    margin-right: calc(-1 * env(safe-area-inset-right));
-    width: calc(100% + env(safe-area-inset-left) + env(safe-area-inset-right));
   }
 }

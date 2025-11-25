@@ -235,10 +235,34 @@ export default function CourseAutocomplete({
               onClick={() => handleSelectCourse(course)}
               onMouseEnter={() => setSelectedIndex(index)}
             >
-              <div className={styles.suggestionCode}>{stripCourseCodeSuffix(course.code)}</div>
-              {course.name && course.name !== course.code && (
-                <div className={styles.suggestionName}>{course.name}</div>
-              )}
+              {(() => {
+                // Normalize course code for comparison
+                const normalizedCode = stripCourseCodeSuffix(course.code).toUpperCase().trim();
+                const normalizedName = course.name?.toUpperCase().trim() || '';
+                
+                // If name starts with the code, only show name (name already contains code)
+                // Otherwise, show code and name separately
+                const nameContainsCode = normalizedName && (
+                  normalizedName === normalizedCode ||
+                  normalizedName.startsWith(normalizedCode + ' ') ||
+                  normalizedName.startsWith(normalizedCode + '-')
+                );
+                
+                if (nameContainsCode) {
+                  // Name already contains code - only show name
+                  return <div className={styles.suggestionName}>{course.name}</div>;
+                } else {
+                  // Show code and name separately
+                  return (
+                    <>
+                      <div className={styles.suggestionCode}>{normalizedCode}</div>
+                      {course.name && course.name.trim() && (
+                        <div className={styles.suggestionName}>{course.name}</div>
+                      )}
+                    </>
+                  );
+                }
+              })()}
               <div className={styles.suggestionInstitution}>
                 {formatInstitutionLabel(course.institution, 'short-full')}
               </div>

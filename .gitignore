@@ -51,4 +51,10 @@ inspo/
 # Uncomment the line below if you don't want to commit cache.json
 # data/cache.json
 
+# Backup and compressed files
+*.backup
+*.gz
+*.bak
+*.tmp
+
 

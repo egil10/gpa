@@ -13,6 +13,7 @@ interface CourseNameAutocompleteProps {
   institution?: string;
   placeholder?: string;
   disabled?: boolean;
+  simple?: boolean; // Simple mode: show only course codes, ignore institution filter, 3 unique codes only
 }
 
 export default function CourseNameAutocomplete({
@@ -22,6 +23,7 @@ export default function CourseNameAutocomplete({
   institution,
   placeholder = 'Emnekode',
   disabled = false,
+  simple = false, // Simple mode for GPA calculator
 }: CourseNameAutocompleteProps) {
   const [query, setQuery] = useState(value || '');
   const [suggestions, setSuggestions] = useState<CourseInfo[]>([]);
@@ -77,17 +79,45 @@ export default function CourseNameAutocomplete({
       debounceRef.current = setTimeout(async () => {
         const trimmed = searchQuery.trim();
         if (trimmed.length === 0) {
-          const popular = await getPopularCoursesList();
-          setSuggestions(popular);
-          setShowSuggestions(popular.length > 0);
-          setSelectedIndex(popular.length > 0 ? 0 : -1);
+          if (simple) {
+            // In simple mode, don't show suggestions when empty
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setSelectedIndex(-1);
+          } else {
+            const popular = await getPopularCoursesList();
+            setSuggestions(popular);
+            setShowSuggestions(popular.length > 0);
+            setSelectedIndex(popular.length > 0 ? 0 : -1);
+          }
         } else {
           try {
-            const results = await searchAllCourses(trimmed, institution, 5);
-            const filtered = filterUnavailable(results).slice(0, 5);
-            setSuggestions(filtered);
-            setShowSuggestions(filtered.length > 0);
-            setSelectedIndex(filtered.length > 0 ? 0 : -1);
+            // In simple mode, search across all institutions and get unique course codes
+            if (simple) {
+              const results = await searchAllCourses(trimmed, undefined, 10); // Search all, get more results
+              const filtered = filterUnavailable(results);
+              
+              // Get unique course codes (normalized) - prioritize first occurrence
+              const uniqueCodes = new Map<string, CourseInfo>();
+              for (const course of filtered) {
+                const normalizedCode = stripCourseCodeSuffix(course.code).toUpperCase();
+                if (!uniqueCodes.has(normalizedCode)) {
+                  uniqueCodes.set(normalizedCode, course);
+                  if (uniqueCodes.size >= 3) break; // Stop at 3 unique codes
+                }
+              }
+              
+              const uniqueResults = Array.from(uniqueCodes.values());
+              setSuggestions(uniqueResults);
+              setShowSuggestions(uniqueResults.length > 0);
+              setSelectedIndex(uniqueResults.length > 0 ? 0 : -1);
+            } else {
+              const results = await searchAllCourses(trimmed, institution, 5);
+              const filtered = filterUnavailable(results).slice(0, 5);
+              setSuggestions(filtered);
+              setShowSuggestions(filtered.length > 0);
+              setSelectedIndex(filtered.length > 0 ? 0 : -1);
+            }
           } catch (error) {
             console.error('Search error:', error);
             setSuggestions([]);
@@ -97,7 +127,7 @@ export default function CourseNameAutocomplete({
         }
       }, 200);
     },
-    [institution, getPopularCoursesList, filterUnavailable]
+    [institution, getPopularCoursesList, filterUnavailable, simple]
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +241,8 @@ export default function CourseNameAutocomplete({
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck="false"
+          enterKeyHint="search"
+          inputMode="text"
         />
         {query && (
           <button
@@ -239,13 +271,56 @@ export default function CourseNameAutocomplete({
               role="option"
               aria-selected={index === selectedIndex}
             >
-              <div className={styles.suggestionMeta}>
-                <span className={styles.suggestionCode}>{stripCourseCodeSuffix(course.code)}</span>
-                <span className={styles.suggestionInstitution}>
-                  {formatInstitutionLabel(course.institution, 'short-full')}
-                </span>
-              </div>
-              <div className={styles.suggestionName}>{course.name}</div>
+              {simple ? (
+                // Simple mode: only show course code
+                <div className={styles.suggestionCodeSimple}>
+                  {stripCourseCodeSuffix(course.code)}
+                </div>
+              ) : (
+                // Full mode: show code, name, and institution
+                (() => {
+                  // Normalize course code for comparison
+                  const normalizedCode = stripCourseCodeSuffix(course.code).toUpperCase().trim();
+                  const normalizedName = course.name?.toUpperCase().trim() || '';
+                  
+                  // If name starts with the code, only show name (name already contains code)
+                  // Otherwise, show code and name separately
+                  const nameContainsCode = normalizedName && (
+                    normalizedName === normalizedCode ||
+                    normalizedName.startsWith(normalizedCode + ' ') ||
+                    normalizedName.startsWith(normalizedCode + '-')
+                  );
+                  
+                  if (nameContainsCode) {
+                    // Name already contains code - only show name
+                    return (
+                      <>
+                        <div className={styles.suggestionMeta}>
+                          <span className={styles.suggestionInstitution}>
+                            {formatInstitutionLabel(course.institution, 'short-full')}
+                          </span>
+                        </div>
+                        <div className={styles.suggestionName}>{course.name}</div>
+                      </>
+                    );
+                  } else {
+                    // Show code and name separately
+                    return (
+                      <>
+                        <div className={styles.suggestionMeta}>
+                          <span className={styles.suggestionCode}>{normalizedCode}</span>
+                          <span className={styles.suggestionInstitution}>
+                            {formatInstitutionLabel(course.institution, 'short-full')}
+                          </span>
+                        </div>
+                        {course.name && course.name.trim() && (
+                          <div className={styles.suggestionName}>{course.name}</div>
+                        )}
+                      </>
+                    );
+                  }
+                })()
+              )}
             </button>
           ))}
         </div>

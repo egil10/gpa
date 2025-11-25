@@ -360,7 +360,18 @@ export default function Home() {
           const formattedCode = formatCourseCode(course.code, course.institution);
           const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
 
-          if (cancelled || !data || data.length === 0) return null;
+          // If no data returned, the course will be marked as unavailable automatically
+          // Don't try to load it again - just skip it
+          if (cancelled || !data || data.length === 0) {
+            // Mark as unavailable if not already marked (fetchAllYearsData should do this, but ensure it)
+            if (typeof window !== 'undefined' && !data || data.length === 0) {
+              const { markCourseAsUnavailable } = await import('@/lib/course-availability');
+              const { stripCourseCodeSuffix } = await import('@/lib/all-courses');
+              const normalizedCode = stripCourseCodeSuffix(course.code, course.institution);
+              markCourseAsUnavailable(normalizedCode, course.institution);
+            }
+            return null;
+          }
 
           const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
           const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
@@ -646,6 +657,10 @@ export default function Home() {
       : allCourses;
 
     // Apply search filter with priority: code starts with > code contains > name starts with > name contains
+    // Optimized: Limit results to prevent performance issues with large result sets (e.g., "JUS" returns 100+ courses)
+    const MAX_FILTERED_RESULTS = 100; // Cap results at 100 to prevent performance issues
+    let estimatedTotalMatches = 0; // Estimate total matches (for display)
+    
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
       const codeStartsWith: typeof filtered = [];
@@ -655,7 +670,17 @@ export default function Home() {
       const institutionStartsWith: typeof filtered = [];
       const institutionContains: typeof filtered = [];
 
-      filtered.forEach(c => {
+      let totalResults = 0;
+
+      // Early termination: stop filtering once we have enough high-priority results
+      // This prevents iterating through thousands of courses when we only need 100
+      for (const c of filtered) {
+        if (totalResults >= MAX_FILTERED_RESULTS) {
+          // Stop processing after we have enough results for display
+          // This prevents iterating through thousands of courses unnecessarily
+          break;
+        }
+
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
         const institutionNameUpper = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
@@ -664,27 +689,39 @@ export default function Home() {
         if (codeUpper === query) {
           // Exact code match - highest priority
           codeStartsWith.unshift(c);
+          totalResults++;
         } else if (codeUpper.startsWith(query)) {
           // Code starts with query - valid prefix match
           codeStartsWith.push(c);
+          totalResults++;
         } else if (nameUpper.startsWith(query)) {
           nameStartsWith.push(c);
+          totalResults++;
         } else if (nameUpper.includes(query)) {
           nameContains.push(c);
+          totalResults++;
         } else if (
           (institutionShortUpper && institutionShortUpper.startsWith(query)) ||
           (institutionNameUpper && institutionNameUpper.startsWith(query))
         ) {
           institutionStartsWith.push(c);
+          totalResults++;
         } else if (
           (institutionShortUpper && institutionShortUpper.includes(query)) ||
           (institutionNameUpper && institutionNameUpper.includes(query))
         ) {
           institutionContains.push(c);
+          totalResults++;
         }
-      });
+      }
 
-      // Combine with priority order
+      // Estimate total matches: if we hit the limit, there are likely more
+      // This is just for display purposes - we don't need to count all matches (expensive)
+      estimatedTotalMatches = totalResults >= MAX_FILTERED_RESULTS 
+        ? MAX_FILTERED_RESULTS + 1 // Indicate there are more
+        : totalResults;
+
+      // Combine with priority order and limit to max results
       // Removed codeContains to prevent false matches like "INF100" matching "INF1000"
       filtered = [
         ...codeStartsWith,
@@ -692,10 +729,13 @@ export default function Home() {
         ...nameContains,
         ...institutionStartsWith,
         ...institutionContains,
-      ];
+      ].slice(0, MAX_FILTERED_RESULTS);
+    } else {
+      estimatedTotalMatches = filtered.length;
     }
 
     // Get courses with loaded data, ensuring institution matches filter
+    // Prioritize courses that already have data loaded (instant display)
     const coursesWithData = filtered
       .map(course => {
         const key = `${course.institution}-${course.code}`;
@@ -707,6 +747,10 @@ export default function Home() {
         return null;
       })
       .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
+    
+    // Track if we have more filtered courses than courses with data
+    // This helps us show a message if results are being limited
+    const hasMoreFilteredResults = filtered.length > coursesWithData.length && filtered.length >= 100;
 
     // If we have a stable order and sort hasn't changed, maintain it
     if (courseOrder.length > 0 && sortBy === lastSortBy && !searchQuery.trim()) {
@@ -809,6 +853,15 @@ export default function Home() {
 
     return finalCourses;
   }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy, isTopDefaultView, topInstitutionCourses]);
+
+  // Track if search results are limited (for displaying message to user)
+  const isSearchResultLimited = useMemo(() => {
+    if (!searchQuery.trim()) return false;
+    // If we have exactly MAX_FILTERED_RESULTS (100) courses, results are likely limited
+    const MAX_FILTERED_RESULTS = 100;
+    // Check both filtered courses and displayed courses to see if we're at the limit
+    return filteredAndSortedCourses.length >= MAX_FILTERED_RESULTS;
+  }, [searchQuery, filteredAndSortedCourses.length]);
 
   // Update course order when sorting (separate effect to avoid infinite loop)
   useEffect(() => {
@@ -1039,47 +1092,77 @@ export default function Home() {
     }
 
     let cancelled = false;
-    const INITIAL_BATCH_SIZE = 50; // Load initial 50 courses
-    const MAX_CONCURRENT_REQUESTS = 10; // Limit concurrent API calls
+    const INITIAL_BATCH_SIZE = 30; // Reduced from 50 to 30 for faster initial load
+    const MAX_FILTERED_FOR_LOADING = 50; // Limit how many courses we'll even consider loading
+    const MAX_CONCURRENT_REQUESTS = 8; // Reduced from 10 to 8 for better performance
 
     const debounceTimer = setTimeout(() => {
       if (cancelled) return;
 
       const query = searchQuery.trim().toUpperCase();
       // Filter and sort matches by priority: code starts with > code contains > name starts with > name contains
+      // Optimized: Early termination and result limiting for performance
       const codeStartsWith: typeof allCourses = [];
       const codeContains: typeof allCourses = [];
       const nameStartsWith: typeof allCourses = [];
       const nameContains: typeof allCourses = [];
 
-      allCourses.forEach(c => {
+      let totalFound = 0;
+      const MAX_TO_FIND = MAX_FILTERED_FOR_LOADING; // Stop searching after finding this many
+
+      // Early termination: stop once we have enough results
+      for (const c of allCourses) {
+        if (totalFound >= MAX_TO_FIND) break;
+
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
-        if (!matchesInstitution) return;
+        if (!matchesInstitution) continue;
 
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
 
         if (codeUpper.startsWith(query)) {
           codeStartsWith.push(c);
+          totalFound++;
         } else if (codeUpper.includes(query)) {
           codeContains.push(c);
+          totalFound++;
         } else if (nameUpper.startsWith(query)) {
           nameStartsWith.push(c);
+          totalFound++;
         } else if (nameUpper.includes(query)) {
           nameContains.push(c);
+          totalFound++;
         }
-      });
+      }
 
-      const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
+      // Combine with priority order and limit results
+      const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains]
+        .slice(0, MAX_FILTERED_FOR_LOADING);
 
       // Only load initial batch - user can load more via "Load More" button
-      const initialBatch = matchingCourses.slice(0, INITIAL_BATCH_SIZE);
+      // Prioritize courses that already have data loaded
+      const coursesWithData = matchingCourses.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return coursesDataRef.current.has(key);
+      });
+      
+      const coursesWithoutData = matchingCourses.filter(course => {
+        const key = `${course.institution}-${course.code}`;
+        return !coursesDataRef.current.has(key);
+      });
+      
+      // Show courses with data first, then load new ones
+      const initialBatch = [
+        ...coursesWithData.slice(0, INITIAL_BATCH_SIZE),
+        ...coursesWithoutData.slice(0, Math.max(0, INITIAL_BATCH_SIZE - coursesWithData.length))
+      ];
 
-      // Use refs to check current state
+      // Only load courses that don't already have data and aren't currently loading
+      // Filter out courses we already have data for (from coursesWithData above)
       const coursesToLoad = initialBatch.filter(course => {
         const key = `${course.institution}-${course.code}`;
         return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-      });
+      }).slice(0, INITIAL_BATCH_SIZE); // Additional safety limit
 
       if (coursesToLoad.length === 0 || cancelled) {
         return;
@@ -1423,6 +1506,12 @@ export default function Home() {
                   }}
                   placeholder={searchHint || 'Emnekode'}
                   className={styles.searchInput}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  enterKeyHint="search"
+                  inputMode="text"
                 />
                 {searchInput.trim() && (
                   <button
@@ -1518,7 +1607,12 @@ export default function Home() {
                 ) : (
                   <div className={styles.resultsInfoContent}>
                     <p className={styles.resultsCount}>
-                      Viser {displayedCourses.length} emner
+                      Viser {displayedCourses.length} {isSearchResultLimited && searchQuery.trim() ? 'av 100+' : ''} emner
+                      {isSearchResultLimited && searchQuery.trim() && (
+                        <span className={styles.resultsLimitedHint} title="Resultater er begrenset til 100 for bedre ytelse">
+                          {' '}(flere tilgjengelig)
+                        </span>
+                      )}
                     </p>
                     {searchQuery.trim() && (
                       <button

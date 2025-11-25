@@ -540,6 +540,13 @@
   flex-wrap: wrap;
 }
 
+.resultsLimitedHint {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  margin-left: var(--space-xs);
+}
+
 .resultsCount {
   margin: 0;
   color: var(--text-secondary);
@@ -666,23 +673,125 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: var(--space-4xl) 0 var(--space-3xl);
+    padding: var(--space-3xl) var(--space-md) var(--space-2xl);
     /* Account for safe area and navbar */
-    padding-top: calc(var(--space-4xl) + env(safe-area-inset-top));
+    padding-top: calc(var(--space-3xl) + env(safe-area-inset-top));
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+  
+  .heroContent {
+    gap: var(--space-lg);
   }
   
   .heroTitle {
-    font-size: 2rem;
+    font-size: 1.75rem;
     line-height: 1.2;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .heroLogo {
-    height: 3rem;
+    height: 2.5rem;
     width: auto;
   }
   
   .heroSubtitle {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
+    padding: 0 var(--space-sm);
+  }
+  
+  .ctaButtons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    gap: var(--space-sm);
+  }
+  
+  .ctaButton {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
+    touch-action: manipulation;
+  }
+  
+  .distributionsSection {
+    padding: var(--space-3xl) var(--space-md) var(--space-2xl);
+    padding-left: calc(var(--space-md) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-md) + env(safe-area-inset-right));
+  }
+  
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+    width: 100%;
+  }
+  
+  .controls {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+    margin-bottom: var(--space-lg);
+  }
+  
+  .controlGroup {
+    min-width: 100%;
+    width: 100%;
+  }
+  
+  .controlGroup:last-child {
+    width: 100%;
+  }
+  
+  .controlsActions {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    width: 100%;
+  }
+  
+  .searchInput,
+  .select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    touch-action: manipulation;
+  }
+  
+  .searchInputWrapper {
+    min-height: 48px;
+  }
+  
+  .refreshButton {
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+  
+  .toggleButton {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    font-size: var(--text-sm);
+    touch-action: manipulation;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .sectionSubtitle {
+    font-size: var(--text-sm);
   }
   
   .distributionsSection {
@@ -760,7 +869,9 @@
   .loadMoreButtonInline {
     width: 100%;
     padding: 0.875rem 1rem;
-    min-height: 44px;
+    min-height: 48px;
+    touch-action: manipulation;
+    font-size: var(--text-base);
   }
   
   .resultsInfo {
@@ -770,14 +881,38 @@
   }
   
   .clearSearchButton {
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1rem;
+    min-height: 48px;
+    touch-action: manipulation;
+    font-size: var(--text-sm);
+  }
+  
+  .searchClearButton {
+    min-width: 44px;
     min-height: 44px;
+    touch-action: manipulation;
   }
 }
 
 @media (max-width: 480px) {
+  .hero {
+    padding: var(--space-2xl) var(--space-sm) var(--space-xl);
+    padding-top: calc(var(--space-2xl) + env(safe-area-inset-top));
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
+  }
+  
   .heroTitle {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    gap: var(--space-xs);
+  }
+  
+  .heroLogo {
+    height: 2rem;
+  }
+  
+  .heroSubtitle {
+    font-size: var(--text-sm);
   }
   
   .sectionTitle {
@@ -786,6 +921,24 @@
   
   .cardsGrid {
     gap: var(--space-md);
+  }
+  
+  .controls {
+    gap: var(--space-sm);
+  }
+  
+  .controlLabel {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .dashboardCard {
+    padding: var(--space-md);
   }
 }
 
