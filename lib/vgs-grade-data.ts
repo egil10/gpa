@@ -47,7 +47,7 @@ let cachedVGSData: VGSGradeDataFile | null = null;
 const VGS_DATA_CACHE_KEY = 'vgs-grade-data';
 const VGS_COURSES_CACHE_KEY = 'vgs-courses-list';
 const VGS_CACHE_VERSION_KEY = 'vgs-cache-version';
-const VGS_CACHE_VERSION = '1.1'; // Increment when data structure changes (updated to include all 994 courses)
+const VGS_CACHE_VERSION = '1.2'; // Increment when data structure changes (v1.2: privacy filter applied, 845 courses with >5 students)
 
 /**
  * Load VGS grade data from JSON file (cached)
