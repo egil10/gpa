@@ -341,61 +341,62 @@ function generateMarkdownReport(results: ComparisonResult[]): string {
     md += `### ${result.institution}\n\n`;
     
     if (result.dataDir) {
-      md += `**Data Directory** (${result.dataDir.file}):\n`;
-      md += `- Total courses: ${result.dataDir.totalCourses.toLocaleString()}\n`;
-      md += `- Average length: ${result.dataDir.averageLength} chars\n`;
-      md += `- Length range: ${result.dataDir.minLength}-${result.dataDir.maxLength} chars\n`;
-      md += `- Codes ending with digit: ${result.dataDir.codesEndingWithDigit} (${((result.dataDir.codesEndingWithDigit / result.dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
+      const dataDir = result.dataDir; // Store in const to help TypeScript narrow the type
+      md += `**Data Directory** (${dataDir.file}):\n`;
+      md += `- Total courses: ${dataDir.totalCourses.toLocaleString()}\n`;
+      md += `- Average length: ${dataDir.averageLength} chars\n`;
+      md += `- Length range: ${dataDir.minLength}-${dataDir.maxLength} chars\n`;
+      md += `- Codes ending with digit: ${dataDir.codesEndingWithDigit} (${((dataDir.codesEndingWithDigit / dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
       
       // Digit ending breakdown
-      if (Object.keys(result.dataDir.codesEndingWithEachDigit).length > 0) {
+      if (Object.keys(dataDir.codesEndingWithEachDigit).length > 0) {
         md += `- **Codes ending with each digit:**\n`;
-        const digitEntries = Object.entries(result.dataDir.codesEndingWithEachDigit)
+        const digitEntries = Object.entries(dataDir.codesEndingWithEachDigit)
           .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
         digitEntries.forEach(([digit, count]) => {
-          const pct = ((count / result.dataDir.totalCourses) * 100).toFixed(1);
+          const pct = ((count / dataDir.totalCourses) * 100).toFixed(1);
           md += `  - Ends with "${digit}": ${count.toLocaleString()} (${pct}%)\n`;
         });
       }
       
-      md += `- Codes with dash: ${result.dataDir.codesWithDash} (${((result.dataDir.codesWithDash / result.dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
-      if (result.dataDir.codesWithMultipleDashes > 0) {
-        md += `- Codes with multiple dashes: ${result.dataDir.codesWithMultipleDashes} (${((result.dataDir.codesWithMultipleDashes / result.dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
+      md += `- Codes with dash: ${dataDir.codesWithDash} (${((dataDir.codesWithDash / dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
+      if (dataDir.codesWithMultipleDashes > 0) {
+        md += `- Codes with multiple dashes: ${dataDir.codesWithMultipleDashes} (${((dataDir.codesWithMultipleDashes / dataDir.totalCourses) * 100).toFixed(1)}%)\n`;
       }
       
       // Dash count distribution
-      if (Object.keys(result.dataDir.dashCountDistribution).length > 0) {
+      if (Object.keys(dataDir.dashCountDistribution).length > 0) {
         md += `- **Dash count distribution:**\n`;
-        const dashEntries = Object.entries(result.dataDir.dashCountDistribution)
+        const dashEntries = Object.entries(dataDir.dashCountDistribution)
           .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
         dashEntries.forEach(([dashCount, count]) => {
-          const pct = ((count / result.dataDir.totalCourses) * 100).toFixed(1);
+          const pct = ((count / dataDir.totalCourses) * 100).toFixed(1);
           md += `  - ${dashCount} dash(es): ${count.toLocaleString()} (${pct}%)\n`;
         });
       }
       
       // Space analysis
-      if (result.dataDir.codesWithSpace > 0) {
-        md += `- ⚠️ **Codes with space: ${result.dataDir.codesWithSpace} (${((result.dataDir.codesWithSpace / result.dataDir.totalCourses) * 100).toFixed(1)}%)**\n`;
-        if (Object.keys(result.dataDir.spaceCountDistribution).length > 0) {
+      if (dataDir.codesWithSpace > 0) {
+        md += `- ⚠️ **Codes with space: ${dataDir.codesWithSpace} (${((dataDir.codesWithSpace / dataDir.totalCourses) * 100).toFixed(1)}%)**\n`;
+        if (Object.keys(dataDir.spaceCountDistribution).length > 0) {
           md += `- **Space count distribution:**\n`;
-          const spaceEntries = Object.entries(result.dataDir.spaceCountDistribution)
+          const spaceEntries = Object.entries(dataDir.spaceCountDistribution)
             .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
           spaceEntries.forEach(([spaceCount, count]) => {
-            const pct = ((count / result.dataDir.totalCourses) * 100).toFixed(1);
+            const pct = ((count / dataDir.totalCourses) * 100).toFixed(1);
             md += `  - ${spaceCount} space(s): ${count.toLocaleString()} (${pct}%)\n`;
           });
         }
       }
       
       // Top length distribution
-      const topLengths = Object.entries(result.dataDir.lengthDistribution)
+      const topLengths = Object.entries(dataDir.lengthDistribution)
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
         .slice(0, 5);
       md += `- Most common lengths: ${topLengths.map(([len, count]) => `${len} chars (${count})`).join(', ')}\n`;
       
       // Top suffix patterns
-      const topSuffixes = Object.entries(result.dataDir.suffixPatterns)
+      const topSuffixes = Object.entries(dataDir.suffixPatterns)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
       if (topSuffixes.length > 0) {
@@ -403,74 +404,74 @@ function generateMarkdownReport(results: ComparisonResult[]): string {
       }
       
       // Format-specific issues
-      if (result.dataDir.formatIssues.biNonOneEndings.length > 0) {
+      if (dataDir.formatIssues.biNonOneEndings.length > 0) {
         md += `\n⚠️ **BI Format Issues (codes ending with digits other than 1):**\n`;
-        md += `   Total: ${result.dataDir.formatIssues.biNonOneEndings.length} courses\n`;
-        md += `   Examples: ${result.dataDir.formatIssues.biNonOneEndings.slice(0, 10).join(', ')}\n`;
-        if (result.dataDir.formatIssues.biNonOneEndings.length > 10) {
-          md += `   ... and ${result.dataDir.formatIssues.biNonOneEndings.length - 10} more\n`;
+        md += `   Total: ${dataDir.formatIssues.biNonOneEndings.length} courses\n`;
+        md += `   Examples: ${dataDir.formatIssues.biNonOneEndings.slice(0, 10).join(', ')}\n`;
+        if (dataDir.formatIssues.biNonOneEndings.length > 10) {
+          md += `   ... and ${dataDir.formatIssues.biNonOneEndings.length - 10} more\n`;
         }
       }
       
-      if (result.dataDir.formatIssues.codesEndingWithDash.length > 0) {
+      if (dataDir.formatIssues.codesEndingWithDash.length > 0) {
         md += `\n⚠️ **Codes Ending With Dash:**\n`;
-        result.dataDir.formatIssues.codesEndingWithDash.slice(0, 10).forEach(code => {
+        dataDir.formatIssues.codesEndingWithDash.slice(0, 10).forEach(code => {
           md += `   - ${code}\n`;
         });
-        if (result.dataDir.formatIssues.codesEndingWithDash.length > 10) {
-          md += `   ... and ${result.dataDir.formatIssues.codesEndingWithDash.length - 10} more\n`;
+        if (dataDir.formatIssues.codesEndingWithDash.length > 10) {
+          md += `   ... and ${dataDir.formatIssues.codesEndingWithDash.length - 10} more\n`;
         }
       }
       
-      if (result.dataDir.formatIssues.codesWithSpace.length > 0) {
+      if (dataDir.formatIssues.codesWithSpace.length > 0) {
         md += `\n🔴 **Codes With Spaces (CRITICAL - Can Cause Errors):**\n`;
-        md += `   Total: ${result.dataDir.formatIssues.codesWithSpace.length} courses\n`;
-        result.dataDir.formatIssues.codesWithSpace.slice(0, 20).forEach(code => {
+        md += `   Total: ${dataDir.formatIssues.codesWithSpace.length} courses\n`;
+        dataDir.formatIssues.codesWithSpace.slice(0, 20).forEach(code => {
           const spaceCount = (code.match(/ /g) || []).length;
           md += `   - "${code}" (${spaceCount} space(s))\n`;
         });
-        if (result.dataDir.formatIssues.codesWithSpace.length > 20) {
-          md += `   ... and ${result.dataDir.formatIssues.codesWithSpace.length - 20} more\n`;
+        if (dataDir.formatIssues.codesWithSpace.length > 20) {
+          md += `   ... and ${dataDir.formatIssues.codesWithSpace.length - 20} more\n`;
         }
       }
       
-      if (result.dataDir.formatIssues.veryShortCodes.length > 0) {
+      if (dataDir.formatIssues.veryShortCodes.length > 0) {
         md += `\n⚠️ **Very Short Codes (< 3 chars):**\n`;
-        result.dataDir.formatIssues.veryShortCodes.slice(0, 10).forEach(code => {
+        dataDir.formatIssues.veryShortCodes.slice(0, 10).forEach(code => {
           md += `   - ${code}\n`;
         });
-        if (result.dataDir.formatIssues.veryShortCodes.length > 10) {
-          md += `   ... and ${result.dataDir.formatIssues.veryShortCodes.length - 10} more\n`;
+        if (dataDir.formatIssues.veryShortCodes.length > 10) {
+          md += `   ... and ${dataDir.formatIssues.veryShortCodes.length - 10} more\n`;
         }
       }
       
-      if (result.dataDir.formatIssues.veryLongCodes.length > 0) {
+      if (dataDir.formatIssues.veryLongCodes.length > 0) {
         md += `\n⚠️ **Very Long Codes (> 20 chars):**\n`;
-        result.dataDir.formatIssues.veryLongCodes.slice(0, 10).forEach(code => {
+        dataDir.formatIssues.veryLongCodes.slice(0, 10).forEach(code => {
           md += `   - ${code}\n`;
         });
-        if (result.dataDir.formatIssues.veryLongCodes.length > 10) {
-          md += `   ... and ${result.dataDir.formatIssues.veryLongCodes.length - 10} more\n`;
+        if (dataDir.formatIssues.veryLongCodes.length > 10) {
+          md += `   ... and ${dataDir.formatIssues.veryLongCodes.length - 10} more\n`;
         }
       }
       
-      if (result.dataDir.formatIssues.unusualPatterns.length > 0) {
+      if (dataDir.formatIssues.unusualPatterns.length > 0) {
         md += `\n⚠️ **Unusual Patterns:**\n`;
-        result.dataDir.formatIssues.unusualPatterns.slice(0, 10).forEach(pattern => {
+        dataDir.formatIssues.unusualPatterns.slice(0, 10).forEach(pattern => {
           md += `   - ${pattern}\n`;
         });
-        if (result.dataDir.formatIssues.unusualPatterns.length > 10) {
-          md += `   ... and ${result.dataDir.formatIssues.unusualPatterns.length - 10} more\n`;
+        if (dataDir.formatIssues.unusualPatterns.length > 10) {
+          md += `   ... and ${dataDir.formatIssues.unusualPatterns.length - 10} more\n`;
         }
       }
       
-      if (result.dataDir.potentialIssues.length > 0) {
+      if (dataDir.potentialIssues.length > 0) {
         md += `\n⚠️ **All Potential Issues:**\n`;
-        result.dataDir.potentialIssues.slice(0, 10).forEach(issue => {
+        dataDir.potentialIssues.slice(0, 10).forEach(issue => {
           md += `  - ${issue}\n`;
         });
-        if (result.dataDir.potentialIssues.length > 10) {
-          md += `  - ... and ${result.dataDir.potentialIssues.length - 10} more\n`;
+        if (dataDir.potentialIssues.length > 10) {
+          md += `  - ... and ${dataDir.potentialIssues.length - 10} more\n`;
         }
       }
       md += '\n';

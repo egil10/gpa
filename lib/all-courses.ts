@@ -231,11 +231,9 @@ function searchCoursesFromList(
   query: string,
   limit: number
 ): CourseInfo[] {
-  // Normalize query to handle spaces
-  const normalizedQuery = normalizeCourseCode(stripCourseCodeSuffix(query));
-  // Strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
-  // Only strip -1 suffix, don't strip standalone 1 as it might be part of the code (e.g., STK-MAT2011)
-  const normalizedQuery = stripCourseCodeSuffix(query.trim().toUpperCase());
+  // Normalize and strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
+  // stripCourseCodeSuffix already normalizes (removes spaces, uppercases) internally
+  const normalizedQuery = stripCourseCodeSuffix(query);
   
   if (!normalizedQuery) {
     // Return popular courses (by code length - shorter codes are usually more popular)
