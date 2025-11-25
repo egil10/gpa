@@ -830,61 +830,87 @@
 
   .controlsActions {
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
+    gap: var(--space-sm);
   }
   
   .controlLabel {
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-  
-  .searchInput,
-  .select {
-    padding: 0.75rem 1rem;
-    font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 44px;
-  }
-  
-  .applyButton {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    min-height: 44px;
-    justify-content: center;
-  }
-
-  .resetButton {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    min-height: 44px;
-    justify-content: center;
-  }
-  
-  .searchClearButton {
     width: 2.5rem;
     height: 2.5rem;
     min-width: 44px;
     min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .searchInput,
+  .select {
+    padding: 0.875rem 1rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .applyButton {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    font-size: var(--text-sm);
+  }
+
+  .resetButton {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    font-size: var(--text-sm);
+  }
+  
+  .searchClearButton {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   }
   
   .loadMoreButtonInline {
     width: 100%;
-    padding: 0.875rem 1rem;
-    min-height: 48px;
+    padding: 1rem 1.25rem;
+    min-height: 52px;
     touch-action: manipulation;
     font-size: var(--text-base);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    font-weight: 600;
   }
   
   .resultsInfo {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0;
+  }
+  
+  .resultsInfoContent {
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--space-sm);
   }
   
   .clearSearchButton {
-    padding: 0.625rem 1rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
     min-height: 48px;
     touch-action: manipulation;
     font-size: var(--text-sm);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    justify-content: center;
   }
   
   .searchClearButton {
@@ -905,18 +931,22 @@
   .heroTitle {
     font-size: 1.5rem;
     gap: var(--space-xs);
+    line-height: 1.3;
   }
   
   .heroLogo {
     height: 2rem;
+    width: auto;
   }
   
   .heroSubtitle {
     font-size: var(--text-sm);
+    line-height: 1.5;
   }
   
   .sectionTitle {
     font-size: 1.25rem;
+    line-height: 1.3;
   }
   
   .cardsGrid {
@@ -925,11 +955,31 @@
   
   .controls {
     gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
   }
   
   .controlLabel {
     min-width: 44px;
     min-height: 44px;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .searchInput,
+  .select {
+    min-height: 48px;
+    padding: 0.875rem 0.875rem;
+  }
+  
+  .applyButton,
+  .resetButton {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+  }
+  
+  .loadMoreButtonInline {
+    min-height: 52px;
+    padding: 1rem 1.125rem;
   }
   
   .dashboardGrid {
@@ -939,6 +989,14 @@
   
   .dashboardCard {
     padding: var(--space-md);
+  }
+  
+  .resultsInfo {
+    padding: var(--space-sm) 0;
+  }
+  
+  .resultsCount {
+    font-size: var(--text-xs);
   }
 }
 

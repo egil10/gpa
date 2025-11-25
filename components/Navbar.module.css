@@ -74,6 +74,52 @@
     padding-left: max(calc(var(--space-md) + env(safe-area-inset-left)), var(--space-sm));
     padding-right: max(calc(var(--space-md) + env(safe-area-inset-right)), var(--space-sm));
     flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+  
+  .navLinks {
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .navLinks a {
+    font-size: var(--text-xs);
+    padding: 0.75rem 0.875rem;
+    /* Better touch targets */
+    min-height: 44px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .navLinks a:active {
+    background-color: var(--surface-hover);
+  }
+  
+  .logo {
+    font-size: 0.875rem;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navContent {
+    padding: var(--space-xs) 0;
+    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
     gap: var(--space-xs);
   }
   
@@ -83,44 +129,15 @@
   }
   
   .navLinks a {
-    font-size: var(--text-xs);
-    padding: 0.625rem 0.75rem;
-    /* Better touch targets */
-    min-height: 44px;
-    min-width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-  }
-  
-  .logo {
-    font-size: 0.875rem;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    touch-action: manipulation;
-  }
-}
-
-@media (max-width: 480px) {
-  .navContent {
-    padding-left: calc(var(--space-sm) + env(safe-area-inset-left));
-    padding-right: calc(var(--space-sm) + env(safe-area-inset-right));
-  }
-  
-  .navLinks {
-    gap: var(--space-xs);
-  }
-  
-  .navLinks a {
     font-size: 0.7rem;
-    padding: 0.5rem 0.625rem;
-    min-width: 40px;
+    padding: 0.625rem 0.75rem;
+    min-width: 44px;
+    min-height: 44px;
   }
   
   .logo {
     font-size: 0.8rem;
+    min-height: 44px;
+    min-width: 44px;
   }
 }

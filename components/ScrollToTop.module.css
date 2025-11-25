@@ -36,19 +36,28 @@
 @media (max-width: 768px) {
   .scrollToTop {
     /* Position above bottom search bar */
-    bottom: calc(5rem + env(safe-area-inset-bottom));
-    right: calc(0.75rem + env(safe-area-inset-right));
-    width: 2.75rem;
-    height: 2.75rem;
-    min-width: 44px;
-    min-height: 44px;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    right: calc(1rem + env(safe-area-inset-right));
+    width: 3rem;
+    height: 3rem;
+    min-width: 48px;
+    min-height: 48px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .scrollToTop:active {
+    transform: scale(0.95);
   }
 }
 
 @media (max-width: 480px) {
   .scrollToTop {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
-    right: calc(0.5rem + env(safe-area-inset-right));
+    bottom: calc(6rem + env(safe-area-inset-bottom));
+    right: calc(0.75rem + env(safe-area-inset-right));
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 

@@ -26,9 +26,29 @@
   .homeButton {
     top: calc(var(--space-md) + env(safe-area-inset-top));
     left: calc(var(--space-md) + env(safe-area-inset-left));
+    width: 3rem;
+    height: 3rem;
+    /* Better touch target */
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    touch-action: manipulation;
+  }
+  
+  .homeButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  .homeButton {
+    top: calc(var(--space-sm) + env(safe-area-inset-top));
+    left: calc(var(--space-sm) + env(safe-area-inset-left));
     width: 2.75rem;
     height: 2.75rem;
-    /* Better touch target */
     min-width: 44px;
     min-height: 44px;
   }
