@@ -289,7 +289,7 @@ async function main() {
           ...stats,
           institution: course.institution,
           courseName: course.courseName,
-          courseCode: normalizedOriginal, // Ensure output uses normalized code
+          courseCode: normalizeCourseCodeAdvanced(course.courseCode).normalized, // Ensure output uses normalized code
         });
         successCount++;
         console.log(`  ✅ Found data for ${course.courseCode} (avg: ${stats.averageGrade?.toFixed(1)}, year: ${stats.year}, students: ${stats.totalStudents})`);

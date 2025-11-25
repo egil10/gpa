@@ -830,12 +830,12 @@ export default function Home() {
       topInstitutionCourses.length > 0;
 
     if (isTopDefaultView) {
-      // If we have hardcoded courses data, show them in increments of 12
-      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        // All hardcoded courses are already loaded, so just show them in increments
-        if (displayCount < hardcoded28Data.courses.length) {
+      // If we have top courses data, show them in increments of 12
+      if (topCoursesData && topCoursesData.courses.length > 0) {
+        // All top courses are already loaded, so just show them in increments
+        if (displayCount < topCoursesData.courses.length) {
           // Load next increment of 12 courses
-          setDisplayCount(prev => Math.min(prev + COURSES_PER_INCREMENT, hardcoded28Data.courses.length));
+          setDisplayCount(prev => Math.min(prev + COURSES_PER_INCREMENT, topCoursesData.courses.length));
           return;
         }
         return;
@@ -1005,8 +1005,8 @@ export default function Home() {
     loadCoursesData,
     isTopDefaultView,
     topInstitutionCourses.length,
-    hardcoded28Data,
-    HARDCODED_28_TOTAL,
+    topCoursesData,
+    TOP_COURSES_TOTAL,
   ]);
 
   // Sync refs with state
@@ -1267,10 +1267,10 @@ export default function Home() {
     if (loading) return false;
 
     if (isTopDefaultView) {
-      // If we have hardcoded course data, check if we have more than current display count
-      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        // Show "Load more" if we're showing less than all hardcoded courses
-        return displayCount < hardcoded28Data.courses.length;
+      // If we have top courses data, check if we have more than current display count
+      if (topCoursesData && topCoursesData.courses.length > 0) {
+        // Show "Load more" if we're showing less than all top courses
+        return displayCount < topCoursesData.courses.length;
       }
 
       // Fallback: Check if we have more courses to display (either with data or that need loading)
@@ -1363,7 +1363,7 @@ export default function Home() {
     initialLoadComplete,
     isTopDefaultView,
     topInstitutionCourses.length,
-    hardcoded28Data,
+    topCoursesData,
   ]);
 
   return (
