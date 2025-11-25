@@ -256,6 +256,45 @@ async function fetchCourseGradeData(
             codeFormats.push(withoutPeriod);
             codeFormats.push(`${withoutPeriod}-1`);
         }
+    } else if (institution === 'FIH') {
+        // FIH (Fjellhaug Internasjonale Høgskole): Many courses have -DK1/-DK2 suffixes
+        // Examples: "BTM1001-DK1", "BTM1001-DK2", "EX1001-DK2"
+        // Try as-is first, then base code without suffix
+        codeFormats.push(cleaned);
+        
+        // If code has -DK1 or -DK2 suffix, try base code
+        if (cleaned.includes('-DK1') || cleaned.includes('-DK2')) {
+            const baseCode = cleaned.replace(/-DK[12]$/, '');
+            codeFormats.push(baseCode); // Try base code (e.g., "BTM1001")
+            codeFormats.push(`${baseCode}-1`); // Try base with -1 (e.g., "BTM1001-1")
+        } else {
+            // No -DK suffix: try with -1
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
+    } else if (institution === 'BD') {
+        // BD (Bibelskolen i Drammen): Some courses have dash suffixes like "HINS-I1A", "HINS-MP100"
+        // Also has very short codes like "HINS" alone
+        // Try as-is first
+        codeFormats.push(cleaned);
+        
+        // If code has a dash, try variations
+        if (cleaned.includes('-')) {
+            const parts = cleaned.split('-');
+            // Try just the base (e.g., "HINS-I1A" -> "HINS")
+            if (parts.length > 1) {
+                codeFormats.push(parts[0]);
+                codeFormats.push(`${parts[0]}-1`);
+            }
+        } else {
+            // No dash: try with -1
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
