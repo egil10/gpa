@@ -361,10 +361,11 @@ function loadVGSGradeData(): GradeData[] {
 
       // Convert grade distribution (1-6 scale) to GradeData format
       if (entry.gradeDistribution && entry.totalStudents) {
-        for (const [grade, count] of Object.entries(entry.gradeDistribution)) {
-          if (count !== null && count !== undefined && count > 0) {
+        for (const [grade, count] of Object.entries(entry.gradeDistribution)) {      
+          const countValue = typeof count === 'number' ? count : 0;
+          if (countValue > 0) {
             // Count is percentage, convert to actual count
-            const actualCount = Math.round((count / 100) * entry.totalStudents);
+            const actualCount = Math.round((countValue / 100) * entry.totalStudents);
             
             gradeData.push({
               Institusjonskode: 'VGS',
