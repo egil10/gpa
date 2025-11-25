@@ -218,6 +218,14 @@ async function fetchCourseGradeData(
             `${cleaned}1`, // Try with "1" suffix (standard BI format)
             formatCourseCode(cleaned, institution), // Use formatCourseCode result
         );
+    } else if (institution === 'AHO') {
+        // AHO: Course codes are purely numeric (e.g., "12400", "12701")
+        // Try as-is first (most likely), then with -1 suffix
+        codeFormats.push(
+            cleaned, // Try numeric code as-is first (e.g., "12400")
+            formatCourseCode(cleaned, institution), // Then with -1 suffix (e.g., "12400-1")
+            `${cleaned}-1`, // Also try explicit -1
+        );
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
