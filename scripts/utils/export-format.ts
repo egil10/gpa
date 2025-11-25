@@ -2,6 +2,8 @@
  * Shared utilities for exporting course data in optimized format
  */
 
+import { normalizeCourseCodeAdvanced } from '../../lib/course-code-normalizer';
+
 /**
  * Normalize course code by removing spaces and converting to uppercase
  * This ensures consistent storage and matching across all discovery scripts
@@ -11,9 +13,10 @@
  *   "BAKU 1" -> "BAKU1"
  *   "1DIM 000" -> "1DIM000"
  *   "HK IKT" -> "HKIKT"
+ *   "IN2010-1" -> "IN2010"
  */
 export function normalizeCourseCodeForStorage(code: string): string {
-  return code.replace(/\s/g, '').trim().toUpperCase();
+  return normalizeCourseCodeAdvanced(code).normalized;
 }
 
 export interface OptimizedCourse {
@@ -46,17 +49,17 @@ export function optimizeCourse(course: FullCourseExport): OptimizedCourse {
     c: normalizeCourseCodeForStorage(course.courseCode), // Normalize code (remove spaces)
     y: [...course.years].sort((a, b) => b - a), // Most recent first
   };
-  
+
   // Only include name if it exists and is different from code
   if (course.courseName && course.courseName !== course.courseCode) {
     optimized.n = course.courseName;
   }
-  
+
   // Include student count for last year (useful for sorting/popular courses)
   if (course.lastYearStudents && course.lastYearStudents > 0) {
     optimized.s = course.lastYearStudents;
   }
-  
+
   return optimized;
 }
 
@@ -68,14 +71,14 @@ export function courseHasData(course: FullCourseExport): boolean {
   // Course has data if it has lastYearStudents > 0 (most reliable indicator of actual data)
   // This ensures we only include courses with actual retrievable data from the API
   // Courses with lastYearStudents = 0 or undefined likely have no grade data available
-  const hasStudentCount = course.lastYearStudents !== undefined && 
-                          course.lastYearStudents !== null && 
-                          course.lastYearStudents > 0;
-  
+  const hasStudentCount = course.lastYearStudents !== undefined &&
+    course.lastYearStudents !== null &&
+    course.lastYearStudents > 0;
+
   if (hasStudentCount) {
     return true; // Has actual student data
   }
-  
+
   // If no lastYearStudents but has years array with data, include it (legacy format)
   // This handles edge cases where data format might be different
   const hasYears = Array.isArray(course.years) && course.years.length > 0;
@@ -84,7 +87,7 @@ export function courseHasData(course: FullCourseExport): boolean {
     // If it's explicitly 0, that means no students, so exclude it
     return course.lastYearStudents !== 0;
   }
-  
+
   return false; // No data available
 }
 

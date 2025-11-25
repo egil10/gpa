@@ -58,12 +58,14 @@ export function getAvailableInstitutions(): string[] {
 const courseDataCache: Map<string, CourseInfo[]> = new Map();
 const loadingPromises: Map<string, Promise<CourseInfo[]>> = new Map();
 
+import { normalizeCourseCodeAdvanced } from './course-code-normalizer';
+
 /**
  * Normalize course code by removing spaces and trimming
  * This is used for consistent storage and matching
  */
 export function normalizeCourseCode(code: string): string {
-  return code.replace(/\s/g, '').trim().toUpperCase();
+  return normalizeCourseCodeAdvanced(code).normalized;
 }
 
 /**
@@ -91,12 +93,7 @@ export function normalizeCourseCode(code: string): string {
  * Note: This matches how the discovery scripts should store course codes
  */
 export function stripCourseCodeSuffix(code: string, institution?: string): string {
-  // First normalize spaces (remove them) and trim
-  const normalized = normalizeCourseCode(code);
-  // Remove numeric suffixes (dash followed by one or more digits at the end)
-  // This removes API artifacts like "-0", "-1", "-2", etc.
-  // But preserves meaningful suffixes like "-HFSEM", "-MNEKS", "-MOSEM"
-  return normalized.replace(/-[0-9]+$/, '');
+  return normalizeCourseCodeAdvanced(code).normalized;
 }
 
 /**
@@ -107,14 +104,14 @@ function courseHasData(courseData: CourseData): boolean {
   // Course has data if it has lastYearStudents > 0 (most reliable indicator of actual data)
   // This ensures we only include courses with actual retrievable data from the API
   // Courses with lastYearStudents = 0 or undefined likely have no grade data available
-  const hasStudentCount = courseData.lastYearStudents !== undefined && 
-                          courseData.lastYearStudents !== null && 
-                          courseData.lastYearStudents > 0;
-  
+  const hasStudentCount = courseData.lastYearStudents !== undefined &&
+    courseData.lastYearStudents !== null &&
+    courseData.lastYearStudents > 0;
+
   if (hasStudentCount) {
     return true; // Has actual student data
   }
-  
+
   // If no lastYearStudents but has years array with data, include it (legacy format)
   // This handles edge cases where data format might be different
   const hasYears = Array.isArray(courseData.years) && courseData.years.length > 0;
@@ -123,7 +120,7 @@ function courseHasData(courseData: CourseData): boolean {
     // If it's explicitly 0, that means no students, so exclude it
     return courseData.lastYearStudents !== 0;
   }
-  
+
   return false; // No data available
 }
 
@@ -171,11 +168,11 @@ export async function loadInstitutionCourses(institution: string): Promise<Cours
       // The loadCourseData function will try multiple paths automatically
       const fileName = `data/institutions/${institutionData.file}`;
       const courseData = await loadCourseData(fileName, institutionData.code);
-      
+
       // Convert to CourseInfo format and filter out courses without data
       const courses = courseData
         .filter(cd => courseHasData(cd)) // Only include courses with data
-        .map(cd => 
+        .map(cd =>
           courseDataToCourseInfo(cd, institution, institutionData.code)
         );
 
@@ -234,7 +231,7 @@ function searchCoursesFromList(
   // Normalize and strip suffix from query for searching (user might type "IN2010-1" but we want to match "IN2010")
   // stripCourseCodeSuffix already normalizes (removes spaces, uppercases) internally
   const normalizedQuery = stripCourseCodeSuffix(query);
-  
+
   if (!normalizedQuery) {
     // Return popular courses (by code length - shorter codes are usually more popular)
     return courses
@@ -246,7 +243,7 @@ function searchCoursesFromList(
   // Filter out courses with very short codes (1-3 characters) unless query is also very short
   // This prevents showing "IN", "IND", "INF" as valid courses when user types "INF"
   const minCodeLength = normalizedQuery.length <= 3 ? normalizedQuery.length : 4;
-  
+
   // Search by code first, then by name
   const exactCodeMatches: CourseInfo[] = [];
   const codeStartsWith: CourseInfo[] = [];
@@ -298,21 +295,21 @@ function searchCoursesFromList(
   // Prioritize: exact code > code starts with > name starts with > name contains > institution
   // Removed "code contains" to prevent false matches like "INF100" matching "INF1000"
   const exactMatches = exactCodeMatches;
-  
+
   // If we have exact matches, prioritize them heavily - only show prefix matches if we have few exact matches
   // Sort prefix matches by code length (shorter = usually more popular)
   const sortedPrefixMatches = codeStartsWith.sort((a, b) => a.code.length - b.code.length);
-  
+
   // If we have many exact matches, only show those. Otherwise, mix in some prefix matches
   const remainingSlots = Math.max(0, limit - exactMatches.length);
-  const prefixMatches = remainingSlots > 0 && exactMatches.length < limit / 2 
+  const prefixMatches = remainingSlots > 0 && exactMatches.length < limit / 2
     ? sortedPrefixMatches.slice(0, remainingSlots)
     : [];
-  
+
   // Combine all results and remove duplicates (by unique key)
   const allResults: CourseInfo[] = [];
   const seenKeys = new Set<string>();
-  
+
   for (const course of [
     ...exactMatches,
     ...prefixMatches,
@@ -323,19 +320,19 @@ function searchCoursesFromList(
   ]) {
     // Use key if available, otherwise create a composite key from institution and code
     const courseKey = course.key || `${course.institution}-${course.code}`;
-    
+
     // Skip if we've already seen this course (by unique key)
     if (!seenKeys.has(courseKey)) {
       seenKeys.add(courseKey);
       allResults.push(course);
-      
+
       // Stop once we have enough results
       if (allResults.length >= limit) {
         break;
       }
     }
   }
-  
+
   return allResults;
 }
 
@@ -350,14 +347,14 @@ export async function getCourseByCode(
   // Also normalizes spaces for consistent matching
   const normalizedCode = stripCourseCodeSuffix(code, institution);
   console.log(`[getCourseByCode] Searching for code: "${code}" -> normalized: "${normalizedCode}" (institution: ${institution})`);
-  
+
   if (institution) {
     const courses = await loadInstitutionCourses(institution);
     console.log(`[getCourseByCode] Loaded ${courses.length} courses for ${institution}`);
-    
+
     // When institution is specified, use unique key for exact matching to avoid conflicts
     const uniqueKey = `${institution}-${normalizedCode}`;
-    
+
     // Try multiple matching strategies for robustness
     let found = courses.find(c => {
       // Prioritize unique key match if available
@@ -368,7 +365,7 @@ export async function getCourseByCode(
       const normalizedStoredCode = stripCourseCodeSuffix(c.code, institution);
       return normalizedStoredCode === normalizedCode;
     });
-    
+
     // If not found, try case-insensitive match and also check if code matches after normalization
     if (!found) {
       found = courses.find(c => {
@@ -377,18 +374,18 @@ export async function getCourseByCode(
         return normalizedCourseCode === normalizedCode;
       });
     }
-    
+
     // If still not found, try partial match (for cases where there might be slight variations)
     if (!found && normalizedCode.length >= 4) {
       found = courses.find(c => {
         const courseCodeUpper = c.code.toUpperCase().trim();
         const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper, institution);
         // Try exact match first, then check if the normalized code is contained
-        return normalizedCourseCode === normalizedCode || 
-               (normalizedCourseCode.startsWith(normalizedCode) && normalizedCourseCode.length <= normalizedCode.length + 2);
+        return normalizedCourseCode === normalizedCode ||
+          (normalizedCourseCode.startsWith(normalizedCode) && normalizedCourseCode.length <= normalizedCode.length + 2);
       });
     }
-    
+
     if (found) {
       console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution}) using ${found.key ? 'unique key' : 'code match'}`);
     } else {
@@ -448,27 +445,27 @@ export async function getPopularCourses(
 export async function getMostPopularCoursesRoundRobin(limit: number = 12): Promise<CourseInfo[]> {
   const institutions = Object.keys(INSTITUTION_DATA_FILES);
   const coursesByInstitution: Map<string, Array<CourseInfo & { studentCount: number }>> = new Map();
-  
+
   // Load course data for each institution (with student counts)
   await Promise.all(institutions.map(async (institution) => {
     try {
       const institutionData = INSTITUTION_DATA_FILES[institution];
       if (!institutionData) return;
-      
+
       // Load course data (which has student counts)
       let fileName = `data/institutions/${institutionData.file}`;
       let courseData = await loadCourseData(fileName, institutionData.code);
-      
+
       if (courseData.length === 0) {
         fileName = institutionData.file;
         courseData = await loadCourseData(fileName, institutionData.code);
       }
-      
+
       if (courseData.length === 0 && typeof window !== 'undefined') {
         fileName = `/gpa/data/institutions/${institutionData.file}`;
         courseData = await loadCourseData(fileName, institutionData.code);
       }
-      
+
       // Convert to CourseInfo with student counts, sort by student count
       const coursesWithCounts = courseData
         .filter(cd => courseHasData(cd) && cd.lastYearStudents && cd.lastYearStudents > 0)
@@ -477,31 +474,31 @@ export async function getMostPopularCoursesRoundRobin(limit: number = 12): Promi
           studentCount: cd.lastYearStudents || 0,
         }))
         .sort((a, b) => b.studentCount - a.studentCount); // Highest first
-      
+
       coursesByInstitution.set(institution, coursesWithCounts);
     } catch (error) {
       console.warn(`Failed to load popular courses for ${institution}:`, error);
     }
   }));
-  
+
   // Round-robin selection: pick 1 from each institution, then loop
   const selected: CourseInfo[] = [];
   const institutionIndices = new Map<string, number>(); // Track current index per institution
-  
+
   // Initialize indices
   institutions.forEach(inst => institutionIndices.set(inst, 0));
-  
+
   // Keep selecting until we have enough or run out of courses
   while (selected.length < limit) {
     let foundAny = false;
-    
+
     // One round: pick one from each institution
     for (const institution of institutions) {
       if (selected.length >= limit) break;
-      
+
       const courses = coursesByInstitution.get(institution) || [];
       const currentIndex = institutionIndices.get(institution) || 0;
-      
+
       if (currentIndex < courses.length) {
         const course = courses[currentIndex];
         // Avoid duplicates
@@ -520,11 +517,11 @@ export async function getMostPopularCoursesRoundRobin(limit: number = 12): Promi
         }
       }
     }
-    
+
     // If we didn't find any new courses, we're done
     if (!foundAny) break;
   }
-  
+
   return selected.slice(0, limit);
 }
 

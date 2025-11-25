@@ -55,7 +55,7 @@ async function discoverINNCourses() {
       // Merge into master map
       // INN uses format COURSECODE-1 (with dash), same as UiO/NTNU/OsloMet/Nord/NMBU/UiA
       courses.forEach(course => {
-        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix and normalize
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode); // Remove numeric API suffix and normalize
         const existing = allCoursesMap.get(baseCode);
 
         if (existing) {

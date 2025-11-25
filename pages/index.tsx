@@ -12,7 +12,7 @@ import { loadAllCourses, getMostPopularCoursesRoundRobin } from '@/lib/all-cours
 import { CourseInfo } from '@/lib/courses';
 import { loadHomepageTopCourses, HomepageTopDataset } from '@/lib/homepage-data';
 import { loadHomepageGradeData, HomepageGradeDataPayload } from '@/lib/homepage-grade-data';
-import { loadHardcoded28Data, Hardcoded28Payload } from '@/lib/hardcoded-28-data';
+import { loadTopCoursesData, TopCoursesPayload } from '@/lib/top-courses-data';
 import styles from '@/styles/Home.module.css';
 
 type SortOption = 'most-a' | 'least-a' | 'highest-avg' | 'lowest-avg' | 'most-students' | 'least-students' | 'alphabetical-az' | 'alphabetical-za';
@@ -37,19 +37,19 @@ function getBasePath(routerBasePath?: string): string {
       return '/gpa';
     }
   }
-  
+
   // Server-side: check environment variables (for SSR)
   if (typeof process !== 'undefined') {
     const isVercel = !!process.env.VERCEL;
     if (isVercel) {
       return ''; // Force empty on Vercel
     }
-    
+
     const isProduction = process.env.NODE_ENV === 'production';
     const isGitHubPages = isProduction && !isVercel;
     return isGitHubPages ? '/gpa' : '';
   }
-  
+
   // Fallback: use router basePath (should only be used if runtime detection fails)
   // But we've already checked runtime above, so this is just a safety net
   if (routerBasePath !== undefined && typeof window !== 'undefined') {
@@ -60,7 +60,7 @@ function getBasePath(routerBasePath?: string): string {
     }
     return routerBasePath;
   }
-  
+
   return '';
 }
 const INITIAL_COURSES_COUNT = 12; // Show 12 courses on initial load (one per institution, loaded in increments of 12)
@@ -72,7 +72,7 @@ export default function Home() {
   const [allCourses, setAllCourses] = useState<CourseInfo[]>([]);
   const [topDataset, setTopDataset] = useState<HomepageTopDataset | null>(null);
   const [preRenderedData, setPreRenderedData] = useState<HomepageGradeDataPayload | null>(null);
-  const [hardcoded28Data, setHardcoded28Data] = useState<Hardcoded28Payload | null>(null);
+  const [topCoursesData, setTopCoursesData] = useState<TopCoursesPayload | null>(null);
   const [coursesData, setCoursesData] = useState<Map<string, CourseStats & { institution: string; courseName: string }>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState<Set<string>>(new Set());
@@ -170,15 +170,15 @@ export default function Home() {
     };
   }, []);
 
-  // Load hardcoded 28-course data FIRST for instant display (no API calls needed)
+  // Load top courses data FIRST for instant display (no API calls needed)
   useEffect(() => {
     let cancelled = false;
-    loadHardcoded28Data()
+    loadTopCoursesData()
       .then((data) => {
         if (!data || cancelled) return;
 
-        setHardcoded28Data(data);
-        // Populate coursesData immediately with hardcoded data for instant display
+        setTopCoursesData(data);
+        // Populate coursesData immediately with preloaded data for instant display
         const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
         data.courses.forEach((course) => {
           const key = `${course.institution}-${course.normalizedCode}`;
@@ -192,10 +192,10 @@ export default function Home() {
         setInitialLoadComplete(true);
         // Show first 12 courses initially (increment of 12)
         setDisplayCount(INITIAL_COURSES_COUNT);
-        console.log(`[HardcodedCourses] Loaded ${data.courses.length} courses instantly (1 per institution)`);
+        console.log(`[TopCourses] Loaded ${data.courses.length} courses instantly (1 per institution)`);
       })
       .catch((error) => {
-        console.warn('Hardcoded 28-course data unavailable:', error);
+        console.warn('Top courses data unavailable:', error);
         // Fallback to regular pre-rendered data
       });
 
@@ -204,19 +204,19 @@ export default function Home() {
     };
   }, []);
 
-  // Load pre-rendered grade data as fallback (if hardcoded 28 not available)
+  // Load pre-rendered grade data as fallback (if top courses data not available)
   useEffect(() => {
-    // Only load if hardcoded 28 data is not available
-    if (hardcoded28Data) return;
-    
+    // Only load if top courses data is not available
+    if (topCoursesData) return;
+
     let cancelled = false;
     loadHomepageGradeData()
       .then((data) => {
         if (!data || cancelled) return;
 
         setPreRenderedData(data);
-        // Only populate if we don't already have hardcoded data
-        if (!hardcoded28Data) {
+        // Only populate if we don't already have top courses data
+        if (!topCoursesData) {
           const dataMap = new Map<string, CourseStats & { institution: string; courseName: string }>();
           data.courses.forEach((course) => {
             // Normalize course code: remove API formatting suffixes for key matching
@@ -248,7 +248,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [hardcoded28Data]);
+  }, [topCoursesData]);
 
   // Reset initial load when institution changes
   useEffect(() => {
@@ -289,18 +289,18 @@ export default function Home() {
   // Check if initial load is complete (we have at least 9 courses loaded OR no more courses to load)
   useEffect(() => {
     if (searchQuery.trim() || initialLoadComplete) return;
-    
+
     const filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
-    
+
     const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
       return coursesDataRef.current.has(key);
     });
-    
+
     const loadingCount = loadingCoursesRef.current.size;
-    
+
     // Mark as complete if we have enough courses AND nothing is currently loading
     if (coursesWithData.length >= INITIAL_COURSES_COUNT && loadingCount === 0) {
       setInitialLoadComplete(true);
@@ -322,22 +322,22 @@ export default function Home() {
   // Skip API calls on GitHub Pages
   const loadCoursesData = useCallback((coursesToLoad: CourseInfo[]) => {
     if (coursesToLoad.length === 0) return;
-    
+
     // Check if we're on GitHub Pages (skip API calls)
-    const isGitHubPages = typeof window !== 'undefined' && 
+    const isGitHubPages = typeof window !== 'undefined' &&
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
-    
+
     // Skip API calls on GitHub Pages (they will fail due to CORS)
     if (isGitHubPages) {
       return;
     }
-    
+
     // Filter out courses that already have data
     const coursesToFetch = coursesToLoad.filter(course => {
       const key = `${course.institution}-${course.code}`;
       return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
     });
-    
+
     if (coursesToFetch.length === 0) return;
 
     // Mark as loading
@@ -349,24 +349,24 @@ export default function Home() {
 
     // Fetch the courses
     let cancelled = false;
-    
+
     Promise.all(
       coursesToFetch.map(async (course) => {
         try {
           const uniData = UNIVERSITIES[course.institution];
           if (!uniData) return null;
-          
+
           const formattedCode = formatCourseCode(course.code, course.institution);
           const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-          
+
           if (cancelled || !data || data.length === 0) return null;
-          
+
           const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
           const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-          
+
           const stats = processGradeData(yearData);
           if (!stats) return null;
-          
+
           return {
             key: `${course.institution}-${course.code}`,
             data: {
@@ -383,9 +383,9 @@ export default function Home() {
       })
     ).then(results => {
       if (cancelled) return;
-      
+
       const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
-      
+
       setCoursesData(prev => {
         const next = new Map(prev);
         validResults.forEach(({ key, data }) => next.set(key, data));
@@ -416,7 +416,7 @@ export default function Home() {
   // Skip API calls on GitHub Pages
   useEffect(() => {
     // Check if we're on GitHub Pages (skip API calls)
-    const isGitHubPages = typeof window !== 'undefined' && 
+    const isGitHubPages = typeof window !== 'undefined' &&
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
     if (allCourses.length === 0 || searchQuery.trim() || initialLoadComplete) return;
     // Skip API calls on GitHub Pages (they will fail anyway)
@@ -424,7 +424,7 @@ export default function Home() {
       setInitialLoadComplete(true);
       return;
     }
-    
+
     // If institution filter is 'all', use popular courses in round-robin fashion
     // Load data for all top courses, even if pre-rendered data exists (some institutions might be missing)
     if (selectedInstitution === 'all') {
@@ -444,12 +444,12 @@ export default function Home() {
           for (let i = 0; i < toLoad.length; i += batchSize) {
             batches.push(toLoad.slice(i, i + batchSize));
           }
-          
+
           // Load first batch immediately (initial 12 courses)
           if (batches.length > 0) {
             loadCoursesData(batches[0]);
           }
-          
+
           // Load remaining batches with delays (next 12, then final 12)
           batches.slice(1).forEach((batch, idx) => {
             setTimeout(() => {
@@ -465,7 +465,7 @@ export default function Home() {
             const key = `${course.institution}-${course.code}`;
             return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
           });
-          
+
           if (toLoad.length > 0) {
             loadCoursesData(toLoad);
           } else if (popularCourses.length > 0) {
@@ -473,12 +473,12 @@ export default function Home() {
           }
         }).catch(error => {
           console.warn('Failed to load popular courses, falling back to regular selection:', error);
-        const fallbackCourses = allCourses
-          .filter(course => {
-            const key = `${course.institution}-${course.code}`;
-            return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
-          })
-          .slice(0, INITIAL_COURSES_COUNT);
+          const fallbackCourses = allCourses
+            .filter(course => {
+              const key = `${course.institution}-${course.code}`;
+              return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
+            })
+            .slice(0, INITIAL_COURSES_COUNT);
           if (fallbackCourses.length > 0) {
             loadCoursesData(fallbackCourses);
           }
@@ -486,7 +486,7 @@ export default function Home() {
       }
       return; // Exit early - loading popular courses asynchronously
     }
-    
+
     // Institution filter is active - use filtered courses
     const filtered = allCourses.filter(c => c.institution === selectedInstitution);
     const coursesToLoad = filtered
@@ -531,34 +531,34 @@ export default function Home() {
       setLastSortBy(sortBy);
     }
   }, [sortBy, selectedInstitution, searchQuery, lastSortBy]);
-  
+
   // Note: We don't clear coursesData when institution filter changes because:
   // 1. The filtering logic already ensures only courses from selected institution are shown
   // 2. Clearing would lose data if user switches back to "all"
   // 3. The safety check in filteredAndSortedCourses ensures institution matches
 
-  // Compute total number of hardcoded courses dynamically from loaded data
-  const HARDCODED_28_TOTAL = useMemo(() => {
-    return hardcoded28Data?.courses.length ?? 0;
-  }, [hardcoded28Data]);
+  // Compute total number of top courses dynamically from loaded data
+  const TOP_COURSES_TOTAL = useMemo(() => {
+    return topCoursesData?.courses.length ?? 0;
+  }, [topCoursesData]);
 
   // Filter and sort courses (only using already-loaded data)
   const filteredAndSortedCourses = useMemo(() => {
-    // In default view (all institutions, no search), prioritize hardcoded 28 courses
+    // In default view (all institutions, no search), prioritize top courses
     if (isTopDefaultView) {
-      // If we have hardcoded 28-course data, use it exclusively (instant, no API calls needed)
-      if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        // Use ALL hardcoded courses directly - they're already loaded and ready to display
-        const coursesWithData = hardcoded28Data.courses
+      // If we have top courses data, use it exclusively (instant, no API calls needed)
+      if (topCoursesData && topCoursesData.courses.length > 0) {
+        // Use ALL top courses directly - they're already loaded and ready to display
+        const coursesWithData = topCoursesData.courses
           .map(course => {
-            // Create a CourseStats-compatible object directly from hardcoded data
-            // No need to look up in coursesData - use the hardcoded data directly
+            // Create a CourseStats-compatible object directly from top courses data
+            // No need to look up in coursesData - use the data directly
             return {
               ...course,
               courseCode: course.normalizedCode,
             };
           });
-        
+
         // Sort by selected sort option
         coursesWithData.sort((a, b) => {
           switch (sortBy) {
@@ -588,10 +588,10 @@ export default function Home() {
               return 0;
           }
         });
-        
+
         return coursesWithData;
       }
-      
+
       // Fallback: use topInstitutionCourses (one per institution)
       if (topInstitutionCourses.length > 0) {
         const coursesWithData = topInstitutionCourses
@@ -604,7 +604,7 @@ export default function Home() {
             return null;
           })
           .filter((item): item is CourseStats & { institution: string; courseName: string } => item !== null);
-        
+
         // Sort by selected sort option
         coursesWithData.sort((a, b) => {
           switch (sortBy) {
@@ -634,16 +634,16 @@ export default function Home() {
               return 0;
           }
         });
-        
+
         return coursesWithData;
       }
     }
-    
+
     // Filter courses by institution and search query
     let filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
-    
+
     // Apply search filter with priority: code starts with > code contains > name starts with > name contains
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
@@ -653,13 +653,13 @@ export default function Home() {
       const nameContains: typeof filtered = [];
       const institutionStartsWith: typeof filtered = [];
       const institutionContains: typeof filtered = [];
-      
+
       filtered.forEach(c => {
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
         const institutionNameUpper = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
         const institutionShortUpper = UNIVERSITIES[c.institution]?.shortName?.toUpperCase() || '';
-        
+
         if (codeUpper === query) {
           // Exact code match - highest priority
           codeStartsWith.unshift(c);
@@ -682,7 +682,7 @@ export default function Home() {
           institutionContains.push(c);
         }
       });
-      
+
       // Combine with priority order
       // Removed codeContains to prevent false matches like "INF100" matching "INF1000"
       filtered = [
@@ -712,7 +712,7 @@ export default function Home() {
       // Sort by existing order first, then append new courses
       const orderedCourses: (CourseStats & { institution: string; courseName: string })[] = [];
       const unorderedCourses: (CourseStats & { institution: string; courseName: string })[] = [];
-      
+
       coursesWithData.forEach(course => {
         // Normalize course code for key matching (same logic as pre-rendered data)
         // For all institutions, consistently remove "-1" suffix only
@@ -728,14 +728,14 @@ export default function Home() {
           unorderedCourses.push(course);
         }
       });
-      
+
       // Sort ordered courses by their position in courseOrder
       orderedCourses.sort((a, b) => {
         const keyA = `${a.institution}-${a.courseCode}`;
         const keyB = `${b.institution}-${b.courseCode}`;
         return courseOrder.indexOf(keyA) - courseOrder.indexOf(keyB);
       });
-      
+
       // Sort new courses and append
       unorderedCourses.sort((a, b) => {
         switch (sortBy) {
@@ -765,7 +765,7 @@ export default function Home() {
             return 0;
         }
       });
-      
+
       return [...orderedCourses, ...unorderedCourses];
     }
 
@@ -775,7 +775,7 @@ export default function Home() {
       if (selectedInstitution === 'all') return true;
       return course.institution === selectedInstitution;
     });
-    
+
     // Sort using loaded data only (when order should be reset)
     finalCourses.sort((a, b) => {
       switch (sortBy) {
@@ -805,7 +805,7 @@ export default function Home() {
           return 0;
       }
     });
-    
+
     return finalCourses;
   }, [allCourses, coursesData, sortBy, selectedInstitution, searchQuery, courseOrder, lastSortBy, isTopDefaultView, topInstitutionCourses]);
 
@@ -821,9 +821,9 @@ export default function Home() {
   // Load more courses when user clicks "load more"
   const handleLoadMore = useCallback(() => {
     // Check if we're on GitHub Pages (skip API calls)
-    const isGitHubPages = typeof window !== 'undefined' && 
+    const isGitHubPages = typeof window !== 'undefined' &&
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
-    
+
     const isTopDefaultView =
       selectedInstitution === 'all' &&
       !searchQuery.trim() &&
@@ -840,19 +840,19 @@ export default function Home() {
         }
         return;
       }
-      
+
       // Fallback: First, check if we have more courses with data that we can show
       const coursesWithData = topInstitutionCourses.filter(course => {
         const key = `${course.institution}-${course.code}`;
         return coursesDataRef.current.has(key);
       });
-      
+
       if (displayCount < coursesWithData.length) {
         // Show more courses that already have data (in increments of 12)
         setDisplayCount(prev => Math.min(prev + COURSES_PER_INCREMENT, coursesWithData.length));
         return;
       }
-      
+
       // If no more courses with data, try to load data for courses without data
       const coursesToLoad = topInstitutionCourses
         .filter(course => {
@@ -860,7 +860,7 @@ export default function Home() {
           return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
         })
         .slice(0, COURSES_PER_INCREMENT); // Load 12 at a time
-      
+
       if (coursesToLoad.length > 0) {
         loadCoursesData(coursesToLoad);
         // Increase display count to show courses once data is loaded (in increments of 12)
@@ -875,7 +875,7 @@ export default function Home() {
       setDisplayCount(prev => prev + COURSES_PER_PAGE);
       return;
     }
-    
+
     // Skip API calls on GitHub Pages (they will fail due to CORS)
     if (isGitHubPages) {
       return;
@@ -883,7 +883,7 @@ export default function Home() {
 
     // Otherwise, load new course data
     let coursesToLoad: typeof allCourses = [];
-    
+
     if (searchQuery.trim()) {
       // If searching, load matching courses with priority sorting
       const query = searchQuery.trim().toUpperCase();
@@ -891,14 +891,14 @@ export default function Home() {
       const codeContains: typeof allCourses = [];
       const nameStartsWith: typeof allCourses = [];
       const nameContains: typeof allCourses = [];
-      
+
       allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
         if (!matchesInstitution) return;
-        
+
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
-        
+
         if (codeUpper.startsWith(query)) {
           codeStartsWith.push(c);
         } else if (codeUpper.includes(query)) {
@@ -909,9 +909,9 @@ export default function Home() {
           nameContains.push(c);
         }
       });
-      
+
       const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
-      
+
       // Use refs to check which courses are already loaded
       coursesToLoad = matchingCourses
         .filter(course => {
@@ -949,18 +949,18 @@ export default function Home() {
         try {
           const uniData = UNIVERSITIES[course.institution];
           if (!uniData) return null;
-          
+
           const formattedCode = formatCourseCode(course.code, course.institution);
           const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-          
+
           if (!data || data.length === 0) return null;
-          
+
           const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
           const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-          
+
           const stats = processGradeData(yearData);
           if (!stats) return null;
-          
+
           return {
             key: `${course.institution}-${course.code}`,
             data: {
@@ -975,7 +975,7 @@ export default function Home() {
       })
     ).then(results => {
       const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
-      
+
       setCoursesData(prev => {
         const next = new Map(prev);
         validResults.forEach(({ key, data }) => next.set(key, data));
@@ -1027,37 +1027,37 @@ export default function Home() {
       }
       return;
     }
-    
+
     // Check if we're on GitHub Pages (skip API calls)
-    const isGitHubPages = typeof window !== 'undefined' && 
+    const isGitHubPages = typeof window !== 'undefined' &&
       (window.location.hostname.includes('github.io') || window.location.hostname.includes('github.com'));
-    
+
     // Skip API calls on GitHub Pages (they will fail due to CORS)
     if (isGitHubPages) {
       return;
     }
-    
+
     let cancelled = false;
     const INITIAL_BATCH_SIZE = 50; // Load initial 50 courses
     const MAX_CONCURRENT_REQUESTS = 10; // Limit concurrent API calls
-    
+
     const debounceTimer = setTimeout(() => {
       if (cancelled) return;
-      
+
       const query = searchQuery.trim().toUpperCase();
       // Filter and sort matches by priority: code starts with > code contains > name starts with > name contains
       const codeStartsWith: typeof allCourses = [];
       const codeContains: typeof allCourses = [];
       const nameStartsWith: typeof allCourses = [];
       const nameContains: typeof allCourses = [];
-      
+
       allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
         if (!matchesInstitution) return;
-        
+
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
-        
+
         if (codeUpper.startsWith(query)) {
           codeStartsWith.push(c);
         } else if (codeUpper.includes(query)) {
@@ -1068,12 +1068,12 @@ export default function Home() {
           nameContains.push(c);
         }
       });
-      
+
       const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
-      
+
       // Only load initial batch - user can load more via "Load More" button
       const initialBatch = matchingCourses.slice(0, INITIAL_BATCH_SIZE);
-      
+
       // Use refs to check current state
       const coursesToLoad = initialBatch.filter(course => {
         const key = `${course.institution}-${course.code}`;
@@ -1096,7 +1096,7 @@ export default function Home() {
       (async () => {
         for (let i = 0; i < coursesToLoad.length; i += chunkSize) {
           if (cancelled) break;
-          
+
           const chunk = coursesToLoad.slice(i, i + chunkSize);
           const results = await Promise.all(
             chunk.map(async (course) => {
@@ -1104,18 +1104,18 @@ export default function Home() {
               try {
                 const uniData = UNIVERSITIES[course.institution];
                 if (!uniData) return null;
-                
+
                 const formattedCode = formatCourseCode(course.code, course.institution);
                 const data = await fetchAllYearsData(uniData.code, formattedCode, undefined, course.institution);
-                
+
                 if (!data || data.length === 0) return null;
-                
+
                 const latestYear = Math.max(...data.map(d => parseInt(d.Årstall, 10)));
                 const yearData = data.filter(d => parseInt(d.Årstall, 10) === latestYear);
-                
+
                 const stats = processGradeData(yearData);
                 if (!stats) return null;
-                
+
                 return {
                   key: `${course.institution}-${course.code}`,
                   data: {
@@ -1129,11 +1129,11 @@ export default function Home() {
               }
             })
           );
-          
+
           if (cancelled) break;
-          
+
           const validResults = results.filter((r): r is { key: string; data: CourseStats & { institution: string; courseName: string } } => r !== null);
-          
+
           // Update courses data
           setCoursesData(prev => {
             const next = new Map(prev);
@@ -1172,11 +1172,11 @@ export default function Home() {
 
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Show hint in search field if no search query but filters are being applied
     const newSearchQuery = searchInput.trim();
     if (!newSearchQuery) {
-      const institutionName = pendingInstitution !== 'all' 
+      const institutionName = pendingInstitution !== 'all'
         ? formatInstitutionLabel(pendingInstitution, 'full-short')
         : '';
       if (institutionName || pendingSortBy !== 'most-a') {
@@ -1189,26 +1189,26 @@ export default function Home() {
     } else {
       setSearchHint('');
     }
-    
+
     // Apply pending filters and sort
     setSortBy(pendingSortBy);
     setSelectedInstitution(pendingInstitution);
-    
+
     // Apply search query from input
     setSearchQuery(newSearchQuery);
-    
+
     // Reset display to initial state - start fresh
     setDisplayCount(newSearchQuery ? COURSES_PER_PAGE : INITIAL_COURSES_COUNT);
-    
+
     // Reset course order and initial load state to force reload
     setCourseOrder([]);
-    
+
     // If there's a search query, courses will reload via the search effect
     // If no search query and filters changed, reset initial load to reload popular courses
     if (!newSearchQuery) {
       setInitialLoadComplete(false);
     }
-    
+
     // Force re-render by clearing any cached course data that might not match new filters
     // The effects will reload the appropriate courses based on new filters/search
   };
@@ -1235,13 +1235,13 @@ export default function Home() {
     setLastSortBy(null);
   }, []);
 
-useEffect(() => {
-  if (!router.isReady) return;
-  if (router.query.reset === '1') {
-    handleResetFilters();
-    router.replace(router.pathname, undefined, { shallow: true });
-  }
-}, [router, handleResetFilters]);
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.reset === '1') {
+      handleResetFilters();
+      router.replace(router.pathname, undefined, { shallow: true });
+    }
+  }, [router, handleResetFilters]);
 
   const handleSearchClear = () => {
     setSearchInput('');
@@ -1272,7 +1272,7 @@ useEffect(() => {
         // Show "Load more" if we're showing less than all hardcoded courses
         return displayCount < hardcoded28Data.courses.length;
       }
-      
+
       // Fallback: Check if we have more courses to display (either with data or that need loading)
       // First check if we have more courses with data than we're displaying
       const coursesWithData = topInstitutionCourses.filter(course => {
@@ -1289,12 +1289,12 @@ useEffect(() => {
       });
       return coursesWithoutData.length > 0;
     }
-    
+
     // Check if we have more courses already loaded that we haven't displayed
     if (displayCount < filteredAndSortedCourses.length) {
       return true;
     }
-    
+
     // If searching, check if there are more matching courses that need data loaded
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toUpperCase();
@@ -1303,14 +1303,14 @@ useEffect(() => {
       const codeContains: typeof allCourses = [];
       const nameStartsWith: typeof allCourses = [];
       const nameContains: typeof allCourses = [];
-      
+
       allCourses.forEach(c => {
         const matchesInstitution = selectedInstitution === 'all' || c.institution === selectedInstitution;
         if (!matchesInstitution) return;
-        
+
         const codeUpper = c.code.toUpperCase();
         const nameUpper = c.name ? c.name.toUpperCase() : '';
-        
+
         if (codeUpper.startsWith(query)) {
           codeStartsWith.push(c);
         } else if (codeUpper.includes(query)) {
@@ -1321,28 +1321,28 @@ useEffect(() => {
           nameContains.push(c);
         }
       });
-      
+
       const matchingCourses = [...codeStartsWith, ...codeContains, ...nameStartsWith, ...nameContains];
-      
+
       const coursesWithData = matchingCourses.filter(c => {
         const key = `${c.institution}-${c.code}`;
         return coursesDataRef.current.has(key);
       });
-      
+
       return coursesWithData.length < matchingCourses.length;
     }
-    
+
     // Check if there are more courses that need data loaded (on initial load or after filtering)
     const filtered = selectedInstitution !== 'all'
       ? allCourses.filter(c => c.institution === selectedInstitution)
       : allCourses;
-    
+
     // Count courses that have data loaded
     const coursesWithData = filtered.filter(c => {
       const key = `${c.institution}-${c.code}`;
       return coursesDataRef.current.has(key);
     });
-    
+
     // On initial load (before initialLoadComplete), show button once we have at least one batch loaded
     // and there are more courses available
     if (!initialLoadComplete) {
@@ -1350,7 +1350,7 @@ useEffect(() => {
       // This ensures we don't show the button while still loading the initial batch
       return coursesWithData.length >= COURSES_PER_PAGE && coursesWithData.length < filtered.length;
     }
-    
+
     // After initial load is complete, show button if there are more courses to load
     return coursesWithData.length < filtered.length;
   }, [
@@ -1372,8 +1372,8 @@ useEffect(() => {
         <div className="container">
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              <span 
-                className={styles.heroLogo} 
+              <span
+                className={styles.heroLogo}
                 aria-hidden="true"
                 style={{
                   // Use absolute path - Next.js will handle basePath automatically based on next.config.js
@@ -1541,8 +1541,8 @@ useEffect(() => {
                 ))}
               </div>
               <div className={styles.loadMoreContainer}>
-                <button 
-                  onClick={handleLoadMore} 
+                <button
+                  onClick={handleLoadMore}
                   className={`${styles.loadMoreButtonInline} ${!hasMoreCourses ? styles.loadMoreButtonDimmed : ''}`}
                   disabled={loadingCourses.size > 0 || !hasMoreCourses}
                   aria-label="Last flere emner"

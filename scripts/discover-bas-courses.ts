@@ -26,33 +26,33 @@ async function discoverBASCourses() {
 
   const institutionCode = '8243';
   const institutionName = 'BAS';
-  
+
   const currentYear = new Date().getFullYear();
   const years: number[] = [];
   for (let year = currentYear; year >= 2000; year--) {
     years.push(year);
   }
   const allCoursesMap = new Map<string, CourseExport>();
-  
+
   console.log(`📡 Fetching all courses from ${institutionName}...`);
   console.log(`   Processing ${years.length} years in batches...\n`);
-  
+
   for (let i = 0; i < years.length; i++) {
     const year = years[i];
     console.log(`[${i + 1}/${years.length}] 📅 Fetching year ${year}...`);
-    
+
     try {
       const startTime = Date.now();
       const courses = await getAllCoursesForInstitution(institutionCode, year);
       const duration = Date.now() - startTime;
-      
+
       console.log(`   ✅ Found ${courses.length} courses in ${duration}ms`);
-      
+
       courses.forEach((course: DiscoveredCourse) => {
         // Remove numeric API suffix (like -1, -2, -0) and normalize spaces
-        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, ''));
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode); // Remove numeric API suffix and normalize
         const existing = allCoursesMap.get(baseCode);
-        
+
         if (existing) {
           if (!existing.years.includes(year)) {
             existing.years.push(year);
@@ -80,9 +80,9 @@ async function discoverBASCourses() {
           });
         }
       });
-      
+
       console.log(`   📊 Total unique courses so far: ${allCoursesMap.size}\n`);
-      
+
       if (i < years.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -91,26 +91,26 @@ async function discoverBASCourses() {
       console.log(`   ⚠️  Continuing with next year...\n`);
     }
   }
-  
+
   const allCourses = Array.from(allCoursesMap.values())
     .filter(courseHasData) // Only courses with actual data (lastYearStudents > 0 or years with data)
     .sort((a, b) => a.courseCode.localeCompare(b.courseCode));
-  
+
   console.log(`\n✅ Discovery complete!`);
   console.log(`   Total unique courses: ${allCourses.length}\n`);
-  
+
   const dataDir = path.join(process.cwd(), 'data', 'institutions');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
-  
+
   const outputFile = path.join(dataDir, 'bas-all-courses.json');
   const exportData = createOptimizedExport(institutionCode, allCourses);
   fs.writeFileSync(outputFile, JSON.stringify(exportData));
-  
+
   console.log(`✅ Exported ${allCourses.length} courses to:`);
   console.log(`   ${outputFile}\n`);
-  
+
   console.log(`📊 Summary:`);
   console.log(`   Total courses: ${allCourses.length}`);
   console.log(`   Courses with 2024 data: ${allCourses.filter(c => c.years.includes(2024)).length}`);
@@ -121,37 +121,37 @@ async function discoverBASCourses() {
     .filter(c => c.years.includes(2024))
     .reduce((sum, c) => sum + (c.studentCountByYear[2024] || 0), 0)
     .toLocaleString()}`);
-  
+
   const maxYears = Math.max(...allCourses.map(c => c.years.length), 0);
   const coursesWithAllYears = allCourses.filter(c => c.years.length === maxYears).length;
   console.log(`   Courses with all ${maxYears} years: ${coursesWithAllYears}`);
-  
+
   console.log(`\n📚 Sample courses:`);
   allCourses.slice(0, 10).forEach(course => {
     const yearsStr = course.years.slice(0, 3).join(', ') + (course.years.length > 3 ? '...' : '');
     console.log(`   ${course.courseCode.padEnd(12)} - ${course.lastYearStudents.toLocaleString().padStart(6)} students (${course.years.length} years: ${yearsStr})`);
   });
-  
+
   if (allCourses.length > 10) {
     console.log(`   ... and ${allCourses.length - 10} more courses`);
   }
-  
+
   console.log(`\n📈 Courses by prefix:`);
   const prefixCounts: Record<string, number> = {};
   allCourses.forEach(course => {
     const prefix = course.courseCode.charAt(0);
     prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
   });
-  
+
   Object.entries(prefixCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .forEach(([prefix, count]) => {
       console.log(`   ${prefix}*: ${count} courses`);
     });
-  
+
   console.log(`\n✅ All done!`);
-  
+
   return allCourses;
 }
 

@@ -1,12 +1,12 @@
 import { CourseStats } from '@/types';
 
-export interface Hardcoded28Payload {
+export interface TopCoursesPayload {
   generatedAt: string;
   courses: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }>;
 }
 
-let cachedData: Hardcoded28Payload | null = null;
-let loadingPromise: Promise<Hardcoded28Payload | null> | null = null;
+let cachedData: TopCoursesPayload | null = null;
+let loadingPromise: Promise<TopCoursesPayload | null> | null = null;
 
 function resolveBasePath(): string {
   if (typeof window === 'undefined') {
@@ -15,7 +15,7 @@ function resolveBasePath(): string {
   return window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
 }
 
-export async function loadHardcoded28Data(): Promise<Hardcoded28Payload | null> {
+export async function loadTopCoursesData(): Promise<TopCoursesPayload | null> {
   if (cachedData) {
     return cachedData;
   }
@@ -29,19 +29,19 @@ export async function loadHardcoded28Data(): Promise<Hardcoded28Payload | null> 
   }
 
   const basePath = resolveBasePath();
-  loadingPromise = fetch(`${basePath}/data/homepage-hardcoded-28.json`, {
+  loadingPromise = fetch(`${basePath}/data/homepage-top-courses-data.json`, {
     cache: 'force-cache',
   })
     .then(async (response) => {
       if (!response.ok) {
-        throw new Error(`Failed to load homepage-hardcoded-28.json: ${response.status}`);
+        throw new Error(`Failed to load homepage-top-courses-data.json: ${response.status}`);
       }
-      const data = (await response.json()) as Hardcoded28Payload;
+      const data = (await response.json()) as TopCoursesPayload;
       cachedData = data;
       return data;
     })
     .catch((error) => {
-      console.warn('Unable to load hardcoded 28-course data:', error);
+      console.warn('Unable to load top courses data:', error);
       return null;
     })
     .finally(() => {
@@ -50,4 +50,3 @@ export async function loadHardcoded28Data(): Promise<Hardcoded28Payload | null> 
 
   return loadingPromise;
 }
-

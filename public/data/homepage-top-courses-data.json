@@ -1,0 +1,1255 @@
+{
+  "generatedAt": "2025-11-25T13:13:04.008Z",
+  "courses": [
+    {
+      "courseCode": "EXPHIL03",
+      "year": 2025,
+      "institution": "UiO",
+      "totalStudents": 1434,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 227,
+          "percentage": 16
+        },
+        {
+          "grade": "B",
+          "count": 392,
+          "percentage": 27
+        },
+        {
+          "grade": "C",
+          "count": 497,
+          "percentage": 35
+        },
+        {
+          "grade": "D",
+          "count": 207,
+          "percentage": 14
+        },
+        {
+          "grade": "E",
+          "count": 72,
+          "percentage": 5
+        },
+        {
+          "grade": "F",
+          "count": 39,
+          "percentage": 3
+        }
+      ],
+      "averageGrade": 3.26,
+      "courseName": "EXPHIL03",
+      "normalizedCode": "EXPHIL03"
+    },
+    {
+      "courseCode": "TDT4110",
+      "year": 2024,
+      "institution": "NTNU",
+      "totalStudents": 2977,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 252,
+          "percentage": 8
+        },
+        {
+          "grade": "B",
+          "count": 609,
+          "percentage": 20
+        },
+        {
+          "grade": "C",
+          "count": 742,
+          "percentage": 25
+        },
+        {
+          "grade": "D",
+          "count": 696,
+          "percentage": 23
+        },
+        {
+          "grade": "E",
+          "count": 459,
+          "percentage": 15
+        },
+        {
+          "grade": "F",
+          "count": 219,
+          "percentage": 7
+        }
+      ],
+      "averageGrade": 2.61,
+      "courseName": "TDT4110",
+      "normalizedCode": "TDT4110"
+    },
+    {
+      "courseCode": "EXPHIL-SVSEM",
+      "year": 2024,
+      "institution": "UiB",
+      "totalStudents": 591,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 28,
+          "percentage": 5
+        },
+        {
+          "grade": "B",
+          "count": 128,
+          "percentage": 22
+        },
+        {
+          "grade": "C",
+          "count": 268,
+          "percentage": 45
+        },
+        {
+          "grade": "D",
+          "count": 122,
+          "percentage": 21
+        },
+        {
+          "grade": "E",
+          "count": 27,
+          "percentage": 5
+        },
+        {
+          "grade": "F",
+          "count": 18,
+          "percentage": 3
+        }
+      ],
+      "averageGrade": 2.92,
+      "courseName": "Examen philosophicum",
+      "normalizedCode": "EXPHIL-SVSEM"
+    },
+    {
+      "courseCode": "SAM3",
+      "year": 2025,
+      "institution": "NHH",
+      "totalStudents": 469,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 113,
+          "percentage": 24
+        },
+        {
+          "grade": "B",
+          "count": 168,
+          "percentage": 36
+        },
+        {
+          "grade": "C",
+          "count": 115,
+          "percentage": 25
+        },
+        {
+          "grade": "D",
+          "count": 55,
+          "percentage": 12
+        },
+        {
+          "grade": "E",
+          "count": 3,
+          "percentage": 1
+        },
+        {
+          "grade": "F",
+          "count": 15,
+          "percentage": 3
+        }
+      ],
+      "averageGrade": 3.61,
+      "courseName": "SAM3",
+      "normalizedCode": "SAM3"
+    },
+    {
+      "courseCode": "BØK34233",
+      "year": 2025,
+      "institution": "BI",
+      "totalStudents": 3083,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 256,
+          "percentage": 8
+        },
+        {
+          "grade": "B",
+          "count": 360,
+          "percentage": 12
+        },
+        {
+          "grade": "C",
+          "count": 626,
+          "percentage": 20
+        },
+        {
+          "grade": "D",
+          "count": 566,
+          "percentage": 18
+        },
+        {
+          "grade": "E",
+          "count": 670,
+          "percentage": 22
+        },
+        {
+          "grade": "F",
+          "count": 605,
+          "percentage": 20
+        }
+      ],
+      "averageGrade": 2.08,
+      "courseName": "BØK34233",
+      "normalizedCode": "BØK34233"
+    },
+    {
+      "courseCode": "SYBA1200",
+      "year": 2020,
+      "institution": "OsloMet",
+      "totalStudents": 655,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 225,
+          "percentage": 34
+        },
+        {
+          "grade": "B",
+          "count": 316,
+          "percentage": 48
+        },
+        {
+          "grade": "C",
+          "count": 90,
+          "percentage": 14
+        },
+        {
+          "grade": "D",
+          "count": 18,
+          "percentage": 3
+        },
+        {
+          "grade": "E",
+          "count": 3,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 3,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 4.12,
+      "courseName": "SYBA1200",
+      "normalizedCode": "SYBA1200"
+    },
+    {
+      "courseCode": "SYK1005",
+      "year": 2025,
+      "institution": "Nord",
+      "totalStudents": 468,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 50,
+          "percentage": 11
+        },
+        {
+          "grade": "B",
+          "count": 98,
+          "percentage": 21
+        },
+        {
+          "grade": "C",
+          "count": 172,
+          "percentage": 37
+        },
+        {
+          "grade": "D",
+          "count": 98,
+          "percentage": 21
+        },
+        {
+          "grade": "E",
+          "count": 30,
+          "percentage": 6
+        },
+        {
+          "grade": "F",
+          "count": 20,
+          "percentage": 4
+        }
+      ],
+      "averageGrade": 2.96,
+      "courseName": "SYK1005",
+      "normalizedCode": "SYK1005"
+    },
+    {
+      "courseCode": "STAT100",
+      "year": 2025,
+      "institution": "NMBU",
+      "totalStudents": 468,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 52,
+          "percentage": 11
+        },
+        {
+          "grade": "B",
+          "count": 53,
+          "percentage": 11
+        },
+        {
+          "grade": "C",
+          "count": 68,
+          "percentage": 15
+        },
+        {
+          "grade": "D",
+          "count": 65,
+          "percentage": 14
+        },
+        {
+          "grade": "E",
+          "count": 86,
+          "percentage": 18
+        },
+        {
+          "grade": "F",
+          "count": 144,
+          "percentage": 31
+        }
+      ],
+      "averageGrade": 1.91,
+      "courseName": "STAT100",
+      "normalizedCode": "STAT100"
+    },
+    {
+      "courseCode": "SY-121",
+      "year": 2022,
+      "institution": "UiA",
+      "totalStudents": 209,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 25,
+          "percentage": 12
+        },
+        {
+          "grade": "B",
+          "count": 50,
+          "percentage": 24
+        },
+        {
+          "grade": "C",
+          "count": 64,
+          "percentage": 31
+        },
+        {
+          "grade": "D",
+          "count": 12,
+          "percentage": 6
+        },
+        {
+          "grade": "E",
+          "count": 25,
+          "percentage": 12
+        },
+        {
+          "grade": "F",
+          "count": 33,
+          "percentage": 16
+        }
+      ],
+      "averageGrade": 2.71,
+      "courseName": "SY-121",
+      "normalizedCode": "SY-121"
+    },
+    {
+      "courseCode": "SYK1002",
+      "year": 2025,
+      "institution": "INN",
+      "totalStudents": 284,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 12,
+          "percentage": 4
+        },
+        {
+          "grade": "B",
+          "count": 38,
+          "percentage": 13
+        },
+        {
+          "grade": "C",
+          "count": 95,
+          "percentage": 33
+        },
+        {
+          "grade": "D",
+          "count": 38,
+          "percentage": 13
+        },
+        {
+          "grade": "E",
+          "count": 31,
+          "percentage": 11
+        },
+        {
+          "grade": "F",
+          "count": 70,
+          "percentage": 25
+        }
+      ],
+      "averageGrade": 2.13,
+      "courseName": "SYK1002",
+      "normalizedCode": "SYK1002"
+    },
+    {
+      "courseCode": "STA100",
+      "year": 2025,
+      "institution": "UiS",
+      "totalStudents": 403,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 45,
+          "percentage": 11
+        },
+        {
+          "grade": "B",
+          "count": 49,
+          "percentage": 12
+        },
+        {
+          "grade": "C",
+          "count": 89,
+          "percentage": 22
+        },
+        {
+          "grade": "D",
+          "count": 41,
+          "percentage": 10
+        },
+        {
+          "grade": "E",
+          "count": 67,
+          "percentage": 17
+        },
+        {
+          "grade": "F",
+          "count": 112,
+          "percentage": 28
+        }
+      ],
+      "averageGrade": 2.08,
+      "courseName": "STA100",
+      "normalizedCode": "STA100"
+    },
+    {
+      "courseCode": "SAM2000",
+      "year": 2024,
+      "institution": "USN",
+      "totalStudents": 808,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 37,
+          "percentage": 5
+        },
+        {
+          "grade": "B",
+          "count": 101,
+          "percentage": 13
+        },
+        {
+          "grade": "C",
+          "count": 141,
+          "percentage": 17
+        },
+        {
+          "grade": "D",
+          "count": 178,
+          "percentage": 22
+        },
+        {
+          "grade": "E",
+          "count": 133,
+          "percentage": 16
+        },
+        {
+          "grade": "F",
+          "count": 218,
+          "percentage": 27
+        }
+      ],
+      "averageGrade": 1.86,
+      "courseName": "SAM2000",
+      "normalizedCode": "SAM2000"
+    },
+    {
+      "courseCode": "BED-2043NETT",
+      "year": 2025,
+      "institution": "UiT",
+      "totalStudents": 600,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 57,
+          "percentage": 10
+        },
+        {
+          "grade": "B",
+          "count": 166,
+          "percentage": 28
+        },
+        {
+          "grade": "C",
+          "count": 232,
+          "percentage": 39
+        },
+        {
+          "grade": "D",
+          "count": 96,
+          "percentage": 16
+        },
+        {
+          "grade": "E",
+          "count": 42,
+          "percentage": 7
+        },
+        {
+          "grade": "F",
+          "count": 7,
+          "percentage": 1
+        }
+      ],
+      "averageGrade": 3.13,
+      "courseName": "BED-2043NETT",
+      "normalizedCode": "BED-2043NETT"
+    },
+    {
+      "courseCode": "EXMUS10",
+      "year": 2025,
+      "institution": "NMH",
+      "totalStudents": 77,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 6,
+          "percentage": 8
+        },
+        {
+          "grade": "B",
+          "count": 17,
+          "percentage": 22
+        },
+        {
+          "grade": "C",
+          "count": 28,
+          "percentage": 36
+        },
+        {
+          "grade": "D",
+          "count": 10,
+          "percentage": 13
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 6,
+          "percentage": 8
+        },
+        {
+          "grade": "Bestått",
+          "count": 10,
+          "percentage": 13
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3.01,
+      "courseName": "EXMUS10",
+      "normalizedCode": "EXMUS10"
+    },
+    {
+      "courseCode": "IDR109",
+      "year": 2025,
+      "institution": "NIH",
+      "totalStudents": 133,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 35,
+          "percentage": 26
+        },
+        {
+          "grade": "B",
+          "count": 45,
+          "percentage": 34
+        },
+        {
+          "grade": "C",
+          "count": 44,
+          "percentage": 33
+        },
+        {
+          "grade": "D",
+          "count": 9,
+          "percentage": 7
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3.8,
+      "courseName": "IDR109",
+      "normalizedCode": "IDR109"
+    },
+    {
+      "courseCode": "LOG505",
+      "year": 2025,
+      "institution": "HIM",
+      "totalStudents": 350,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 19,
+          "percentage": 5
+        },
+        {
+          "grade": "B",
+          "count": 48,
+          "percentage": 14
+        },
+        {
+          "grade": "C",
+          "count": 95,
+          "percentage": 27
+        },
+        {
+          "grade": "D",
+          "count": 96,
+          "percentage": 27
+        },
+        {
+          "grade": "E",
+          "count": 67,
+          "percentage": 19
+        },
+        {
+          "grade": "F",
+          "count": 25,
+          "percentage": 7
+        }
+      ],
+      "averageGrade": 2.37,
+      "courseName": "LOG505",
+      "normalizedCode": "LOG505"
+    },
+    {
+      "courseCode": "ARK4006",
+      "year": 2025,
+      "institution": "AHO",
+      "totalStudents": 72,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 7,
+          "percentage": 10
+        },
+        {
+          "grade": "B",
+          "count": 15,
+          "percentage": 21
+        },
+        {
+          "grade": "C",
+          "count": 3,
+          "percentage": 4
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "Bestått",
+          "count": 44,
+          "percentage": 61
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 3,
+          "percentage": 4
+        }
+      ],
+      "averageGrade": 3.28,
+      "courseName": "ARK4006",
+      "normalizedCode": "ARK4006"
+    },
+    {
+      "courseCode": "PED-6501",
+      "year": 2025,
+      "institution": "SH",
+      "totalStudents": 16,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 6,
+          "percentage": 38
+        },
+        {
+          "grade": "B",
+          "count": 5,
+          "percentage": 31
+        },
+        {
+          "grade": "C",
+          "count": 5,
+          "percentage": 31
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 4.06,
+      "courseName": "PED-6501",
+      "normalizedCode": "PED-6501"
+    },
+    {
+      "courseCode": "SPL10323",
+      "year": 2025,
+      "institution": "HiØ",
+      "totalStudents": 256,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "B",
+          "count": 18,
+          "percentage": 7
+        },
+        {
+          "grade": "C",
+          "count": 61,
+          "percentage": 24
+        },
+        {
+          "grade": "D",
+          "count": 41,
+          "percentage": 16
+        },
+        {
+          "grade": "E",
+          "count": 65,
+          "percentage": 25
+        },
+        {
+          "grade": "F",
+          "count": 71,
+          "percentage": 28
+        }
+      ],
+      "averageGrade": 1.57,
+      "courseName": "SPL10323",
+      "normalizedCode": "SPL10323"
+    },
+    {
+      "courseCode": "REL152N",
+      "year": 2025,
+      "institution": "HVO",
+      "totalStudents": 175,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 7,
+          "percentage": 4
+        },
+        {
+          "grade": "B",
+          "count": 46,
+          "percentage": 26
+        },
+        {
+          "grade": "C",
+          "count": 69,
+          "percentage": 39
+        },
+        {
+          "grade": "D",
+          "count": 29,
+          "percentage": 17
+        },
+        {
+          "grade": "E",
+          "count": 13,
+          "percentage": 7
+        },
+        {
+          "grade": "F",
+          "count": 11,
+          "percentage": 6
+        }
+      ],
+      "averageGrade": 2.84,
+      "courseName": "REL152N",
+      "normalizedCode": "REL152N"
+    },
+    {
+      "courseCode": "BØA116",
+      "year": 2025,
+      "institution": "HVL",
+      "totalStudents": 383,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 8,
+          "percentage": 2
+        },
+        {
+          "grade": "B",
+          "count": 59,
+          "percentage": 15
+        },
+        {
+          "grade": "C",
+          "count": 241,
+          "percentage": 63
+        },
+        {
+          "grade": "D",
+          "count": 62,
+          "percentage": 16
+        },
+        {
+          "grade": "E",
+          "count": 13,
+          "percentage": 3
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 2.97,
+      "courseName": "BØA116",
+      "normalizedCode": "BØA116"
+    },
+    {
+      "courseCode": "BASP1035BD",
+      "year": 2025,
+      "institution": "VID",
+      "totalStudents": 116,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 5,
+          "percentage": 4
+        },
+        {
+          "grade": "B",
+          "count": 13,
+          "percentage": 11
+        },
+        {
+          "grade": "C",
+          "count": 31,
+          "percentage": 27
+        },
+        {
+          "grade": "D",
+          "count": 19,
+          "percentage": 16
+        },
+        {
+          "grade": "E",
+          "count": 33,
+          "percentage": 28
+        },
+        {
+          "grade": "F",
+          "count": 15,
+          "percentage": 13
+        }
+      ],
+      "averageGrade": 2.08,
+      "courseName": "BASP1035BD",
+      "normalizedCode": "BASP1035BD"
+    },
+    {
+      "courseCode": "K1010",
+      "year": 2020,
+      "institution": "MF",
+      "totalStudents": 90,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 7,
+          "percentage": 8
+        },
+        {
+          "grade": "B",
+          "count": 17,
+          "percentage": 19
+        },
+        {
+          "grade": "C",
+          "count": 26,
+          "percentage": 29
+        },
+        {
+          "grade": "D",
+          "count": 27,
+          "percentage": 30
+        },
+        {
+          "grade": "E",
+          "count": 9,
+          "percentage": 10
+        },
+        {
+          "grade": "F",
+          "count": 4,
+          "percentage": 4
+        }
+      ],
+      "averageGrade": 2.71,
+      "courseName": "K1010",
+      "normalizedCode": "K1010"
+    },
+    {
+      "courseCode": "EXP101",
+      "year": 2025,
+      "institution": "AHS",
+      "totalStudents": 72,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 10,
+          "percentage": 14
+        },
+        {
+          "grade": "B",
+          "count": 29,
+          "percentage": 40
+        },
+        {
+          "grade": "C",
+          "count": 25,
+          "percentage": 35
+        },
+        {
+          "grade": "D",
+          "count": 8,
+          "percentage": 11
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 3.57,
+      "courseName": "EXP101",
+      "normalizedCode": "EXP101"
+    },
+    {
+      "courseCode": "DID2",
+      "year": 2024,
+      "institution": "BD",
+      "totalStudents": 9,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 5,
+          "percentage": 56
+        },
+        {
+          "grade": "B",
+          "count": 4,
+          "percentage": 44
+        },
+        {
+          "grade": "C",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "D",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "E",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 4.56,
+      "courseName": "DID2",
+      "normalizedCode": "DID2"
+    },
+    {
+      "courseCode": "BHNHB2030",
+      "year": 2021,
+      "institution": "DMMH",
+      "totalStudents": 159,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 8,
+          "percentage": 5
+        },
+        {
+          "grade": "B",
+          "count": 34,
+          "percentage": 21
+        },
+        {
+          "grade": "C",
+          "count": 49,
+          "percentage": 31
+        },
+        {
+          "grade": "D",
+          "count": 39,
+          "percentage": 25
+        },
+        {
+          "grade": "E",
+          "count": 16,
+          "percentage": 10
+        },
+        {
+          "grade": "F",
+          "count": 13,
+          "percentage": 8
+        }
+      ],
+      "averageGrade": 2.62,
+      "courseName": "BHNHB2030",
+      "normalizedCode": "BHNHB2030"
+    },
+    {
+      "courseCode": "RLE1003",
+      "year": 2021,
+      "institution": "FIH",
+      "totalStudents": 37,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 0,
+          "percentage": 0
+        },
+        {
+          "grade": "B",
+          "count": 9,
+          "percentage": 24
+        },
+        {
+          "grade": "C",
+          "count": 14,
+          "percentage": 38
+        },
+        {
+          "grade": "D",
+          "count": 9,
+          "percentage": 24
+        },
+        {
+          "grade": "E",
+          "count": 5,
+          "percentage": 14
+        },
+        {
+          "grade": "F",
+          "count": 0,
+          "percentage": 0
+        }
+      ],
+      "averageGrade": 2.73,
+      "courseName": "RLE1003",
+      "normalizedCode": "RLE1003"
+    },
+    {
+      "courseCode": "BCR3103",
+      "year": 2025,
+      "institution": "HK",
+      "totalStudents": 866,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 163,
+          "percentage": 19
+        },
+        {
+          "grade": "B",
+          "count": 295,
+          "percentage": 34
+        },
+        {
+          "grade": "C",
+          "count": 264,
+          "percentage": 30
+        },
+        {
+          "grade": "D",
+          "count": 109,
+          "percentage": 13
+        },
+        {
+          "grade": "E",
+          "count": 28,
+          "percentage": 3
+        },
+        {
+          "grade": "F",
+          "count": 7,
+          "percentage": 1
+        }
+      ],
+      "averageGrade": 3.5,
+      "courseName": "BCR3103",
+      "normalizedCode": "BCR3103"
+    },
+    {
+      "courseCode": "BSY-221",
+      "year": 2025,
+      "institution": "LDH",
+      "totalStudents": 308,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 80,
+          "percentage": 26
+        },
+        {
+          "grade": "B",
+          "count": 120,
+          "percentage": 39
+        },
+        {
+          "grade": "C",
+          "count": 37,
+          "percentage": 12
+        },
+        {
+          "grade": "D",
+          "count": 8,
+          "percentage": 3
+        },
+        {
+          "grade": "E",
+          "count": 4,
+          "percentage": 1
+        },
+        {
+          "grade": "F",
+          "count": 59,
+          "percentage": 19
+        }
+      ],
+      "averageGrade": 3.28,
+      "courseName": "BSY-221",
+      "normalizedCode": "BSY-221"
+    },
+    {
+      "courseCode": "HSM124",
+      "year": 2025,
+      "institution": "NLA",
+      "totalStudents": 398,
+      "distributions": [
+        {
+          "grade": "A",
+          "count": 10,
+          "percentage": 3
+        },
+        {
+          "grade": "B",
+          "count": 29,
+          "percentage": 7
+        },
+        {
+          "grade": "C",
+          "count": 63,
+          "percentage": 16
+        },
+        {
+          "grade": "D",
+          "count": 41,
+          "percentage": 10
+        },
+        {
+          "grade": "E",
+          "count": 54,
+          "percentage": 14
+        },
+        {
+          "grade": "F",
+          "count": 201,
+          "percentage": 51
+        }
+      ],
+      "averageGrade": 1.23,
+      "courseName": "HSM124",
+      "normalizedCode": "HSM124"
+    }
+  ]
+}

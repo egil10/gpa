@@ -54,7 +54,7 @@ async function discoverNHHAllCourses() {
 
       // Merge into master map
       courses.forEach(course => {
-        const baseCode = normalizeCourseCodeForStorage(course.courseCode.replace(/-[0-9]+$/, '')); // Remove numeric API suffix and normalize
+        const baseCode = normalizeCourseCodeForStorage(course.courseCode); // Remove numeric API suffix and normalize
         const existing = allCoursesMap.get(baseCode);
 
         if (existing) {
