@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-25T01:07:54.952Z",
+  "timestamp": "2025-11-25T01:14:56.995Z",
   "institutions": [
     {
       "name": "uib",
@@ -18,13 +18,13 @@
     {
       "name": "usn",
       "code": "1176",
-      "storedCount": 2996,
+      "storedCount": 2860,
       "apiCount": 1687,
       "codesWithSpaces": 0,
       "duplicates": 0,
-      "missingInStored": 406,
-      "missingInAPI": 1611,
-      "formatMismatches": 1134,
+      "missingInStored": 417,
+      "missingInAPI": 1583,
+      "formatMismatches": 1148,
       "criticalIssues": [
         "4 API codes with spaces (need normalization)"
       ]
@@ -46,12 +46,12 @@
     {
       "name": "aho",
       "code": "1220",
-      "storedCount": 1127,
+      "storedCount": 1025,
       "apiCount": 137,
       "codesWithSpaces": 0,
       "duplicates": 0,
-      "missingInStored": 14,
-      "missingInAPI": 885,
+      "missingInStored": 16,
+      "missingInAPI": 873,
       "formatMismatches": 117,
       "criticalIssues": [
         "114 API codes with spaces (need normalization)"
@@ -60,12 +60,12 @@
     {
       "name": "vid",
       "code": "8208",
-      "storedCount": 984,
+      "storedCount": 974,
       "apiCount": 478,
       "codesWithSpaces": 0,
       "duplicates": 0,
       "missingInStored": 175,
-      "missingInAPI": 496,
+      "missingInAPI": 491,
       "formatMismatches": 238,
       "criticalIssues": [
         "14 API codes with spaces (need normalization)"
@@ -74,12 +74,12 @@
     {
       "name": "sh",
       "code": "0217",
-      "storedCount": 318,
+      "storedCount": 315,
       "apiCount": 86,
       "codesWithSpaces": 0,
       "duplicates": 0,
       "missingInStored": 59,
-      "missingInAPI": 276,
+      "missingInAPI": 273,
       "formatMismatches": 27,
       "criticalIssues": [
         "45 API codes with spaces (need normalization)"
@@ -88,12 +88,12 @@
     {
       "name": "ldh",
       "code": "8202",
-      "storedCount": 292,
+      "storedCount": 285,
       "apiCount": 62,
       "codesWithSpaces": 0,
       "duplicates": 0,
       "missingInStored": 59,
-      "missingInAPI": 251,
+      "missingInAPI": 248,
       "formatMismatches": 2,
       "criticalIssues": [
         "1 API codes with spaces (need normalization)"
@@ -991,7 +991,7 @@
     },
     {
       "institution": "usn",
-      "storedCount": 2996,
+      "storedCount": 2860,
       "apiCount": 1687,
       "codesWithSpaces": [],
       "duplicates": [],
@@ -999,6 +999,8 @@
         "1461-1",
         "1562-1",
         "1574-1",
+        "15MA2F1-2",
+        "15MA2F2-2",
         "15VEILPO-2",
         "2307-1",
         "2309-1",
@@ -1013,13 +1015,11 @@
         "3363N-1",
         "3364N-1",
         "4006N-1",
-        "4019N-1",
-        "4216-1",
-        "4501-1"
+        "4019N-1"
       ],
       "missingInAPI": [
         "050-E1",
-        "050-E10-2",
+        "050-E10",
         "050-E11",
         "050-E12",
         "050-E13",
@@ -1027,15 +1027,15 @@
         "050-E15",
         "050-E16",
         "050-E17",
-        "050-E2-2",
+        "050-E2",
         "050-E3",
-        "050-E4-2",
+        "050-E4",
         "050-E5",
         "050-E7",
         "050-E8",
-        "050-E9-2",
+        "050-E9",
         "051-E1",
-        "051-E10-2",
+        "051-E10",
         "051-E11",
         "051-E12"
       ]
@@ -1296,16 +1296,18 @@
     },
     {
       "institution": "aho",
-      "storedCount": 1127,
+      "storedCount": 1025,
       "apiCount": 137,
       "codesWithSpaces": [],
       "duplicates": [],
       "missingInStored": [
         "40 326-1",
         "40 556-1",
+        "60 150-3",
         "60 537-1",
         "60 539-1",
         "60 701-1",
+        "70 111-2",
         "70 132-2",
         "70 154-1",
         "70 307-1",
@@ -1328,7 +1330,7 @@
         "40304",
         "40305",
         "40306",
-        "40307-2",
+        "40307",
         "40308",
         "40309",
         "40310",
@@ -1341,7 +1343,7 @@
     },
     {
       "institution": "sh",
-      "storedCount": 318,
+      "storedCount": 315,
       "apiCount": 86,
       "codesWithSpaces": [],
       "duplicates": [],
@@ -1545,7 +1547,7 @@
     },
     {
       "institution": "vid",
-      "storedCount": 984,
+      "storedCount": 974,
       "apiCount": 478,
       "codesWithSpaces": [],
       "duplicates": [],
@@ -2005,7 +2007,7 @@
     },
     {
       "institution": "ldh",
-      "storedCount": 292,
+      "storedCount": 285,
       "apiCount": 62,
       "codesWithSpaces": [],
       "duplicates": [],
@@ -2040,10 +2042,9 @@
         "BIS-EMNE12",
         "BIS-EMNE13",
         "BIS-EMNE14A",
-        "BIS-EMNE3-2",
+        "BIS-EMNE3",
         "BIS-EMNE4",
-        "BIS-EMNE5-2",
-        "BIS-EMNE6",
+        "BIS-EMNE5",
         "BIS-EMNE7",
         "BIS-EMNE7A",
         "BIS-EMNE7B",
@@ -2051,7 +2052,8 @@
         "BIS-EMNE8B",
         "BIS-LEGEREG",
         "BLFGS",
-        "BLFGS000"
+        "BLFGS000",
+        "BLFHS"
       ]
     },
     {
