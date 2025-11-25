@@ -1,10 +1,16 @@
+import { normalizeCourseCodeAdvanced } from './course-code-normalizer';
+
 const STORAGE_KEY = 'unavailable-courses';
 
 const unavailableCourses = new Set<string>();
 let initialized = false;
 
 function makeKey(code: string, institution: string): string {
-  return `${institution.toUpperCase()}::${code.replace(/\s+/g, '').toUpperCase()}`;
+  // Use the same normalization as used in all-courses.ts for consistent matching
+  // This ensures that codes are normalized the same way whether checking availability or searching
+  // This is especially important for VGS courses which might have spaces in the original data
+  const normalizedCode = normalizeCourseCodeAdvanced(code).normalized;
+  return `${institution.toUpperCase()}::${normalizedCode}`;
 }
 
 function ensureInitialized(): void {

@@ -177,12 +177,16 @@ export async function loadInstitutionCourses(institution: string): Promise<Cours
         const vgsCourses = await getAllVGSCourses();
         
         // Convert VGS courses to CourseInfo format
+        // IMPORTANT: Normalize the code for consistent searching and matching
+        // VGS course codes might have spaces or different formatting in the data
         const courses: CourseInfo[] = vgsCourses.map(vgsCourse => {
+          // Normalize the code (removes spaces, uppercases, handles suffixes)
+          // This ensures search works correctly - stored code matches normalized search queries
           const normalizedCode = normalizeCourseCode(vgsCourse.code);
           const uniqueKey = `${institution}-${normalizedCode}`;
           
           return {
-            code: vgsCourse.code,
+            code: normalizedCode, // Store normalized code for consistent searching
             name: vgsCourse.name,
             institution,
             institutionCode: institutionData.code,

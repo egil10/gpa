@@ -186,13 +186,18 @@ export async function fetchVGSGradeData(
   try {
     const data = await loadVGSGradeData();
     
-    // Normalize course code (uppercase, trim)
-    const normalizedCode = courseCode.toUpperCase().trim();
+    // Normalize course code for matching (same normalization as used when storing courses)
+    // This handles spaces, case, and ensures consistent matching
+    // Import normalizeCourseCodeAdvanced to match the normalization used in all-courses.ts
+    const { normalizeCourseCodeAdvanced } = await import('./course-code-normalizer');
+    const normalizedSearchCode = normalizeCourseCodeAdvanced(courseCode).normalized;
     
-    // Find matching entries
-    const matchingEntries = data.gradeData.filter(
-      entry => entry.courseCode.toUpperCase() === normalizedCode
-    );
+    // Find matching entries - normalize both the search code and stored codes for comparison
+    // The data file might have codes with spaces (e.g., "ENG 1007"), so we need to normalize both
+    const matchingEntries = data.gradeData.filter(entry => {
+      const normalizedEntryCode = normalizeCourseCodeAdvanced(entry.courseCode).normalized;
+      return normalizedEntryCode === normalizedSearchCode;
+    });
 
     if (matchingEntries.length === 0) {
       return [];
