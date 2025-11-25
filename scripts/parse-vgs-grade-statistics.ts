@@ -12,6 +12,9 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as XLSX from 'xlsx';
+import * as os from 'os';
+import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 
 interface VGSGradeData {
   courseCode: string;
@@ -33,27 +36,131 @@ interface VGSGradeData {
   schoolName?: string; // EnhetNavn
 }
 
-interface ParsedRow {
-  courseCode: string;
-  courseName: string;
-  level: string;
-  county?: string;
-  schoolOrgNumber?: string;
-  schoolName?: string;
-  yearData: Record<string, {
-    averageGrade: number | null;
-    totalStudents: number;
-    grade1: number | null;
-    grade2: number | null;
-    grade3: number | null;
-    grade4: number | null;
-    grade5: number | null;
-    grade6: number | null;
-  }>;
+type YearMetric =
+  | 'Snittkarakter'
+  | 'Antall elever'
+  | 'Karakteren 1'
+  | 'Karakteren 2'
+  | 'Karakteren 3'
+  | 'Karakteren 4'
+  | 'Karakteren 5'
+  | 'Karakteren 6';
+
+interface YearColumnMeta {
+  year: string;
+  metric: YearMetric;
+  index: number;
 }
 
-const CSV_FILE = path.join(__dirname, '..', '20251125-1728_Karakterer_i_videregaaende_skole.csv');
+interface ColumnIndices {
+  courseCodeIndex: number;
+  courseNameIndex: number;
+  levelIndex: number;
+  countyIndex: number;
+  orgNumberIndex: number;
+  schoolNameIndex: number;
+}
+
+interface ParserContext {
+  header: string[];
+  yearColumnsEntries: Array<[string, YearColumnMeta]>;
+  years: string[];
+  indices: ColumnIndices;
+}
+
+interface WorkerPayload {
+  lines: string[];
+  context: ParserContext;
+  workerId: number;
+}
+
+interface WorkerResult {
+  records: VGSGradeData[];
+  skipped: number;
+  processedRows: number;
+}
+
+const ROOT_DIR = path.join(__dirname, '..');
+const DATA_FILE = resolveDatasetFile();
 const OUTPUT_FILE = path.join(__dirname, '..', 'data', 'vgs-grade-statistics.json');
+
+/**
+ * Figure out which dataset file to parse.
+ * Prefers an explicit env override, then the most recent Karakterer* Excel/CSV file in repo root.
+ */
+function resolveDatasetFile(): string {
+  const overridePath = process.env.VGS_GRADES_SOURCE;
+  if (overridePath) {
+    const candidate = path.isAbsolute(overridePath)
+      ? overridePath
+      : path.join(ROOT_DIR, overridePath);
+    if (!fs.existsSync(candidate)) {
+      throw new Error(`VGS_GRADES_SOURCE file not found: ${candidate}`);
+    }
+    return candidate;
+  }
+
+  const datasetCandidates = fs
+    .readdirSync(ROOT_DIR)
+    .filter(file =>
+      file.toLowerCase().includes('karakterer_i_videregaaende_skole') &&
+      /\.(csv|tsv|xlsx?)$/i.test(file)
+    )
+    .map(file => path.join(ROOT_DIR, file))
+    .filter(fullPath => fs.statSync(fullPath).isFile())
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+
+  if (datasetCandidates.length === 0) {
+    throw new Error('No Karakterer_i_videregaaende_skole dataset file found in repo root');
+  }
+
+  return datasetCandidates[0];
+}
+
+/**
+ * Load dataset content as TSV text, supporting both CSV/TSV and Excel files.
+ */
+function loadDatasetContent(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+
+  if (ext === '.xlsx' || ext === '.xls') {
+    console.log(`📗 Reading Excel file: ${path.basename(filePath)}`);
+    const workbook = XLSX.readFile(filePath, { cellDates: false });
+    const firstSheet = workbook.SheetNames[0];
+    if (!firstSheet) {
+      throw new Error('Excel file contains no sheets');
+    }
+    const worksheet = workbook.Sheets[firstSheet];
+    // Convert to TSV so the rest of the parser can stay the same
+    const tsv = XLSX.utils.sheet_to_csv(worksheet, { FS: '\t' });
+    return `sep=\t\n${tsv}`;
+  }
+
+  console.log(`📄 Reading delimited text file: ${path.basename(filePath)}`);
+
+  // Try UTF-16LE first (common for Excel exports), fallback to UTF-8
+  let csvContent: string;
+  try {
+    const buffer = fs.readFileSync(filePath);
+    if (buffer.length >= 2) {
+      if (buffer[0] === 0xFF && buffer[1] === 0xFE) {
+        csvContent = buffer.toString('utf16le');
+      } else if (buffer[0] === 0xFE && buffer[1] === 0xFF) {
+        csvContent = buffer.swap16().toString('utf16le');
+      } else if (buffer[1] === 0x00 || (buffer.length > 4 && buffer[3] === 0x00)) {
+        csvContent = buffer.toString('utf16le');
+      } else {
+        csvContent = buffer.toString('utf-8');
+      }
+    } else {
+      csvContent = buffer.toString('utf-8');
+    }
+  } catch {
+    csvContent = fs.readFileSync(filePath, 'utf-8');
+  }
+
+  return csvContent;
+}
 
 /**
  * Parse a year string like "2024-25" and return the academic year start (2024)
@@ -80,32 +187,8 @@ function parseNumeric(value: string | undefined): number | null {
  * Parse the CSV file and extract grade statistics
  */
 async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
-  console.log('📖 Reading CSV file...');
-  
-  // Try UTF-16LE first (common for Excel exports), fallback to UTF-8
-  let csvContent: string;
-  try {
-    const buffer = fs.readFileSync(CSV_FILE);
-    // Check if it's UTF-16LE by looking at BOM or byte pattern
-    if (buffer[0] === 0xFF && buffer[1] === 0xFE) {
-      // UTF-16LE BOM present
-      csvContent = buffer.toString('utf16le');
-    } else if (buffer[0] === 0xFE && buffer[1] === 0xFF) {
-      // UTF-16BE BOM present
-      csvContent = buffer.swap16().toString('utf16le');
-    } else {
-      // Try UTF-16LE anyway (might not have BOM)
-      // Check if second byte is null (UTF-16LE indicator)
-      if (buffer[1] === 0x00 || (buffer.length > 4 && buffer[3] === 0x00)) {
-        csvContent = buffer.toString('utf16le');
-      } else {
-        csvContent = buffer.toString('utf-8');
-      }
-    }
-  } catch (e) {
-    // Fallback to UTF-8
-    csvContent = fs.readFileSync(CSV_FILE, 'utf-8');
-  }
+  console.log(`📖 Loading dataset from ${DATA_FILE}`);
+  const csvContent = loadDatasetContent(DATA_FILE);
   
   // Handle both \n and \r\n line endings
   const allLines = csvContent.split(/\r?\n/).filter(line => line.trim() !== '');
@@ -118,9 +201,12 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
   console.log(`Line 0 preview: "${allLines[0].substring(0, 10)}"`);
   console.log(`Line 1 preview: "${allLines[1].substring(0, 50)}"`);
 
-  // Skip "sep=" line (first line)
-  let headerIndex = 1; // Always skip first line (sep=)
-  console.log('Skipping sep= line (line 0)');
+  // Skip optional "sep=" line (first line)
+  let headerIndex = 0;
+  if (allLines[0].startsWith('sep=')) {
+    headerIndex = 1;
+    console.log('Skipping sep= line (line 0)');
+  }
 
   // Parse header - it's tab-separated (line 1 after sep=)
   const headerLine = allLines[headerIndex];
@@ -144,11 +230,7 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
   console.log(`Data lines to process: ${lines.length}`);
 
   // Extract year columns - they follow the pattern: "{year}.Standpunkt.Alle eierformer.Alle kjønn.{metric}"
-  const yearColumns: Map<string, {
-    year: string;
-    metric: 'Snittkarakter' | 'Antall elever' | 'Karakteren 1' | 'Karakteren 2' | 'Karakteren 3' | 'Karakteren 4' | 'Karakteren 5' | 'Karakteren 6';
-    index: number;
-  }> = new Map();
+  const yearColumns: Map<string, YearColumnMeta> = new Map();
 
   header.forEach((col, index) => {
     // Skip first 10 columns (non-year columns)
@@ -205,98 +287,164 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
   console.log(`Years found: ${Array.from(years).sort().join(', ')}`);
 
   // Find column indices
-  const courseCodeIndex = header.indexOf('Vurderingsfagkode');
-  const courseNameIndex = header.indexOf('Vurderingsfagnavn');
-  const levelIndex = header.indexOf('EnhetNivaa'); // 0 = Nasjonalt, 1 = Fylke, 2 = Enhet, 3 = school
-  const countyIndex = header.indexOf('Fylkekode');
-  const orgNumberIndex = header.indexOf('Organisasjonsnummer');
-  const schoolNameIndex = header.indexOf('EnhetNavn');
+  const indices: ColumnIndices = {
+    courseCodeIndex: header.indexOf('Vurderingsfagkode'),
+    courseNameIndex: header.indexOf('Vurderingsfagnavn'),
+    levelIndex: header.indexOf('EnhetNivaa'), // 0 = Nasjonalt, 1 = Fylke, 2 = Enhet, 3 = school
+    countyIndex: header.indexOf('Fylkekode'),
+    orgNumberIndex: header.indexOf('Organisasjonsnummer'),
+    schoolNameIndex: header.indexOf('EnhetNavn'),
+  };
 
-  if (courseCodeIndex === -1 || courseNameIndex === -1) {
+  if (indices.courseCodeIndex === -1 || indices.courseNameIndex === -1) {
     throw new Error('Required columns not found in CSV header');
   }
 
   console.log(`\n📊 Parsing ${lines.length} data rows...\n`);
 
+  const context: ParserContext = {
+    header,
+    yearColumnsEntries: Array.from(yearColumns.entries()),
+    years: Array.from(years),
+    indices,
+  };
+
+  const workerCount = determineWorkerCount(lines.length);
+  console.log(`🧵 Using ${workerCount} worker${workerCount === 1 ? '' : 's'} for parsing`);
+
+  const { records, skipped, processedRows } = await processLinesConcurrently(lines, context, workerCount);
+
+  console.log(`\n✅ Parsing complete!`);
+  console.log(`   Rows processed: ${processedRows}`);
+  console.log(`   Rows skipped: ${skipped}`);
+  console.log(`   Grade records extracted: ${records.length}`);
+  console.log(`   Unique courses: ${new Set(records.map(d => d.courseCode)).size}`);
+
+  return records;
+}
+
+function determineWorkerCount(totalLines: number): number {
+  const requested = process.env.VGS_GRADES_WORKERS
+    ? Math.max(1, parseInt(process.env.VGS_GRADES_WORKERS, 10))
+    : Math.max(1, Math.min(os.cpus().length, 4));
+
+  return totalLines < 2000 ? 1 : requested;
+}
+
+async function processLinesConcurrently(
+  lines: string[],
+  context: ParserContext,
+  workerCount: number
+): Promise<WorkerResult> {
+  if (workerCount <= 1) {
+    return processLinesChunk(lines, context, 0);
+  }
+
+  const chunkSize = Math.ceil(lines.length / workerCount);
+  const tasks: Promise<WorkerResult>[] = [];
+
+  for (let i = 0; i < workerCount; i++) {
+    const chunk = lines.slice(i * chunkSize, (i + 1) * chunkSize);
+    if (chunk.length === 0) continue;
+
+    tasks.push(
+      new Promise((resolve, reject) => {
+        const worker = new Worker(__filename, {
+          workerData: {
+            lines: chunk,
+            context,
+            workerId: i + 1,
+          } satisfies WorkerPayload,
+        });
+
+        worker.on('message', (result: WorkerResult) => resolve(result));
+        worker.on('error', reject);
+        worker.on('exit', code => {
+          if (code !== 0) {
+            reject(new Error(`Worker exited with code ${code}`));
+          }
+        });
+      })
+    );
+  }
+
+  const results = await Promise.all(tasks);
+  return results.reduce<WorkerResult>(
+    (acc, result) => ({
+      records: acc.records.concat(result.records),
+      skipped: acc.skipped + result.skipped,
+      processedRows: acc.processedRows + result.processedRows,
+    }),
+    { records: [], skipped: 0, processedRows: 0 }
+  );
+}
+
+function processLinesChunk(
+  lines: string[],
+  context: ParserContext,
+  workerId: number
+): WorkerResult {
+  const yearColumns = new Map(context.yearColumnsEntries);
+  const years = context.years;
+  const { indices } = context;
+
+  const levelMap: Record<string, 'Nasjonalt' | 'Fylke' | 'Enhet'> = {
+    '0': 'Nasjonalt',
+    '1': 'Nasjonalt',
+    '2': 'Fylke',
+    '3': 'Enhet',
+  };
+
   const allGradeData: VGSGradeData[] = [];
   let rowCount = 0;
   let skippedCount = 0;
 
-  // Process data rows (lines array already has header removed)
   for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const cells = line.split('\t');
+    const line = lines[i];
+    const cells = line.split('\t');
 
-    if (cells.length < header.length) {
-      // Skip incomplete rows
+    if (cells.length < context.header.length) {
       skippedCount++;
       continue;
     }
 
-    const courseCode = cells[courseCodeIndex]?.trim() || '';
-    const courseName = cells[courseNameIndex]?.trim() || '';
+    const courseCode = cells[indices.courseCodeIndex]?.trim() || '';
+    const courseName = cells[indices.courseNameIndex]?.trim() || '';
 
-    // Only process rows with course codes and names
     if (!courseCode || !courseName || courseCode === 'Alle') {
       skippedCount++;
       continue;
     }
 
-    const levelValue = cells[levelIndex]?.trim() || '0';
-    const levelMap: Record<string, 'Nasjonalt' | 'Fylke' | 'Enhet'> = {
-      '0': 'Nasjonalt',
-      '1': 'Nasjonalt', // Also national level
-      '2': 'Fylke',
-      '3': 'Enhet',
-    };
+    const levelValue = cells[indices.levelIndex]?.trim() || '0';
     const level = levelMap[levelValue] || 'Nasjonalt';
 
-    const county = level === 'Fylke' || level === 'Enhet' ? cells[countyIndex]?.trim() : undefined;
-    const schoolOrgNumber = level === 'Enhet' ? cells[orgNumberIndex]?.trim() : undefined;
-    const schoolName = level === 'Enhet' ? cells[schoolNameIndex]?.trim() : undefined;
+    const county =
+      level === 'Fylke' || level === 'Enhet'
+        ? cells[indices.countyIndex]?.trim()
+        : undefined;
+    const schoolOrgNumber =
+      level === 'Enhet' ? cells[indices.orgNumberIndex]?.trim() : undefined;
+    const schoolName =
+      level === 'Enhet' ? cells[indices.schoolNameIndex]?.trim() : undefined;
 
-    // Process each year
     years.forEach(year => {
-      // Get indices for this year's metrics
-      const avgGradeKey = `${year}_Snittkarakter`;
-      const studentCountKey = `${year}_Antall elever`;
-      const grade1Key = `${year}_Karakteren 1`;
-      const grade2Key = `${year}_Karakteren 2`;
-      const grade3Key = `${year}_Karakteren 3`;
-      const grade4Key = `${year}_Karakteren 4`;
-      const grade5Key = `${year}_Karakteren 5`;
-      const grade6Key = `${year}_Karakteren 6`;
-
-      const avgGradeCol = yearColumns.get(avgGradeKey);
-      const studentCountCol = yearColumns.get(studentCountKey);
-      const grade1Col = yearColumns.get(grade1Key);
-      const grade2Col = yearColumns.get(grade2Key);
-      const grade3Col = yearColumns.get(grade3Key);
-      const grade4Col = yearColumns.get(grade4Key);
-      const grade5Col = yearColumns.get(grade5Key);
-      const grade6Col = yearColumns.get(grade6Key);
+      const avgGradeCol = yearColumns.get(`${year}_Snittkarakter`);
+      const studentCountCol = yearColumns.get(`${year}_Antall elever`);
 
       if (!avgGradeCol || !studentCountCol) {
-        return; // Skip years without required data
+        return;
       }
 
       const averageGrade = parseNumeric(cells[avgGradeCol.index]);
       const totalStudents = parseNumeric(cells[studentCountCol.index]);
 
-      // Skip rows without student count or average grade
       if (totalStudents === null || totalStudents === 0 || averageGrade === null) {
         return;
       }
 
-      const grade1 = grade1Col ? parseNumeric(cells[grade1Col.index]) : null;
-      const grade2 = grade2Col ? parseNumeric(cells[grade2Col.index]) : null;
-      const grade3 = grade3Col ? parseNumeric(cells[grade3Col.index]) : null;
-      const grade4 = grade4Col ? parseNumeric(cells[grade4Col.index]) : null;
-      const grade5 = grade5Col ? parseNumeric(cells[grade5Col.index]) : null;
-      const grade6 = grade6Col ? parseNumeric(cells[grade6Col.index]) : null;
-
-      // Only include if we have at least some grade distribution data
-      if (grade1 === null && grade2 === null && grade3 === null && grade4 === null && grade5 === null && grade6 === null) {
+      const gradeDistribution = buildGradeDistribution(year, yearColumns, cells);
+      if (!gradeDistribution) {
         return;
       }
 
@@ -306,14 +454,7 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
         year,
         averageGrade,
         totalStudents: Math.round(totalStudents),
-        gradeDistribution: {
-          '1': grade1 || 0,
-          '2': grade2 || 0,
-          '3': grade3 || 0,
-          '4': grade4 || 0,
-          '5': grade5 || 0,
-          '6': grade6 || 0,
-        },
+        gradeDistribution,
         level,
         county,
         schoolOrgNumber,
@@ -323,18 +464,48 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
       rowCount++;
     });
 
-    if (i % 1000 === 0) {
-      console.log(`  Processed ${i} rows, extracted ${rowCount} grade records so far...`);
+    if (workerId === 0 && i % 500 === 0) {
+      console.log(
+        `  [main] Processed ${i} rows in current chunk, extracted ${rowCount} grade records...`
+      );
+    } else if (workerId > 0 && i % 1000 === 0) {
+      console.log(
+        `  [worker ${workerId}] Processed ${i} rows, accumulated ${rowCount} records`
+      );
     }
   }
 
-  console.log(`\n✅ Parsing complete!`);
-  console.log(`   Rows processed: ${lines.length - 1}`);
-  console.log(`   Rows skipped: ${skippedCount}`);
-  console.log(`   Grade records extracted: ${rowCount}`);
-  console.log(`   Unique courses: ${new Set(allGradeData.map(d => d.courseCode)).size}`);
+  return { records: allGradeData, skipped: skippedCount, processedRows: lines.length };
+}
 
-  return allGradeData;
+function buildGradeDistribution(
+  year: string,
+  yearColumns: Map<string, YearColumnMeta>,
+  cells: string[]
+): VGSGradeData['gradeDistribution'] | null {
+  const grades = ['1', '2', '3', '4', '5', '6'] as const;
+  const distribution: Record<typeof grades[number], number> = {
+    '1': 0,
+    '2': 0,
+    '3': 0,
+    '4': 0,
+    '5': 0,
+    '6': 0,
+  };
+
+  let hasValue = false;
+
+  grades.forEach(grade => {
+    const col = yearColumns.get(`${year}_Karakteren ${grade}`);
+    if (!col) return;
+    const value = parseNumeric(cells[col.index]);
+    if (value !== null) {
+      distribution[grade] = value;
+      hasValue = true;
+    }
+  });
+
+  return hasValue ? distribution : null;
 }
 
 /**
@@ -342,8 +513,8 @@ async function parseVGSGradesCSV(): Promise<VGSGradeData[]> {
  */
 async function main() {
   try {
-    if (!fs.existsSync(CSV_FILE)) {
-      throw new Error(`CSV file not found: ${CSV_FILE}`);
+    if (!fs.existsSync(DATA_FILE)) {
+      throw new Error(`Dataset file not found: ${DATA_FILE}`);
     }
 
     const gradeData = await parseVGSGradesCSV();
@@ -366,7 +537,7 @@ async function main() {
         source: 'UDIR (Utdanningsdirektoratet)',
         url: 'https://www.udir.no/tall-og-forskning/statistikk/statistikk-videregaende-skole/karakterer-vgs/',
         licenseUrl: 'https://statistikkportalen.udir.no/api/rapportering/rest/v1/Tekst/visTekst/3?dataChanged=2025-11-25_163500',
-        csvFile: path.basename(CSV_FILE),
+        csvFile: path.basename(DATA_FILE),
         parsedAt: new Date().toISOString(),
         totalRecords: gradeData.length,
         nationalRecords: nationalData.length,
@@ -399,7 +570,13 @@ async function main() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+if (require.main === module && isMainThread) {
   main();
+}
+
+if (!isMainThread && parentPort) {
+  const payload = workerData as WorkerPayload;
+  const result = processLinesChunk(payload.lines, payload.context, payload.workerId);
+  parentPort.postMessage(result);
 }
 
