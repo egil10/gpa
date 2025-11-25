@@ -21,13 +21,12 @@ interface Hardcoded28Payload {
   courses: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }>;
 }
 
-// The exact 28 courses the user specified, in order
-const HARDCODED_28_COURSES = [
+// Exactly 1 course per institution (36 total)
+const HARDCODED_COURSES = [
   { code: 'TDT4110', institution: 'NTNU', institutionCode: '1150', name: 'TDT4110' },
   { code: 'INTER1100', institution: 'OsloMet', institutionCode: '1175', name: 'INTER1100' },
   { code: 'EXPHIL03', institution: 'UiO', institutionCode: '1110', name: 'EXPHIL03' },
-  { code: 'EXPHIL', institution: 'UiB', institutionCode: '1120', name: 'EXPHIL' },
-  { code: 'INF100', institution: 'UiB', institutionCode: '1120', name: 'INF100' },
+  { code: 'INF100', institution: 'UiB', institutionCode: '1120', name: 'INF100' }, // Removed duplicate EXPHIL - keeping INF100
   { code: 'AOS100-B', institution: 'NMBU', institutionCode: '1173', name: 'AOS100-B' },
   { code: 'PGR112', institution: 'HK', institutionCode: '8253', name: 'PGR112' },
   { code: 'SAM2000', institution: 'USN', institutionCode: '1176', name: 'SAM2000' },
@@ -200,12 +199,12 @@ async function main() {
 ╚════════════════════════════════════════════════════════════╝
 `);
 
-  console.log(`📋 Fetching grade data for ${HARDCODED_28_COURSES.length} hardcoded courses...\n`);
+  console.log(`📋 Fetching grade data for ${HARDCODED_COURSES.length} hardcoded courses (1 per institution)...\n`);
 
   const results: Array<CourseStats & { institution: string; courseName: string; normalizedCode: string }> = [];
 
-  for (let i = 0; i < HARDCODED_28_COURSES.length; i++) {
-    const course = HARDCODED_28_COURSES[i];
+  for (let i = 0; i < HARDCODED_COURSES.length; i++) {
+    const course = HARDCODED_COURSES[i];
     console.log(`[${i + 1}/${HARDCODED_28_COURSES.length}] Fetching ${course.code} (${course.institution})...`);
 
     const stats = await fetchCourseGradeData(
@@ -238,7 +237,7 @@ async function main() {
     }
 
     // Small delay to avoid overwhelming the API
-    if (i < HARDCODED_28_COURSES.length - 1) {
+    if (i < HARDCODED_COURSES.length - 1) {
       await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
@@ -251,8 +250,8 @@ async function main() {
   fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(payload, null, 2));
 
-  console.log(`\n✅ Hardcoded 28-course data saved!`);
-  console.log(`   - Courses with data: ${results.length}/${HARDCODED_28_COURSES.length}`);
+  console.log(`\n✅ Hardcoded course data saved!`);
+  console.log(`   - Courses with data: ${results.length}/${HARDCODED_COURSES.length} (1 per institution)`);
   console.log(`   - Saved to: ${OUTPUT_FILE}\n`);
 }
 

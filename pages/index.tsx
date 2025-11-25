@@ -63,9 +63,9 @@ function getBasePath(routerBasePath?: string): string {
   
   return '';
 }
-const INITIAL_COURSES_COUNT = 15; // Show 15 hardcoded courses on initial load
-const HARDCODED_28_TOTAL = 29; // Total hardcoded courses (show all 29 when "Load more" is clicked)
-const TOP_INITIAL_DISPLAY_COUNT = 12;
+const INITIAL_COURSES_COUNT = 12; // Show 12 courses on initial load (one per institution, loaded in increments of 12)
+const COURSES_PER_INCREMENT = 12; // Load courses in increments of 12 (12, 12, 12 = 36 total)
+const TOTAL_INSTITUTIONS = 36; // Total institutions (36 = one chart per institution)
 
 export default function Home() {
   const router = useRouter();
@@ -190,9 +190,9 @@ export default function Home() {
         setCoursesData(dataMap);
         // Mark as complete immediately - we have instant data!
         setInitialLoadComplete(true);
-        // Show first 15 courses initially
+        // Show first 12 courses initially (increment of 12)
         setDisplayCount(INITIAL_COURSES_COUNT);
-        console.log(`[Hardcoded28] Loaded ${data.courses.length} courses instantly`);
+        console.log(`[HardcodedCourses] Loaded ${data.courses.length} courses instantly (1 per institution)`);
       })
       .catch((error) => {
         console.warn('Hardcoded 28-course data unavailable:', error);
@@ -271,7 +271,7 @@ export default function Home() {
     }
 
     if (!topInitialDisplaySet.current) {
-      const desired = Math.min(TOP_INITIAL_DISPLAY_COUNT, topInstitutionCourses.length);
+      const desired = Math.min(INITIAL_COURSES_COUNT, topInstitutionCourses.length);
       setDisplayCount(desired);
       topInitialDisplaySet.current = true;
     }
@@ -438,18 +438,19 @@ export default function Home() {
 
         if (toLoad.length > 0) {
           // Load in batches to avoid overwhelming the API
-          const batchSize = 10; // Load 10 at a time
+          // Load in increments of 12 (same as display increments)
+          const batchSize = COURSES_PER_INCREMENT; // Load 12 at a time
           const batches = [];
           for (let i = 0; i < toLoad.length; i += batchSize) {
             batches.push(toLoad.slice(i, i + batchSize));
           }
           
-          // Load first batch immediately
+          // Load first batch immediately (initial 12 courses)
           if (batches.length > 0) {
             loadCoursesData(batches[0]);
           }
           
-          // Load remaining batches with delays
+          // Load remaining batches with delays (next 12, then final 12)
           batches.slice(1).forEach((batch, idx) => {
             setTimeout(() => {
               loadCoursesData(batch);
@@ -824,12 +825,12 @@ export default function Home() {
       topInstitutionCourses.length > 0;
 
     if (isTopDefaultView) {
-      // If we have hardcoded 28-course data, show all courses when "Load more" is clicked
+      // If we have hardcoded courses data, show them in increments of 12
       if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
-        // All hardcoded courses are already loaded, so just show them all
+        // All hardcoded courses are already loaded, so just show them in increments
         if (displayCount < hardcoded28Data.courses.length) {
-          // Show all hardcoded courses instantly
-          setDisplayCount(hardcoded28Data.courses.length);
+          // Load next increment of 12 courses
+          setDisplayCount(prev => Math.min(prev + COURSES_PER_INCREMENT, hardcoded28Data.courses.length));
           return;
         }
         return;
@@ -842,8 +843,8 @@ export default function Home() {
       });
       
       if (displayCount < coursesWithData.length) {
-        // Show more courses that already have data
-        setDisplayCount(prev => Math.min(prev + COURSES_PER_PAGE, coursesWithData.length));
+        // Show more courses that already have data (in increments of 12)
+        setDisplayCount(prev => Math.min(prev + COURSES_PER_INCREMENT, coursesWithData.length));
         return;
       }
       
@@ -853,12 +854,12 @@ export default function Home() {
           const key = `${course.institution}-${course.code}`;
           return !coursesDataRef.current.has(key) && !loadingCoursesRef.current.has(key);
         })
-        .slice(0, COURSES_PER_PAGE);
+        .slice(0, COURSES_PER_INCREMENT); // Load 12 at a time
       
       if (coursesToLoad.length > 0) {
         loadCoursesData(coursesToLoad);
-        // Increase display count to show courses once data is loaded
-        setDisplayCount(prev => prev + COURSES_PER_PAGE);
+        // Increase display count to show courses once data is loaded (in increments of 12)
+        setDisplayCount(prev => prev + COURSES_PER_INCREMENT);
       }
       return;
     }
@@ -1261,7 +1262,7 @@ useEffect(() => {
     if (loading) return false;
 
     if (isTopDefaultView) {
-      // If we have hardcoded 28-course data, check if we have more than initial display count
+      // If we have hardcoded course data, check if we have more than current display count
       if (hardcoded28Data && hardcoded28Data.courses.length > 0) {
         // Show "Load more" if we're showing less than all hardcoded courses
         return displayCount < hardcoded28Data.courses.length;

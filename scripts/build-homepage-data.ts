@@ -40,11 +40,11 @@ interface HomepageTopPayload {
 
 const DATA_DIR = path.join(process.cwd(), 'data', 'institutions');
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', 'homepage-top-courses.json');
-const MAX_PER_INSTITUTION = 3; // Top 3 courses per institution
+const MAX_PER_INSTITUTION = 1; // Top 1 course per institution (36 total = one per institution)
 const MIN_YEAR = 2020; // Exclude courses with data older than this year
 const DIRECT_API = 'https://dbh.hkdir.no/api/Tabeller/hentJSONTabellData';
-const MAX_CANDIDATES_TO_CHECK = 3; // Check top 3 courses per institution to find ones with A-F data
-const EARLY_STOP_THRESHOLD = 3; // Stop early once we have this many courses with A-F grades
+const MAX_CANDIDATES_TO_CHECK = 5; // Check top 5 courses per institution to find one with A-F data
+const EARLY_STOP_THRESHOLD = 1; // Stop early once we have 1 course with A-F grades (we only need 1 per institution)
 
 function loadOptimizedCourses(filePath: string): OptimizedCourse[] {
   if (!fs.existsSync(filePath)) {
@@ -671,9 +671,9 @@ async function main() {
         });
         console.log(`      ✅ ${course.courseCode} has A-F grade data (${validation.letterGradeCount} students with A-F grades, ${validation.studentCount} total)`);
         
-        // Early stopping: if we have enough candidates (3), we can stop
+        // Early stopping: if we have 1 course with A-F grades, we can stop (we only need 1 per institution)
         if (coursesWithData.length >= EARLY_STOP_THRESHOLD) {
-          console.log(`   ⏩ Early stopping: Found ${coursesWithData.length} courses with A-F grades (only need top ${MAX_PER_INSTITUTION})`);
+          console.log(`   ⏩ Early stopping: Found ${coursesWithData.length} course with A-F grades (only need ${MAX_PER_INSTITUTION} per institution)`);
           break;
         }
       } else {
