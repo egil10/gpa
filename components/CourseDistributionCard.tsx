@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { CourseStats } from '@/types';
@@ -22,41 +22,43 @@ const GRADE_COLORS: Record<string, string> = {
   'Ikke bestått': '#ef4444',
 };
 
-export default function CourseDistributionCard({ course, institution }: CourseDistributionCardProps) {
+const CourseDistributionCard = memo(function CourseDistributionCard({ course, institution }: CourseDistributionCardProps) {
   const router = useRouter();
   
   // Get display code - consistently remove "-1" suffix for all institutions
   // This matches how course codes are stored in the discovery scripts
-  const getDisplayCode = (code: string, inst: string): string => {
+  const getDisplayCode = useCallback((code: string, inst: string): string => {
     // For all institutions, only remove "-1" suffix (dash followed by 1 at the end)
     // This is the API format suffix, not part of the actual course code
     return code.replace(/-[0-9]+$/, '').trim();
-  };
+  }, []);
   
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     // Strip suffix from course code for URL (formatCourseCode will add it back when making API calls)
     const displayCode = getDisplayCode(course.courseCode, institution);
     router.push(`/sok?code=${encodeURIComponent(displayCode)}&uni=${institution}&year=${course.year}`);
-  };
+  }, [course.courseCode, course.year, institution, router, getDisplayCode]);
   
-  const displayCourseCode = getDisplayCode(course.courseCode, institution);
+  const displayCourseCode = useMemo(() => getDisplayCode(course.courseCode, institution), [course.courseCode, institution, getDisplayCode]);
 
-  // Check if either Bestått or Ikke bestått exists with actual data (count > 0)
-  // Also check if they exist in the distributions array at all (even with 0 count)
-  const hasBestatt = course.distributions.some(d => d.grade === 'Bestått' && d.count > 0);
-  const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått' && d.count > 0);
-  const hasBestattEntry = course.distributions.some(d => d.grade === 'Bestått');
-  const hasIkkeBestattEntry = course.distributions.some(d => d.grade === 'Ikke bestått');
-  const hasAnyPassFailData = hasBestatt || hasIkkeBestatt || hasBestattEntry || hasIkkeBestattEntry;
-  
-  // Check if there are any A-F grades with actual data (count > 0)
-  const hasLetterGrades = course.distributions.some(d => 
-    ['A', 'B', 'C', 'D', 'E', 'F'].includes(d.grade) && d.count > 0
-  );
-  
-  const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
+  // Memoize chart data calculations
+  const chartData = useMemo(() => {
+    // Check if either Bestått or Ikke bestått exists with actual data (count > 0)
+    // Also check if they exist in the distributions array at all (even with 0 count)
+    const hasBestatt = course.distributions.some(d => d.grade === 'Bestått' && d.count > 0);
+    const hasIkkeBestatt = course.distributions.some(d => d.grade === 'Ikke bestått' && d.count > 0);
+    const hasBestattEntry = course.distributions.some(d => d.grade === 'Bestått');
+    const hasIkkeBestattEntry = course.distributions.some(d => d.grade === 'Ikke bestått');
+    const hasAnyPassFailData = hasBestatt || hasIkkeBestatt || hasBestattEntry || hasIkkeBestattEntry;
+    
+    // Check if there are any A-F grades with actual data (count > 0)
+    const hasLetterGrades = course.distributions.some(d => 
+      ['A', 'B', 'C', 'D', 'E', 'F'].includes(d.grade) && d.count > 0
+    );
+    
+    const letterGrades = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const distributionMap = new Map<string, { grade: string; percentage: number; count: number }>();
   
   // Only include A-F grades if they have data OR if there's no pass/fail data
   // This prevents showing empty A-F bars when only pass/fail grades exist
@@ -97,28 +99,31 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
     });
   }
   
-  // Convert to array: A-F first (if included), then Bestått/Ikke bestått
-  // If only pass/fail data exists, only show pass/fail grades (no empty A-F bars)
-  const chartData: Array<{ grade: string; percentage: number; count: number }> = [];
-  
-  // Add A-F grades if they have data OR if there's no pass/fail data
-  if (hasLetterGrades || !hasAnyPassFailData) {
-    letterGrades.forEach(g => {
-      const entry = distributionMap.get(g);
-      if (entry) {
-        chartData.push(entry);
-      }
-    });
-  }
-  
-  // Always add both Bestått and Ikke bestått if we have any pass/fail data
-  // This ensures both bars are shown even if one has 0 count
-  if (hasAnyPassFailData) {
-    const bestattEntry = distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 };
-    const ikkeBestattEntry = distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 };
-    chartData.push(bestattEntry);
-    chartData.push(ikkeBestattEntry);
-  }
+    // Convert to array: A-F first (if included), then Bestått/Ikke bestått
+    // If only pass/fail data exists, only show pass/fail grades (no empty A-F bars)
+    const result: Array<{ grade: string; percentage: number; count: number }> = [];
+    
+    // Add A-F grades if they have data OR if there's no pass/fail data
+    if (hasLetterGrades || !hasAnyPassFailData) {
+      letterGrades.forEach(g => {
+        const entry = distributionMap.get(g);
+        if (entry) {
+          result.push(entry);
+        }
+      });
+    }
+    
+    // Always add both Bestått and Ikke bestått if we have any pass/fail data
+    // This ensures both bars are shown even if one has 0 count
+    if (hasAnyPassFailData) {
+      const bestattEntry = distributionMap.get('Bestått') || { grade: 'Bestått', percentage: 0, count: 0 };
+      const ikkeBestattEntry = distributionMap.get('Ikke bestått') || { grade: 'Ikke bestått', percentage: 0, count: 0 };
+      result.push(bestattEntry);
+      result.push(ikkeBestattEntry);
+    }
+
+    return result;
+  }, [course.distributions]);
 
   return (
     <div className={styles.card} onClick={handleClick}>
@@ -148,8 +153,11 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
               <YAxis 
                 hide
                 domain={[0, (dataMax: number) => {
+                  // Check if we have pass/fail only data
+                  const hasPassFailOnly = chartData.some(d => d.grade === 'Bestått' || d.grade === 'Ikke bestått') &&
+                    !chartData.some(d => ['A', 'B', 'C', 'D', 'E', 'F'].includes(d.grade));
                   // For pass/fail only data, always use 100 as max to show full scale
-                  if (hasAnyPassFailData && !hasLetterGrades) {
+                  if (hasPassFailOnly) {
                     return 100;
                   }
                   // For letter grades, use at least 5% to ensure visibility
@@ -199,5 +207,7 @@ export default function CourseDistributionCard({ course, institution }: CourseDi
       </div>
     </div>
   );
-}
+});
+
+export default CourseDistributionCard;
 

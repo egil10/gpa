@@ -6,6 +6,12 @@
 import { CourseInfo } from './courses';
 import { UNIVERSITIES } from './api';
 import { loadCourseData, CourseData, searchCourseData } from './course-loader';
+import { 
+  getCachedSearchResults, 
+  cacheSearchResults, 
+  isNegativeCacheHit, 
+  cacheNegativeResult 
+} from './search-cache';
 
 // Institution data file mappings - only institutions with actual data files
 export const INSTITUTION_DATA_FILES: Record<string, { file: string; code: string }> = {
@@ -203,21 +209,57 @@ export async function loadAllCourses(): Promise<CourseInfo[]> {
 
 /**
  * Search courses across all institutions or a specific one
+ * Uses cache for fast lookups
  */
 export async function searchAllCourses(
   query: string,
   institution?: string,
   limit: number = 20
 ): Promise<CourseInfo[]> {
+  const normalizedQuery = query.trim();
+  
+  // Empty query returns popular courses (not cached)
+  if (!normalizedQuery) {
+    if (institution) {
+      const courses = await loadInstitutionCourses(institution);
+      return searchCoursesFromList(courses, query, limit);
+    } else {
+      const allCourses = await loadAllCourses();
+      return searchCoursesFromList(allCourses, query, limit);
+    }
+  }
+
+  // Check negative cache first (for "not found" results)
+  if (isNegativeCacheHit(normalizedQuery, institution)) {
+    return [];
+  }
+
+  // Check cache for positive results
+  const cached = getCachedSearchResults(normalizedQuery, institution);
+  if (cached !== null) {
+    return cached.slice(0, limit);
+  }
+
+  // Perform actual search
+  let results: CourseInfo[];
   if (institution) {
     // Search specific institution
     const courses = await loadInstitutionCourses(institution);
-    return searchCoursesFromList(courses, query, limit);
+    results = searchCoursesFromList(courses, normalizedQuery, limit);
   } else {
     // Search all institutions
     const allCourses = await loadAllCourses();
-    return searchCoursesFromList(allCourses, query, limit);
+    results = searchCoursesFromList(allCourses, normalizedQuery, limit);
   }
+
+  // Cache the results (or negative result)
+  if (results.length > 0) {
+    cacheSearchResults(normalizedQuery, results, institution);
+  } else {
+    cacheNegativeResult(normalizedQuery, institution);
+  }
+
+  return results;
 }
 
 /**
@@ -338,6 +380,7 @@ function searchCoursesFromList(
 
 /**
  * Get course by code
+ * Uses cache for fast lookups
  */
 export async function getCourseByCode(
   code: string,
@@ -346,7 +389,25 @@ export async function getCourseByCode(
   // Strip suffix from code for matching (user might type "IN2010-1" but we store "IN2010")
   // Also normalizes spaces for consistent matching
   const normalizedCode = stripCourseCodeSuffix(code, institution);
-  console.log(`[getCourseByCode] Searching for code: "${code}" -> normalized: "${normalizedCode}" (institution: ${institution})`);
+  
+  // Check cache first
+  const cachedResults = getCachedSearchResults(normalizedCode, institution);
+  if (cachedResults && cachedResults.length > 0) {
+    // Find exact match in cached results
+    const exactMatch = cachedResults.find(c => {
+      const courseCodeNormalized = stripCourseCodeSuffix(c.code, c.institution);
+      return courseCodeNormalized === normalizedCode && 
+             (!institution || c.institution === institution);
+    });
+    if (exactMatch) {
+      return exactMatch;
+    }
+  }
+
+  // Check negative cache
+  if (isNegativeCacheHit(normalizedCode, institution)) {
+    return null;
+  }
 
   if (institution) {
     const courses = await loadInstitutionCourses(institution);
@@ -387,18 +448,14 @@ export async function getCourseByCode(
     }
 
     if (found) {
-      console.log(`[getCourseByCode] Found course: ${found.code} (${found.institution}) using ${found.key ? 'unique key' : 'code match'}`);
+      // Cache this positive result
+      cacheSearchResults(normalizedCode, [found], institution);
+      return found;
     } else {
-      // Log more debugging info
-      const sampleCodes = courses.slice(0, 10).map(c => `${c.code}${c.key ? ` (key: ${c.key})` : ''}`);
-      const jusCourses = courses.filter(c => c.code.toUpperCase().startsWith('JUS')).slice(0, 5).map(c => c.code);
-      console.log(`[getCourseByCode] Course not found. Looking for key: "${uniqueKey}" or code: "${normalizedCode}"`);
-      console.log(`[getCourseByCode] Sample course codes: ${sampleCodes.join(', ')}`);
-      if (jusCourses.length > 0) {
-        console.log(`[getCourseByCode] Sample JUS courses: ${jusCourses.join(', ')}`);
-      }
+      // Cache negative result
+      cacheNegativeResult(normalizedCode, institution);
+      return null;
     }
-    return found || null;
   } else {
     const allCourses = await loadAllCourses();
     // When searching all institutions, we can't use unique key directly
@@ -408,10 +465,17 @@ export async function getCourseByCode(
       const normalizedCourseCode = stripCourseCodeSuffix(courseCodeUpper);
       return normalizedCourseCode === normalizedCode || courseCodeUpper === normalizedCode;
     });
-    if (matches.length > 1) {
-      console.warn(`[getCourseByCode] Multiple courses found for code "${normalizedCode}" across institutions: ${matches.map(c => `${c.code} (${c.institution})`).join(', ')}. Returning first match.`);
+    
+    if (matches.length > 0) {
+      const result = matches[0];
+      // Cache this positive result
+      cacheSearchResults(normalizedCode, [result], institution);
+      return result;
+    } else {
+      // Cache negative result
+      cacheNegativeResult(normalizedCode, institution);
+      return null;
     }
-    return matches[0] || null;
   }
 }
 

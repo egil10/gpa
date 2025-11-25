@@ -1,0 +1,102 @@
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-secondary) 40%,
+    var(--bg-tertiary) 50%,
+    var(--bg-secondary) 60%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+  /* GPU acceleration */
+  will-change: background-position;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton.text {
+  border-radius: 0.25rem;
+  height: 1rem;
+}
+
+.skeleton.circle {
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+}
+
+.skeleton.bar {
+  border-radius: 0.5rem;
+}
+
+.skeleton.card {
+  border-radius: 1.5rem;
+  padding: var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.cardSkeleton {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 320px;
+}
+
+.cardTitle {
+  margin-bottom: 0.5rem;
+}
+
+.cardSubtitle {
+  margin-bottom: var(--space-md);
+}
+
+.cardChart {
+  margin: var(--space-sm) 0;
+  border-radius: 0.5rem;
+}
+
+.cardStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (max-width: 768px) {
+  .cardSkeleton {
+    padding: var(--space-md);
+    min-height: 280px;
+  }
+}
+

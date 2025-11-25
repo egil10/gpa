@@ -142,50 +142,104 @@ export default function BottomSearchBar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isFloating]);
 
-  // Search with debouncing
+  // Search with debouncing and immediate cache check
   const performSearch = useCallback((searchQuery: string) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    debounceRef.current = setTimeout(async () => {
-      if (searchQuery.trim().length === 0) {
+    const trimmedQuery = searchQuery.trim();
+    
+    // Immediate check for empty query
+    if (trimmedQuery.length === 0) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedCourse(null);
+      setNotFoundMessage(null);
+      return;
+    }
+
+    // Check cache immediately for instant feedback
+    import('@/lib/search-cache').then(({ getCachedSearchResults, isNegativeCacheHit }) => {
+      const cached = getCachedSearchResults(trimmedQuery, undefined);
+      const isNegative = isNegativeCacheHit(trimmedQuery, undefined);
+
+      if (isNegative) {
+        // Immediate feedback: course not found
         setSuggestions([]);
         setShowSuggestions(false);
         setSelectedCourse(null);
-      } else {
-        try {
-          // Limit to 3 suggestions - searchAllCourses already enforces the limit
-          const results = await searchAllCourses(searchQuery, undefined, 3);
-          const filteredResults = results.filter(
-            course => !isCourseUnavailable(course.code, course.institution)
-          );
-          // Remove duplicates and enforce strict limit of 3
-          const uniqueResults = Array.from(
-            new Map(filteredResults.map(c => [c.key, c])).values()
-          ).slice(0, 3);
-          setSuggestions(uniqueResults);
-          setShowSuggestions(uniqueResults.length > 0);
-          
-          // Check if query matches a course (only if we have results)
-          if (results.length > 0) {
-            getCourseByCode(searchQuery.trim(), undefined).then(course => {
-              setSelectedCourse(course);
-            }).catch(() => {
-              setSelectedCourse(null);
-            });
-          } else {
+        setNotFoundMessage('Ingen data for dette emnet');
+        return;
+      }
+
+      if (cached && cached.length > 0) {
+        // Immediate feedback: show cached results
+        const filteredResults = cached.filter(
+          course => !isCourseUnavailable(course.code, course.institution)
+        ).slice(0, 3);
+        setSuggestions(filteredResults);
+        setShowSuggestions(filteredResults.length > 0);
+        
+        // Check for exact match
+        const exactMatch = filteredResults.find(
+          c => c.code.toUpperCase() === trimmedQuery.toUpperCase()
+        );
+        if (exactMatch) {
+          setSelectedCourse(exactMatch);
+        } else {
+          getCourseByCode(trimmedQuery, undefined).then(course => {
+            setSelectedCourse(course);
+          }).catch(() => {
             setSelectedCourse(null);
-          }
-        } catch (error) {
-          console.error('Search error:', error);
-          setSuggestions([]);
-          setShowSuggestions(false);
+          });
+        }
+        setNotFoundMessage(null);
+        return;
+      }
+    });
+
+    // Debounced full search (for cache misses)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        // Limit to 3 suggestions - searchAllCourses already enforces the limit
+        const results = await searchAllCourses(trimmedQuery, undefined, 3);
+        const filteredResults = results.filter(
+          course => !isCourseUnavailable(course.code, course.institution)
+        );
+        // Remove duplicates and enforce strict limit of 3
+        const uniqueResults = Array.from(
+          new Map(filteredResults.map(c => [c.key, c])).values()
+        ).slice(0, 3);
+        setSuggestions(uniqueResults);
+        setShowSuggestions(uniqueResults.length > 0);
+        
+        // If no results, show feedback immediately
+        if (uniqueResults.length === 0) {
+          setNotFoundMessage('Ingen data for dette emnet');
+        } else {
+          setNotFoundMessage(null);
+        }
+        
+        // Check if query matches a course (only if we have results)
+        if (results.length > 0) {
+          getCourseByCode(trimmedQuery, undefined).then(course => {
+            setSelectedCourse(course);
+          }).catch(() => {
+            setSelectedCourse(null);
+          });
+        } else {
           setSelectedCourse(null);
         }
+      } catch (error) {
+        console.error('Search error:', error);
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setSelectedCourse(null);
+        setNotFoundMessage('Ingen data for dette emnet');
       }
       setSelectedIndex(-1);
-    }, 300); // Increased debounce to 300ms to reduce lag
+    }, 200); // Reduced debounce to 200ms since we have immediate cache feedback
   }, []);
 
   // Perform search when query changes (debounced)
@@ -245,24 +299,24 @@ export default function BottomSearchBar({
           setNotFoundMessage(null);
           handleSelectCourse(course);
         } else {
-          // Show not found message instead of navigating
-          setNotFoundMessage(`Emnekode "${cleanQuery}" ikke funnet`);
+          // Show not found message immediately (in Norwegian)
+          setNotFoundMessage('Ingen data for dette emnet');
           setShowSuggestions(false);
           
-          // Clear message after 3 seconds
+          // Clear message after 4 seconds
           setTimeout(() => {
             setNotFoundMessage(null);
-          }, 3000);
+          }, 4000);
         }
       }).catch(() => {
-        // Show error message
-        setNotFoundMessage(`Kunne ikke søke etter "${cleanQuery}"`);
+        // Show error message (in Norwegian)
+        setNotFoundMessage('Ingen data for dette emnet');
         setShowSuggestions(false);
         
-        // Clear message after 3 sekunder
+        // Clear message after 4 seconds
         setTimeout(() => {
           setNotFoundMessage(null);
-        }, 3000);
+        }, 4000);
       });
     }
   };

@@ -63,19 +63,27 @@
   border-radius: 10rem;
   padding: 0.5rem 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.1s ease-in-out;
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 3rem;
+  /* GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   /* Better touch target on mobile */
   touch-action: manipulation;
 }
 
 .inputContainer:hover {
   border-color: var(--border-hover);
+  transform: translateY(-1px) translateZ(0);
 }
 
 .inputContainer:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px) translateZ(0);
 }
 
 .searchIcon {
@@ -122,8 +130,13 @@
   height: 2.5rem;
   border-radius: 50%;
   color: var(--text-secondary);
-  transition: all 0.1s ease;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0.5;
+  /* GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
   /* Better touch target */
   touch-action: manipulation;
   min-width: 44px;
@@ -133,6 +146,11 @@
 .clearButton:hover {
   opacity: 1;
   background: var(--surface-hover);
+  transform: scale(1.05) translateZ(0);
+}
+
+.clearButton:active {
+  transform: scale(0.95) translateZ(0);
 }
 
 .submitButton {
@@ -144,8 +162,13 @@
   border-radius: 50%;
   background: var(--accent);
   color: var(--text-invert);
-  transition: all 0.1s ease;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
+  /* GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
   /* Better touch target */
   touch-action: manipulation;
   min-width: 44px;
@@ -154,11 +177,12 @@
 
 .submitButton:hover:not(:disabled) {
   background: var(--accent-hover);
-  transform: scale(1.05);
+  transform: scale(1.05) translateZ(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .submitButton:active:not(:disabled) {
-  transform: scale(1);
+  transform: scale(0.98) translateZ(0);
 }
 
 .submitButton:disabled {
@@ -176,11 +200,27 @@
   background: var(--surface);
   border: none;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   max-height: 20rem;
   overflow-y: auto;
   z-index: 50;
   margin-top: 0.5rem;
+  /* Smooth fade-in animation */
+  animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
 }
 
 .suggestionsHeader {
@@ -203,13 +243,19 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: none;
+  /* GPU acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .suggestionItem:hover,
 .suggestionItem.selected {
   background: var(--surface-hover);
+  transform: translateX(2px) translateZ(0);
 }
 
 .suggestionContent {
@@ -256,23 +302,26 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 1rem;
   font-size: 0.875rem;
   color: var(--text-secondary);
   text-align: center;
   z-index: 50;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  animation: slideDown 0.2s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  animation: slideDownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-@keyframes slideDown {
+@keyframes slideDownFade {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(-8px) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 

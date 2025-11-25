@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { ArrowUpDown, Filter, Search, ArrowUp, X, RotateCcw } from 'lucide-react';
+import { ArrowUpDown, Filter, Search, ArrowUp, X, RotateCcw, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import CourseDistributionCard from '@/components/CourseDistributionCard';
+import { GridSkeleton } from '@/components/LoadingSkeleton';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode, formatInstitutionLabel } from '@/lib/api';
 import { processGradeData } from '@/lib/utils';
 import { CourseStats } from '@/types';
@@ -1499,6 +1500,7 @@ export default function Home() {
 
           {loading ? (
             <div className={styles.loading}>
+              <Loader2 size={20} className={styles.loadingSpinner} />
               <p>Laster emneliste...</p>
             </div>
           ) : (
@@ -1532,13 +1534,17 @@ export default function Home() {
                 )}
               </div>
               <div className={styles.cardsGrid}>
-                {displayedCourses.map((course, index) => (
-                  <CourseDistributionCard
-                    key={`${course.courseCode}-${course.year}-${course.institution}-${index}`}
-                    course={course}
-                    institution={course.institution}
-                  />
-                ))}
+                {displayedCourses.length === 0 && loadingCourses.size > 0 ? (
+                  <GridSkeleton count={6} />
+                ) : (
+                  displayedCourses.map((course, index) => (
+                    <CourseDistributionCard
+                      key={`${course.courseCode}-${course.year}-${course.institution}-${index}`}
+                      course={course}
+                      institution={course.institution}
+                    />
+                  ))
+                )}
               </div>
               <div className={styles.loadMoreContainer}>
                 <button

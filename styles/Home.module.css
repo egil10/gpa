@@ -246,9 +246,30 @@
 }
 
 .loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
   text-align: center;
   padding: var(--space-3xl);
   color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+  color: var(--text-muted);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
 }
 
 .loadingSubtext {
@@ -435,14 +456,24 @@
   font-weight: 500;
   font-size: var(--text-base);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--font-inter);
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .loadMoreButtonInline:hover:not(:disabled) {
   background-color: var(--surface-hover);
   border-color: var(--border-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px) translateZ(0);
+}
+
+.loadMoreButtonInline:active:not(:disabled) {
+  transform: translateY(0) translateZ(0) scale(0.98);
+  transition-duration: 0.1s;
 }
 
 .loadMoreButtonInline:disabled {
