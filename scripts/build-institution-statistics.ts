@@ -214,6 +214,7 @@ function loadInstitutionGradeCache(institution: string): GradeData[] {
             Årstall: String(item.y),
             'Antall kandidater totalt': String(item.c),
           } as GradeData));
+          // Use concat instead of spread to avoid stack overflow (though each file is small)
           allData.push(...gradeData);
         }
       } catch (error) {
@@ -233,6 +234,7 @@ function loadInstitutionGradeCache(institution: string): GradeData[] {
         const cached: CachedGradeData = JSON.parse(content);
         
         if (cached.data && Array.isArray(cached.data) && cached.data.length > 0) {
+          // Use concat instead of spread to avoid stack overflow (though each file is small)
           allData.push(...cached.data);
         }
       } catch (error) {
@@ -642,7 +644,7 @@ async function main() {
     console.log(`   Found ${courses.length} total courses in institution files`);
 
     // Collect grade data from all sources
-    const allGradeData: GradeData[] = [];
+    let allGradeData: GradeData[] = [];
     const processedCourses = new Set<string>();
 
     // 1. Load from cache.json (main source) - iterate through ALL cache keys for this institution
@@ -656,7 +658,8 @@ async function main() {
         if (cacheKey.startsWith(institutionPrefix)) {
           const entry = cache.courses[cacheKey];
           if (entry && entry.data && Array.isArray(entry.data) && entry.data.length > 0) {
-            allGradeData.push(...entry.data);
+            // Use concat for safety (though each entry should be small)
+            allGradeData = allGradeData.concat(entry.data);
             // Extract course code from cache key (e.g., "1110-EXPHIL03" -> "EXPHIL03")
             const courseCode = cacheKey.substring(institutionPrefix.length);
             processedCourses.add(courseCode);
@@ -674,7 +677,8 @@ async function main() {
     // 2. Try grade cache files (public/data/grade-cache/{institution}/)
     const gradeCacheData = loadInstitutionGradeCache(institution);
     if (gradeCacheData.length > 0) {
-      allGradeData.push(...gradeCacheData);
+      // Use concat instead of spread to avoid stack overflow with large arrays
+      allGradeData = allGradeData.concat(gradeCacheData);
       console.log(`   Added ${gradeCacheData.length} entries from grade-cache directory`);
     }
 
@@ -682,7 +686,8 @@ async function main() {
     const courseStats = loadHomepageCourseStats(institution);
     if (courseStats.length > 0) {
       const convertedData = convertCourseStatsToGradeData(courseStats);
-      allGradeData.push(...convertedData);
+      // Use concat instead of spread to avoid stack overflow with large arrays
+      allGradeData = allGradeData.concat(convertedData);
       console.log(`   Added ${courseStats.length} courses from homepage data`);
     }
     

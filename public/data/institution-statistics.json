@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2025-11-25T20:16:01.784Z",
+    "generatedAt": "2025-11-25T21:18:57.505Z",
     "totalInstitutions": 32
   },
   "institutions": {
@@ -8,9 +8,9 @@
       "institution": "UiO",
       "institutionCode": "1110",
       "institutionName": "Universitetet i Oslo",
-      "totalCourses": 103,
-      "totalStudents": 402903,
-      "coursesWithData": 103,
+      "totalCourses": 6942,
+      "totalStudents": 2031861,
+      "coursesWithData": 6942,
       "yearRange": {
         "min": 2004,
         "max": 2025
@@ -18,992 +18,2116 @@
       "overallDistribution": [
         {
           "grade": "A",
-          "count": 38696,
+          "count": 197501,
           "percentage": 10
         },
         {
           "grade": "B",
-          "count": 84330,
+          "count": 419734,
           "percentage": 21
         },
         {
           "grade": "C",
-          "count": 106493,
-          "percentage": 26
+          "count": 489408,
+          "percentage": 24
         },
         {
           "grade": "D",
-          "count": 55768,
-          "percentage": 14
+          "count": 234731,
+          "percentage": 12
         },
         {
           "grade": "E",
-          "count": 23198,
-          "percentage": 6
+          "count": 88559,
+          "percentage": 4
         },
         {
           "grade": "F",
-          "count": 29176,
-          "percentage": 7
+          "count": 103023,
+          "percentage": 5
         },
         {
           "grade": "Bestått",
-          "count": 63405,
-          "percentage": 16
+          "count": 478931,
+          "percentage": 24
         },
         {
           "grade": "Ikke bestått",
-          "count": 1837,
-          "percentage": 0
+          "count": 19974,
+          "percentage": 1
         }
       ],
-      "averageGrade": 2.92,
+      "averageGrade": 3.02,
       "yearlyStats": {
         "2004": {
           "year": 2004,
-          "totalStudents": 11600,
-          "totalCourses": 28,
+          "totalStudents": 71715,
+          "totalCourses": 1555,
           "distribution": [
             {
               "grade": "A",
-              "count": 852,
-              "percentage": 7
-            },
-            {
-              "grade": "B",
-              "count": 2571,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 3363,
-              "percentage": 29
-            },
-            {
-              "grade": "D",
-              "count": 1913,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 949,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1869,
-              "percentage": 16
-            },
-            {
-              "grade": "Bestått",
-              "count": 73,
-              "percentage": 1
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 10,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.55
-        },
-        "2005": {
-          "year": 2005,
-          "totalStudents": 12001,
-          "totalCourses": 29,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 903,
+              "count": 5719,
               "percentage": 8
             },
             {
               "grade": "B",
-              "count": 2644,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 3662,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 2102,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 995,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1605,
-              "percentage": 13
-            },
-            {
-              "grade": "Bestått",
-              "count": 82,
-              "percentage": 1
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 8,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.63
-        },
-        "2006": {
-          "year": 2006,
-          "totalStudents": 12107,
-          "totalCourses": 31,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 972,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 2911,
-              "percentage": 24
-            },
-            {
-              "grade": "C",
-              "count": 3708,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 2151,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 1051,
-              "percentage": 9
-            },
-            {
-              "grade": "F",
-              "count": 1297,
-              "percentage": 11
-            },
-            {
-              "grade": "Bestått",
-              "count": 17,
-              "percentage": 0
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.73
-        },
-        "2007": {
-          "year": 2007,
-          "totalStudents": 11076,
-          "totalCourses": 29,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1127,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2683,
-              "percentage": 24
-            },
-            {
-              "grade": "C",
-              "count": 3448,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 1905,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 823,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 1090,
-              "percentage": 10
-            }
-          ],
-          "averageGrade": 2.83
-        },
-        "2008": {
-          "year": 2008,
-          "totalStudents": 10286,
-          "totalCourses": 30,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1138,
-              "percentage": 11
-            },
-            {
-              "grade": "B",
-              "count": 2516,
-              "percentage": 24
-            },
-            {
-              "grade": "C",
-              "count": 3123,
-              "percentage": 30
-            },
-            {
-              "grade": "D",
-              "count": 1668,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 789,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 992,
-              "percentage": 10
-            },
-            {
-              "grade": "Bestått",
-              "count": 60,
-              "percentage": 1
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.86
-        },
-        "2009": {
-          "year": 2009,
-          "totalStudents": 10396,
-          "totalCourses": 30,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1070,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2359,
-              "percentage": 23
-            },
-            {
-              "grade": "C",
-              "count": 3046,
-              "percentage": 29
-            },
-            {
-              "grade": "D",
-              "count": 1831,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 828,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1074,
-              "percentage": 10
-            },
-            {
-              "grade": "Bestått",
-              "count": 188,
-              "percentage": 2
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.79
-        },
-        "2010": {
-          "year": 2010,
-          "totalStudents": 10594,
-          "totalCourses": 31,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1083,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2453,
-              "percentage": 23
-            },
-            {
-              "grade": "C",
-              "count": 3072,
-              "percentage": 29
-            },
-            {
-              "grade": "D",
-              "count": 1836,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 798,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1119,
-              "percentage": 11
-            },
-            {
-              "grade": "Bestått",
-              "count": 233,
-              "percentage": 2
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.8
-        },
-        "2011": {
-          "year": 2011,
-          "totalStudents": 11445,
-          "totalCourses": 35,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1193,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2708,
-              "percentage": 24
-            },
-            {
-              "grade": "C",
-              "count": 3462,
-              "percentage": 30
-            },
-            {
-              "grade": "D",
-              "count": 2021,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 840,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 1133,
-              "percentage": 10
-            },
-            {
-              "grade": "Bestått",
-              "count": 88,
-              "percentage": 1
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.82
-        },
-        "2012": {
-          "year": 2012,
-          "totalStudents": 14403,
-          "totalCourses": 39,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1297,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 3208,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 4042,
-              "percentage": 28
-            },
-            {
-              "grade": "D",
-              "count": 2261,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 905,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 1194,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 1496,
-              "percentage": 10
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.87
-        },
-        "2013": {
-          "year": 2013,
-          "totalStudents": 12916,
-          "totalCourses": 38,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1254,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2997,
-              "percentage": 23
-            },
-            {
-              "grade": "C",
-              "count": 4102,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 2420,
-              "percentage": 19
-            },
-            {
-              "grade": "E",
-              "count": 988,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1018,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 137,
-              "percentage": 1
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.85
-        },
-        "2014": {
-          "year": 2014,
-          "totalStudents": 13155,
-          "totalCourses": 39,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1337,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 3275,
-              "percentage": 25
-            },
-            {
-              "grade": "C",
-              "count": 4194,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 2325,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 900,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 1063,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 61,
-              "percentage": 0
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.9
-        },
-        "2015": {
-          "year": 2015,
-          "totalStudents": 16878,
-          "totalCourses": 43,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1340,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 3086,
-              "percentage": 18
-            },
-            {
-              "grade": "C",
-              "count": 4190,
-              "percentage": 25
-            },
-            {
-              "grade": "D",
-              "count": 2389,
-              "percentage": 14
-            },
-            {
-              "grade": "E",
-              "count": 1047,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 1278,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 3536,
+              "count": 14981,
               "percentage": 21
             },
             {
-              "grade": "Ikke bestått",
-              "count": 12,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.85
-        },
-        "2016": {
-          "year": 2016,
-          "totalStudents": 18341,
-          "totalCourses": 46,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1550,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 3525,
-              "percentage": 19
-            },
-            {
               "grade": "C",
-              "count": 4537,
+              "count": 17895,
               "percentage": 25
             },
             {
               "grade": "D",
-              "count": 2663,
-              "percentage": 15
+              "count": 9257,
+              "percentage": 13
             },
             {
               "grade": "E",
-              "count": 1160,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 1297,
-              "percentage": 7
-            },
-            {
-              "grade": "Bestått",
-              "count": 3566,
-              "percentage": 19
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 43,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.87
-        },
-        "2017": {
-          "year": 2017,
-          "totalStudents": 21628,
-          "totalCourses": 56,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2024,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 4188,
-              "percentage": 19
-            },
-            {
-              "grade": "C",
-              "count": 5213,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 2614,
-              "percentage": 12
-            },
-            {
-              "grade": "E",
-              "count": 1051,
+              "count": 3874,
               "percentage": 5
             },
             {
               "grade": "F",
-              "count": 1397,
+              "count": 6115,
+              "percentage": 9
+            },
+            {
+              "grade": "Bestått",
+              "count": 13109,
+              "percentage": 18
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 765,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.84
+        },
+        "2005": {
+          "year": 2005,
+          "totalStudents": 76704,
+          "totalCourses": 1668,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6212,
+              "percentage": 8
+            },
+            {
+              "grade": "B",
+              "count": 15815,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 19573,
+              "percentage": 26
+            },
+            {
+              "grade": "D",
+              "count": 10005,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 4090,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 5711,
+              "percentage": 7
+            },
+            {
+              "grade": "Bestått",
+              "count": 14641,
+              "percentage": 19
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 657,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.88
+        },
+        "2006": {
+          "year": 2006,
+          "totalStudents": 75749,
+          "totalCourses": 1773,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6269,
+              "percentage": 8
+            },
+            {
+              "grade": "B",
+              "count": 16409,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 19567,
+              "percentage": 26
+            },
+            {
+              "grade": "D",
+              "count": 10116,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 4175,
+              "percentage": 6
+            },
+            {
+              "grade": "F",
+              "count": 4730,
               "percentage": 6
             },
             {
               "grade": "Bestått",
-              "count": 4992,
+              "count": 13593,
+              "percentage": 18
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 890,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.92
+        },
+        "2007": {
+          "year": 2007,
+          "totalStudents": 72773,
+          "totalCourses": 1779,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6331,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 15282,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 18512,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 9583,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 3641,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4221,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 14369,
+              "percentage": 20
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 834,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.94
+        },
+        "2008": {
+          "year": 2008,
+          "totalStudents": 70811,
+          "totalCourses": 1748,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6414,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 14775,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 17482,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 8735,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 3308,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3930,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 15331,
+              "percentage": 22
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 836,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2009": {
+          "year": 2009,
+          "totalStudents": 71419,
+          "totalCourses": 1731,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6491,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 14607,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 17647,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 8856,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 3483,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4130,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 15469,
+              "percentage": 22
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 736,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.96
+        },
+        "2010": {
+          "year": 2010,
+          "totalStudents": 73264,
+          "totalCourses": 1728,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6605,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 14699,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 17782,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 8859,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 3568,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4299,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 16585,
               "percentage": 23
             },
             {
               "grade": "Ikke bestått",
-              "count": 149,
+              "count": 867,
               "percentage": 1
             }
           ],
           "averageGrade": 2.95
         },
-        "2018": {
-          "year": 2018,
-          "totalStudents": 24742,
-          "totalCourses": 72,
+        "2011": {
+          "year": 2011,
+          "totalStudents": 77618,
+          "totalCourses": 1833,
           "distribution": [
             {
               "grade": "A",
-              "count": 2310,
+              "count": 7207,
               "percentage": 9
             },
             {
               "grade": "B",
-              "count": 5131,
+              "count": 16409,
               "percentage": 21
             },
             {
               "grade": "C",
-              "count": 6474,
-              "percentage": 26
+              "count": 19085,
+              "percentage": 25
             },
             {
               "grade": "D",
-              "count": 3065,
+              "count": 9641,
               "percentage": 12
             },
             {
               "grade": "E",
-              "count": 1193,
+              "count": 3622,
               "percentage": 5
             },
             {
               "grade": "F",
-              "count": 1693,
-              "percentage": 7
+              "count": 4232,
+              "percentage": 5
             },
             {
               "grade": "Bestått",
-              "count": 4802,
+              "count": 16477,
+              "percentage": 21
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 945,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.98
+        },
+        "2012": {
+          "year": 2012,
+          "totalStudents": 84734,
+          "totalCourses": 1856,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 7828,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 17740,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 21155,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 10428,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 3938,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4620,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 18165,
+              "percentage": 21
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 860,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.98
+        },
+        "2013": {
+          "year": 2013,
+          "totalStudents": 85850,
+          "totalCourses": 1895,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 7890,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 17711,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 21582,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 11125,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 4285,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4377,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 17643,
+              "percentage": 21
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1237,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.96
+        },
+        "2014": {
+          "year": 2014,
+          "totalStudents": 85886,
+          "totalCourses": 1871,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8097,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 18479,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 22351,
+              "percentage": 26
+            },
+            {
+              "grade": "D",
+              "count": 11090,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 4156,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 4618,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 15892,
               "percentage": 19
             },
             {
               "grade": "Ikke bestått",
-              "count": 74,
+              "count": 1203,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2015": {
+          "year": 2015,
+          "totalStudents": 92786,
+          "totalCourses": 1874,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8296,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 18107,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 22483,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 11246,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 4505,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 5084,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 22336,
+              "percentage": 24
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 729,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2016": {
+          "year": 2016,
+          "totalStudents": 97229,
+          "totalCourses": 1904,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 9123,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 19793,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 23666,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 12209,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 4932,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 5109,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 21616,
+              "percentage": 22
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 781,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.98
+        },
+        "2017": {
+          "year": 2017,
+          "totalStudents": 104716,
+          "totalCourses": 2036,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 10123,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 21111,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 24873,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 11719,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 4552,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 5042,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 26514,
+              "percentage": 25
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 782,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.03
+        },
+        "2018": {
+          "year": 2018,
+          "totalStudents": 110660,
+          "totalCourses": 2172,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 11329,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 23348,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 27267,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 12345,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 4395,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 5644,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 25707,
+              "percentage": 23
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 625,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.05
+        },
+        "2019": {
+          "year": 2019,
+          "totalStudents": 115694,
+          "totalCourses": 2246,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 12021,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 24917,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 28614,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 12869,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 4754,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 5292,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 26540,
+              "percentage": 23
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 687,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.07
+        },
+        "2020": {
+          "year": 2020,
+          "totalStudents": 122083,
+          "totalCourses": 2212,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 11148,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 22439,
+              "percentage": 18
+            },
+            {
+              "grade": "C",
+              "count": 24207,
+              "percentage": 20
+            },
+            {
+              "grade": "D",
+              "count": 10246,
+              "percentage": 8
+            },
+            {
+              "grade": "E",
+              "count": 3105,
+              "percentage": 3
+            },
+            {
+              "grade": "F",
+              "count": 3089,
+              "percentage": 3
+            },
+            {
+              "grade": "Bestått",
+              "count": 45902,
+              "percentage": 38
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1947,
+              "percentage": 2
+            }
+          ],
+          "averageGrade": 3.11
+        },
+        "2021": {
+          "year": 2021,
+          "totalStudents": 118982,
+          "totalCourses": 2233,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 13416,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 25706,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 28262,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 11763,
+              "percentage": 10
+            },
+            {
+              "grade": "E",
+              "count": 3714,
+              "percentage": 3
+            },
+            {
+              "grade": "F",
+              "count": 3485,
+              "percentage": 3
+            },
+            {
+              "grade": "Bestått",
+              "count": 31460,
+              "percentage": 26
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1176,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.16
+        },
+        "2022": {
+          "year": 2022,
+          "totalStudents": 115709,
+          "totalCourses": 2267,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 11737,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 23534,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 26989,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 12127,
+              "percentage": 10
+            },
+            {
+              "grade": "E",
+              "count": 4337,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 5096,
+              "percentage": 4
+            },
+            {
+              "grade": "Bestått",
+              "count": 30982,
+              "percentage": 27
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 907,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.07
+        },
+        "2023": {
+          "year": 2023,
+          "totalStudents": 118359,
+          "totalCourses": 2354,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 12840,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 24072,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 26981,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 12549,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 4652,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 5338,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 30905,
+              "percentage": 26
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1022,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.07
+        },
+        "2024": {
+          "year": 2024,
+          "totalStudents": 125014,
+          "totalCourses": 2419,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 14192,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 25709,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 28697,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 13370,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 5068,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 6044,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 30976,
+              "percentage": 25
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 958,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.08
+        },
+        "2025": {
+          "year": 2025,
+          "totalStudents": 64106,
+          "totalCourses": 1382,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8213,
+              "percentage": 13
+            },
+            {
+              "grade": "B",
+              "count": 14091,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 14738,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 6593,
+              "percentage": 10
+            },
+            {
+              "grade": "E",
+              "count": 2405,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 2817,
+              "percentage": 4
+            },
+            {
+              "grade": "Bestått",
+              "count": 14719,
+              "percentage": 23
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 530,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.14
+        }
+      },
+      "generatedAt": "2025-11-25T21:18:50.933Z"
+    },
+    "NTNU": {
+      "institution": "NTNU",
+      "institutionCode": "1150",
+      "institutionName": "Norges teknisk-naturvitenskapelige universitet",
+      "totalCourses": 7513,
+      "totalStudents": 2751905,
+      "coursesWithData": 7513,
+      "yearRange": {
+        "min": 2004,
+        "max": 2025
+      },
+      "overallDistribution": [
+        {
+          "grade": "A",
+          "count": 325973,
+          "percentage": 12
+        },
+        {
+          "grade": "B",
+          "count": 624557,
+          "percentage": 23
+        },
+        {
+          "grade": "C",
+          "count": 666881,
+          "percentage": 24
+        },
+        {
+          "grade": "D",
+          "count": 340254,
+          "percentage": 12
+        },
+        {
+          "grade": "E",
+          "count": 193460,
+          "percentage": 7
+        },
+        {
+          "grade": "F",
+          "count": 203032,
+          "percentage": 7
+        },
+        {
+          "grade": "Bestått",
+          "count": 372633,
+          "percentage": 14
+        },
+        {
+          "grade": "Ikke bestått",
+          "count": 25115,
+          "percentage": 1
+        }
+      ],
+      "averageGrade": 2.95,
+      "yearlyStats": {
+        "2004": {
+          "year": 2004,
+          "totalStudents": 36875,
+          "totalCourses": 901,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 4208,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 6905,
+              "percentage": 19
+            },
+            {
+              "grade": "C",
+              "count": 7114,
+              "percentage": 19
+            },
+            {
+              "grade": "D",
+              "count": 5643,
+              "percentage": 15
+            },
+            {
+              "grade": "E",
+              "count": 5169,
+              "percentage": 14
+            },
+            {
+              "grade": "F",
+              "count": 5548,
+              "percentage": 15
+            },
+            {
+              "grade": "Bestått",
+              "count": 2147,
+              "percentage": 6
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 141,
               "percentage": 0
+            }
+          ],
+          "averageGrade": 2.52
+        },
+        "2005": {
+          "year": 2005,
+          "totalStudents": 73639,
+          "totalCourses": 1522,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8814,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 15591,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 15307,
+              "percentage": 21
+            },
+            {
+              "grade": "D",
+              "count": 10749,
+              "percentage": 15
+            },
+            {
+              "grade": "E",
+              "count": 9460,
+              "percentage": 13
+            },
+            {
+              "grade": "F",
+              "count": 8319,
+              "percentage": 11
+            },
+            {
+              "grade": "Bestått",
+              "count": 5134,
+              "percentage": 7
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 265,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.7
+        },
+        "2006": {
+          "year": 2006,
+          "totalStudents": 75424,
+          "totalCourses": 1587,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8640,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 15681,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 18077,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 9826,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 8059,
+              "percentage": 11
+            },
+            {
+              "grade": "F",
+              "count": 8862,
+              "percentage": 12
+            },
+            {
+              "grade": "Bestått",
+              "count": 5750,
+              "percentage": 8
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 529,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.72
+        },
+        "2007": {
+          "year": 2007,
+          "totalStudents": 77795,
+          "totalCourses": 1658,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 7365,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 15545,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 22653,
+              "percentage": 29
+            },
+            {
+              "grade": "D",
+              "count": 9849,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 6908,
+              "percentage": 9
+            },
+            {
+              "grade": "F",
+              "count": 8666,
+              "percentage": 11
+            },
+            {
+              "grade": "Bestått",
+              "count": 5991,
+              "percentage": 8
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 818,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.72
+        },
+        "2008": {
+          "year": 2008,
+          "totalStudents": 81778,
+          "totalCourses": 1670,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8759,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 17368,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 24662,
+              "percentage": 30
+            },
+            {
+              "grade": "D",
+              "count": 10355,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 6711,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 7824,
+              "percentage": 10
+            },
+            {
+              "grade": "Bestått",
+              "count": 5536,
+              "percentage": 7
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 563,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.83
+        },
+        "2009": {
+          "year": 2009,
+          "totalStudents": 85575,
+          "totalCourses": 1663,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 8673,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 17105,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 26352,
+              "percentage": 31
+            },
+            {
+              "grade": "D",
+              "count": 11337,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 7323,
+              "percentage": 9
+            },
+            {
+              "grade": "F",
+              "count": 8236,
+              "percentage": 10
+            },
+            {
+              "grade": "Bestått",
+              "count": 5557,
+              "percentage": 6
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 992,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.78
+        },
+        "2010": {
+          "year": 2010,
+          "totalStudents": 90550,
+          "totalCourses": 1732,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 9449,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 18670,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 27873,
+              "percentage": 31
+            },
+            {
+              "grade": "D",
+              "count": 11720,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 7526,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 8512,
+              "percentage": 9
+            },
+            {
+              "grade": "Bestått",
+              "count": 6145,
+              "percentage": 7
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 655,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.82
+        },
+        "2011": {
+          "year": 2011,
+          "totalStudents": 93453,
+          "totalCourses": 1877,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 10058,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 20391,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 28829,
+              "percentage": 31
+            },
+            {
+              "grade": "D",
+              "count": 12131,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 7260,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 8178,
+              "percentage": 9
+            },
+            {
+              "grade": "Bestått",
+              "count": 6215,
+              "percentage": 7
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 391,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.87
+        },
+        "2012": {
+          "year": 2012,
+          "totalStudents": 95349,
+          "totalCourses": 1882,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 10261,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 21295,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 29568,
+              "percentage": 31
+            },
+            {
+              "grade": "D",
+              "count": 12160,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 7306,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 8425,
+              "percentage": 9
+            },
+            {
+              "grade": "Bestått",
+              "count": 6026,
+              "percentage": 6
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 308,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.88
+        },
+        "2013": {
+          "year": 2013,
+          "totalStudents": 99821,
+          "totalCourses": 1897,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 11169,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 22846,
+              "percentage": 23
+            },
+            {
+              "grade": "C",
+              "count": 27690,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 13689,
+              "percentage": 14
+            },
+            {
+              "grade": "E",
+              "count": 8292,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 9234,
+              "percentage": 9
+            },
+            {
+              "grade": "Bestått",
+              "count": 6668,
+              "percentage": 7
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 233,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.86
+        },
+        "2014": {
+          "year": 2014,
+          "totalStudents": 105349,
+          "totalCourses": 1933,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 12630,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 25532,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 26182,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 15166,
+              "percentage": 14
+            },
+            {
+              "grade": "E",
+              "count": 8522,
+              "percentage": 8
+            },
+            {
+              "grade": "F",
+              "count": 8658,
+              "percentage": 8
+            },
+            {
+              "grade": "Bestått",
+              "count": 8347,
+              "percentage": 8
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 312,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.92
+        },
+        "2015": {
+          "year": 2015,
+          "totalStudents": 111548,
+          "totalCourses": 1970,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 13940,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 27850,
+              "percentage": 25
+            },
+            {
+              "grade": "C",
+              "count": 27707,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 15323,
+              "percentage": 14
+            },
+            {
+              "grade": "E",
+              "count": 8046,
+              "percentage": 7
+            },
+            {
+              "grade": "F",
+              "count": 8248,
+              "percentage": 7
+            },
+            {
+              "grade": "Bestått",
+              "count": 9977,
+              "percentage": 9
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 457,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.98
+        },
+        "2016": {
+          "year": 2016,
+          "totalStudents": 136471,
+          "totalCourses": 2484,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 16287,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 33222,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 33061,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 18412,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 9318,
+              "percentage": 7
+            },
+            {
+              "grade": "F",
+              "count": 10068,
+              "percentage": 7
+            },
+            {
+              "grade": "Bestått",
+              "count": 14879,
+              "percentage": 11
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1224,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.96
+        },
+        "2017": {
+          "year": 2017,
+          "totalStudents": 141154,
+          "totalCourses": 2512,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 17551,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 34372,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 33909,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 17381,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 9367,
+              "percentage": 7
+            },
+            {
+              "grade": "F",
+              "count": 10335,
+              "percentage": 7
+            },
+            {
+              "grade": "Bestått",
+              "count": 17185,
+              "percentage": 12
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1054,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 2.99
+        },
+        "2018": {
+          "year": 2018,
+          "totalStudents": 146413,
+          "totalCourses": 2584,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 18101,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 34857,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 33993,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 18967,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 10029,
+              "percentage": 7
+            },
+            {
+              "grade": "F",
+              "count": 11591,
+              "percentage": 8
+            },
+            {
+              "grade": "Bestått",
+              "count": 17854,
+              "percentage": 12
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1021,
+              "percentage": 1
             }
           ],
           "averageGrade": 2.96
         },
         "2019": {
           "year": 2019,
-          "totalStudents": 27308,
-          "totalCourses": 84,
+          "totalStudents": 158379,
+          "totalCourses": 2727,
           "distribution": [
             {
               "grade": "A",
-              "count": 2647,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 5590,
-              "percentage": 20
-            },
-            {
-              "grade": "C",
-              "count": 7219,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 3390,
+              "count": 19509,
               "percentage": 12
             },
             {
+              "grade": "B",
+              "count": 38594,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 37454,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 20347,
+              "percentage": 13
+            },
+            {
               "grade": "E",
-              "count": 1408,
-              "percentage": 5
+              "count": 10339,
+              "percentage": 7
             },
             {
               "grade": "F",
-              "count": 1626,
-              "percentage": 6
+              "count": 11200,
+              "percentage": 7
             },
             {
               "grade": "Bestått",
-              "count": 5290,
-              "percentage": 19
+              "count": 19862,
+              "percentage": 13
             },
             {
               "grade": "Ikke bestått",
-              "count": 138,
+              "count": 1074,
               "percentage": 1
             }
           ],
-          "averageGrade": 2.98
+          "averageGrade": 3
         },
         "2020": {
           "year": 2020,
-          "totalStudents": 29654,
-          "totalCourses": 88,
+          "totalStudents": 188256,
+          "totalCourses": 2964,
           "distribution": [
             {
               "grade": "A",
-              "count": 2590,
+              "count": 16559,
               "percentage": 9
             },
             {
               "grade": "B",
-              "count": 5356,
-              "percentage": 18
+              "count": 31752,
+              "percentage": 17
             },
             {
               "grade": "C",
-              "count": 6111,
-              "percentage": 21
+              "count": 28802,
+              "percentage": 15
             },
             {
               "grade": "D",
-              "count": 2857,
-              "percentage": 10
+              "count": 12253,
+              "percentage": 7
             },
             {
               "grade": "E",
-              "count": 949,
-              "percentage": 3
+              "count": 4481,
+              "percentage": 2
             },
             {
               "grade": "F",
-              "count": 1070,
-              "percentage": 4
+              "count": 3779,
+              "percentage": 2
             },
             {
               "grade": "Bestått",
-              "count": 10335,
-              "percentage": 35
+              "count": 83302,
+              "percentage": 44
             },
             {
               "grade": "Ikke bestått",
-              "count": 386,
-              "percentage": 1
+              "count": 7328,
+              "percentage": 4
             }
           ],
           "averageGrade": 3.05
         },
         "2021": {
           "year": 2021,
-          "totalStudents": 28605,
-          "totalCourses": 92,
+          "totalStudents": 198631,
+          "totalCourses": 3221,
           "distribution": [
             {
               "grade": "A",
-              "count": 2915,
-              "percentage": 10
+              "count": 26469,
+              "percentage": 13
             },
             {
               "grade": "B",
-              "count": 6008,
-              "percentage": 21
-            },
-            {
-              "grade": "C",
-              "count": 7311,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 3290,
-              "percentage": 12
-            },
-            {
-              "grade": "E",
-              "count": 1171,
-              "percentage": 4
-            },
-            {
-              "grade": "F",
-              "count": 1085,
-              "percentage": 4
-            },
-            {
-              "grade": "Bestått",
-              "count": 6582,
+              "count": 46227,
               "percentage": 23
             },
             {
-              "grade": "Ikke bestått",
-              "count": 243,
-              "percentage": 1
-            }
-          ],
-          "averageGrade": 3.08
-        },
-        "2022": {
-          "year": 2022,
-          "totalStudents": 27861,
-          "totalCourses": 93,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2564,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 5517,
-              "percentage": 20
-            },
-            {
               "grade": "C",
-              "count": 6868,
-              "percentage": 25
+              "count": 41562,
+              "percentage": 21
             },
             {
               "grade": "D",
-              "count": 3445,
-              "percentage": 12
+              "count": 19872,
+              "percentage": 10
             },
             {
               "grade": "E",
-              "count": 1371,
+              "count": 9042,
               "percentage": 5
             },
             {
               "grade": "F",
-              "count": 1655,
-              "percentage": 6
+              "count": 8294,
+              "percentage": 4
             },
             {
               "grade": "Bestått",
-              "count": 6250,
+              "count": 43883,
               "percentage": 22
             },
             {
               "grade": "Ikke bestått",
-              "count": 191,
-              "percentage": 1
+              "count": 3282,
+              "percentage": 2
             }
           ],
-          "averageGrade": 2.96
+          "averageGrade": 3.13
         },
-        "2023": {
-          "year": 2023,
-          "totalStudents": 29130,
-          "totalCourses": 94,
+        "2022": {
+          "year": 2022,
+          "totalStudents": 202466,
+          "totalCourses": 3333,
           "distribution": [
             {
               "grade": "A",
-              "count": 3008,
-              "percentage": 10
+              "count": 24805,
+              "percentage": 12
             },
             {
               "grade": "B",
-              "count": 5656,
-              "percentage": 19
+              "count": 48537,
+              "percentage": 24
             },
             {
               "grade": "C",
-              "count": 7092,
+              "count": 48642,
               "percentage": 24
             },
             {
               "grade": "D",
-              "count": 3579,
+              "count": 25239,
               "percentage": 12
             },
             {
               "grade": "E",
-              "count": 1499,
-              "percentage": 5
+              "count": 13212,
+              "percentage": 7
             },
             {
               "grade": "F",
-              "count": 1687,
+              "count": 12604,
               "percentage": 6
             },
             {
               "grade": "Bestått",
-              "count": 6398,
-              "percentage": 22
+              "count": 28087,
+              "percentage": 14
             },
             {
               "grade": "Ikke bestått",
-              "count": 211,
+              "count": 1340,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.02
+        },
+        "2023": {
+          "year": 2023,
+          "totalStudents": 212610,
+          "totalCourses": 3457,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 26256,
+              "percentage": 12
+            },
+            {
+              "grade": "B",
+              "count": 49396,
+              "percentage": 23
+            },
+            {
+              "grade": "C",
+              "count": 49347,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 27395,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 15128,
+              "percentage": 7
+            },
+            {
+              "grade": "F",
+              "count": 14985,
+              "percentage": 7
+            },
+            {
+              "grade": "Bestått",
+              "count": 29002,
+              "percentage": 14
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1101,
               "percentage": 1
             }
           ],
@@ -1011,110 +2135,110 @@
         },
         "2024": {
           "year": 2024,
-          "totalStudents": 30877,
-          "totalCourses": 95,
+          "totalStudents": 231038,
+          "totalCourses": 3475,
           "distribution": [
             {
               "grade": "A",
-              "count": 3341,
-              "percentage": 11
+              "count": 29962,
+              "percentage": 13
             },
             {
               "grade": "B",
-              "count": 6080,
-              "percentage": 20
+              "count": 54179,
+              "percentage": 23
             },
             {
               "grade": "C",
-              "count": 7660,
-              "percentage": 25
+              "count": 52344,
+              "percentage": 23
             },
             {
               "grade": "D",
-              "count": 3798,
-              "percentage": 12
-            },
-            {
-              "grade": "E",
-              "count": 1602,
-              "percentage": 5
-            },
-            {
-              "grade": "F",
-              "count": 1963,
-              "percentage": 6
-            },
-            {
-              "grade": "Bestått",
-              "count": 6217,
-              "percentage": 20
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 216,
-              "percentage": 1
-            }
-          ],
-          "averageGrade": 2.97
-        },
-        "2025": {
-          "year": 2025,
-          "totalStudents": 17900,
-          "totalCourses": 65,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2181,
-              "percentage": 12
-            },
-            {
-              "grade": "B",
-              "count": 3868,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 4596,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 2245,
+              "count": 29766,
               "percentage": 13
             },
             {
               "grade": "E",
-              "count": 881,
-              "percentage": 5
+              "count": 15904,
+              "percentage": 7
             },
             {
               "grade": "F",
-              "count": 971,
-              "percentage": 5
+              "count": 15290,
+              "percentage": 7
             },
             {
               "grade": "Bestått",
-              "count": 3002,
-              "percentage": 17
+              "count": 31999,
+              "percentage": 14
             },
             {
               "grade": "Ikke bestått",
-              "count": 156,
+              "count": 1594,
               "percentage": 1
             }
           ],
-          "averageGrade": 3.05
+          "averageGrade": 3.01
+        },
+        "2025": {
+          "year": 2025,
+          "totalStudents": 109331,
+          "totalCourses": 2085,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 16508,
+              "percentage": 15
+            },
+            {
+              "grade": "B",
+              "count": 28642,
+              "percentage": 26
+            },
+            {
+              "grade": "C",
+              "count": 25753,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 12674,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 6058,
+              "percentage": 6
+            },
+            {
+              "grade": "F",
+              "count": 6176,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 13087,
+              "percentage": 12
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 433,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.16
         }
       },
-      "generatedAt": "2025-11-25T20:15:56.685Z"
+      "generatedAt": "2025-11-25T21:18:52.234Z"
     },
-    "NTNU": {
-      "institution": "NTNU",
-      "institutionCode": "1150",
-      "institutionName": "Norges teknisk-naturvitenskapelige universitet",
-      "totalCourses": 89,
-      "totalStudents": 465449,
-      "coursesWithData": 89,
+    "UiB": {
+      "institution": "UiB",
+      "institutionCode": "1120",
+      "institutionName": "Universitetet i Bergen",
+      "totalCourses": 3887,
+      "totalStudents": 1218742,
+      "coursesWithData": 3887,
       "yearRange": {
         "min": 2004,
         "max": 2025
@@ -1122,610 +2246,422 @@
       "overallDistribution": [
         {
           "grade": "A",
-          "count": 48801,
-          "percentage": 10
+          "count": 111456,
+          "percentage": 9
         },
         {
           "grade": "B",
-          "count": 87676,
-          "percentage": 19
+          "count": 275665,
+          "percentage": 23
         },
         {
           "grade": "C",
-          "count": 112738,
-          "percentage": 24
+          "count": 325786,
+          "percentage": 27
         },
         {
           "grade": "D",
-          "count": 69462,
-          "percentage": 15
+          "count": 153053,
+          "percentage": 13
         },
         {
           "grade": "E",
-          "count": 46865,
-          "percentage": 10
+          "count": 60619,
+          "percentage": 5
         },
         {
           "grade": "F",
-          "count": 50674,
-          "percentage": 11
+          "count": 64164,
+          "percentage": 5
         },
         {
           "grade": "Bestått",
-          "count": 45152,
-          "percentage": 10
+          "count": 221443,
+          "percentage": 18
         },
         {
           "grade": "Ikke bestått",
-          "count": 4081,
+          "count": 6556,
           "percentage": 1
         }
       ],
-      "averageGrade": 2.69,
+      "averageGrade": 3.01,
       "yearlyStats": {
         "2004": {
           "year": 2004,
-          "totalStudents": 5986,
-          "totalCourses": 33,
+          "totalStudents": 40873,
+          "totalCourses": 835,
           "distribution": [
             {
               "grade": "A",
-              "count": 613,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 738,
-              "percentage": 12
-            },
-            {
-              "grade": "C",
-              "count": 935,
-              "percentage": 16
-            },
-            {
-              "grade": "D",
-              "count": 1006,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 1242,
-              "percentage": 21
-            },
-            {
-              "grade": "F",
-              "count": 1452,
-              "percentage": 24
-            }
-          ],
-          "averageGrade": 2.02
-        },
-        "2005": {
-          "year": 2005,
-          "totalStudents": 11361,
-          "totalCourses": 35,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1192,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 1688,
-              "percentage": 15
-            },
-            {
-              "grade": "C",
-              "count": 2106,
-              "percentage": 19
-            },
-            {
-              "grade": "D",
-              "count": 1918,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 2271,
-              "percentage": 20
-            },
-            {
-              "grade": "F",
-              "count": 2186,
-              "percentage": 19
-            }
-          ],
-          "averageGrade": 2.21
-        },
-        "2006": {
-          "year": 2006,
-          "totalStudents": 11869,
-          "totalCourses": 38,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1392,
-              "percentage": 12
-            },
-            {
-              "grade": "B",
-              "count": 1893,
-              "percentage": 16
-            },
-            {
-              "grade": "C",
-              "count": 2790,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 1752,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 1913,
-              "percentage": 16
-            },
-            {
-              "grade": "F",
-              "count": 2129,
-              "percentage": 18
-            }
-          ],
-          "averageGrade": 2.39
-        },
-        "2007": {
-          "year": 2007,
-          "totalStudents": 12496,
-          "totalCourses": 39,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 936,
-              "percentage": 7
-            },
-            {
-              "grade": "B",
-              "count": 1771,
-              "percentage": 14
-            },
-            {
-              "grade": "C",
-              "count": 3817,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 1895,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 1687,
-              "percentage": 14
-            },
-            {
-              "grade": "F",
-              "count": 2390,
-              "percentage": 19
-            }
-          ],
-          "averageGrade": 2.3
-        },
-        "2008": {
-          "year": 2008,
-          "totalStudents": 13710,
-          "totalCourses": 42,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1313,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2195,
-              "percentage": 16
-            },
-            {
-              "grade": "C",
-              "count": 4446,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 2091,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 1547,
-              "percentage": 11
-            },
-            {
-              "grade": "F",
-              "count": 2118,
-              "percentage": 15
-            }
-          ],
-          "averageGrade": 2.51
-        },
-        "2009": {
-          "year": 2009,
-          "totalStudents": 14349,
-          "totalCourses": 43,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1302,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 2310,
-              "percentage": 16
-            },
-            {
-              "grade": "C",
-              "count": 4577,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 2179,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 1735,
-              "percentage": 12
-            },
-            {
-              "grade": "F",
-              "count": 2246,
-              "percentage": 16
-            }
-          ],
-          "averageGrade": 2.48
-        },
-        "2010": {
-          "year": 2010,
-          "totalStudents": 14871,
-          "totalCourses": 43,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1324,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 2367,
-              "percentage": 16
-            },
-            {
-              "grade": "C",
-              "count": 4706,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 2406,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 1904,
-              "percentage": 13
-            },
-            {
-              "grade": "F",
-              "count": 2164,
-              "percentage": 15
-            }
-          ],
-          "averageGrade": 2.48
-        },
-        "2011": {
-          "year": 2011,
-          "totalStudents": 15156,
-          "totalCourses": 43,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1229,
+              "count": 3472,
               "percentage": 8
             },
             {
               "grade": "B",
-              "count": 2388,
-              "percentage": 16
+              "count": 9781,
+              "percentage": 24
             },
             {
               "grade": "C",
-              "count": 4860,
-              "percentage": 32
+              "count": 10620,
+              "percentage": 26
             },
             {
               "grade": "D",
-              "count": 2534,
-              "percentage": 17
+              "count": 5409,
+              "percentage": 13
             },
             {
               "grade": "E",
-              "count": 1875,
-              "percentage": 12
+              "count": 2191,
+              "percentage": 5
             },
             {
               "grade": "F",
-              "count": 2270,
-              "percentage": 15
-            }
-          ],
-          "averageGrade": 2.46
-        },
-        "2012": {
-          "year": 2012,
-          "totalStudents": 16068,
-          "totalCourses": 43,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1508,
+              "count": 3875,
               "percentage": 9
             },
             {
-              "grade": "B",
-              "count": 2646,
-              "percentage": 16
+              "grade": "Bestått",
+              "count": 5430,
+              "percentage": 13
             },
             {
-              "grade": "C",
-              "count": 4955,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 2587,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 1960,
-              "percentage": 12
-            },
-            {
-              "grade": "F",
-              "count": 2412,
-              "percentage": 15
+              "grade": "Ikke bestått",
+              "count": 95,
+              "percentage": 0
             }
           ],
-          "averageGrade": 2.5
+          "averageGrade": 2.88
         },
-        "2013": {
-          "year": 2013,
-          "totalStudents": 16834,
-          "totalCourses": 45,
+        "2005": {
+          "year": 2005,
+          "totalStudents": 42913,
+          "totalCourses": 880,
           "distribution": [
             {
               "grade": "A",
-              "count": 1660,
-              "percentage": 10
+              "count": 3590,
+              "percentage": 8
             },
             {
               "grade": "B",
-              "count": 2927,
-              "percentage": 17
+              "count": 10560,
+              "percentage": 25
             },
             {
               "grade": "C",
-              "count": 4722,
+              "count": 11640,
+              "percentage": 27
+            },
+            {
+              "grade": "D",
+              "count": 5931,
+              "percentage": 14
+            },
+            {
+              "grade": "E",
+              "count": 2472,
+              "percentage": 6
+            },
+            {
+              "grade": "F",
+              "count": 3259,
+              "percentage": 8
+            },
+            {
+              "grade": "Bestått",
+              "count": 5422,
+              "percentage": 13
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 39,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.93
+        },
+        "2006": {
+          "year": 2006,
+          "totalStudents": 44336,
+          "totalCourses": 940,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 3685,
+              "percentage": 8
+            },
+            {
+              "grade": "B",
+              "count": 10827,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 12440,
               "percentage": 28
             },
             {
               "grade": "D",
-              "count": 2884,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 2143,
-              "percentage": 13
-            },
-            {
-              "grade": "F",
-              "count": 2498,
-              "percentage": 15
-            }
-          ],
-          "averageGrade": 2.5
-        },
-        "2014": {
-          "year": 2014,
-          "totalStudents": 17964,
-          "totalCourses": 46,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1987,
-              "percentage": 11
-            },
-            {
-              "grade": "B",
-              "count": 3410,
-              "percentage": 19
-            },
-            {
-              "grade": "C",
-              "count": 4268,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 3210,
-              "percentage": 18
-            },
-            {
-              "grade": "E",
-              "count": 2194,
-              "percentage": 12
-            },
-            {
-              "grade": "F",
-              "count": 2322,
-              "percentage": 13
-            },
-            {
-              "grade": "Bestått",
-              "count": 543,
-              "percentage": 3
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 30,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.6
-        },
-        "2015": {
-          "year": 2015,
-          "totalStudents": 19088,
-          "totalCourses": 46,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2481,
-              "percentage": 13
-            },
-            {
-              "grade": "B",
-              "count": 4134,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 4512,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 3153,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 1998,
-              "percentage": 10
-            },
-            {
-              "grade": "F",
-              "count": 2176,
-              "percentage": 11
-            },
-            {
-              "grade": "Bestått",
-              "count": 604,
-              "percentage": 3
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 30,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.76
-        },
-        "2016": {
-          "year": 2016,
-          "totalStudents": 20450,
-          "totalCourses": 46,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2711,
-              "percentage": 13
-            },
-            {
-              "grade": "B",
-              "count": 4497,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 5019,
-              "percentage": 25
-            },
-            {
-              "grade": "D",
-              "count": 3475,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 2000,
-              "percentage": 10
-            },
-            {
-              "grade": "F",
-              "count": 2127,
-              "percentage": 10
-            },
-            {
-              "grade": "Bestått",
-              "count": 574,
-              "percentage": 3
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 47,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.8
-        },
-        "2017": {
-          "year": 2017,
-          "totalStudents": 21367,
-          "totalCourses": 48,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 3061,
+              "count": 6321,
               "percentage": 14
             },
             {
-              "grade": "B",
-              "count": 4777,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 5138,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 3149,
-              "percentage": 15
-            },
-            {
               "grade": "E",
-              "count": 2061,
-              "percentage": 10
+              "count": 2499,
+              "percentage": 6
             },
             {
               "grade": "F",
-              "count": 2109,
-              "percentage": 10
+              "count": 2708,
+              "percentage": 6
             },
             {
               "grade": "Bestått",
-              "count": 1019,
+              "count": 5758,
+              "percentage": 13
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 98,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2007": {
+          "year": 2007,
+          "totalStudents": 43893,
+          "totalCourses": 980,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 3772,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 10522,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 12474,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 5957,
+              "percentage": 14
+            },
+            {
+              "grade": "E",
+              "count": 2336,
               "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 2449,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 6266,
+              "percentage": 14
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 117,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.99
+        },
+        "2008": {
+          "year": 2008,
+          "totalStudents": 43835,
+          "totalCourses": 979,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 3850,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 10458,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 12149,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 5600,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2320,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 2346,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 7017,
+              "percentage": 16
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 95,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.01
+        },
+        "2009": {
+          "year": 2009,
+          "totalStudents": 44836,
+          "totalCourses": 968,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 4145,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 10961,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 12461,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 5734,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2138,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 2394,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 6947,
+              "percentage": 15
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 56,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.04
+        },
+        "2010": {
+          "year": 2010,
+          "totalStudents": 46617,
+          "totalCourses": 1025,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 4051,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 11125,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 13026,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 6252,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2363,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 2353,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 7386,
+              "percentage": 16
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 61,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.02
+        },
+        "2011": {
+          "year": 2011,
+          "totalStudents": 46039,
+          "totalCourses": 1049,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 3905,
+              "percentage": 8
+            },
+            {
+              "grade": "B",
+              "count": 10961,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 13061,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 6059,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2501,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 2248,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 7251,
+              "percentage": 16
             },
             {
               "grade": "Ikke bestått",
@@ -1733,95 +2669,47 @@
               "percentage": 0
             }
           ],
-          "averageGrade": 2.87
+          "averageGrade": 3.02
         },
-        "2018": {
-          "year": 2018,
-          "totalStudents": 22291,
-          "totalCourses": 48,
+        "2012": {
+          "year": 2012,
+          "totalStudents": 46466,
+          "totalCourses": 1052,
           "distribution": [
             {
               "grade": "A",
-              "count": 2648,
-              "percentage": 12
+              "count": 3948,
+              "percentage": 8
             },
             {
               "grade": "B",
-              "count": 4633,
-              "percentage": 21
-            },
-            {
-              "grade": "C",
-              "count": 5182,
-              "percentage": 23
-            },
-            {
-              "grade": "D",
-              "count": 3621,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 2344,
-              "percentage": 11
-            },
-            {
-              "grade": "F",
-              "count": 2767,
-              "percentage": 12
-            },
-            {
-              "grade": "Bestått",
-              "count": 1022,
-              "percentage": 5
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 74,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.69
-        },
-        "2019": {
-          "year": 2019,
-          "totalStudents": 26290,
-          "totalCourses": 54,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 3046,
-              "percentage": 12
-            },
-            {
-              "grade": "B",
-              "count": 5876,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 6414,
+              "count": 10945,
               "percentage": 24
             },
             {
+              "grade": "C",
+              "count": 13141,
+              "percentage": 28
+            },
+            {
               "grade": "D",
-              "count": 4317,
-              "percentage": 16
+              "count": 6350,
+              "percentage": 14
             },
             {
               "grade": "E",
-              "count": 2425,
-              "percentage": 9
+              "count": 2330,
+              "percentage": 5
             },
             {
               "grade": "F",
-              "count": 2570,
-              "percentage": 10
+              "count": 2650,
+              "percentage": 6
             },
             {
               "grade": "Bestått",
-              "count": 1553,
-              "percentage": 6
+              "count": 7013,
+              "percentage": 15
             },
             {
               "grade": "Ikke bestått",
@@ -1829,1312 +2717,634 @@
               "percentage": 0
             }
           ],
-          "averageGrade": 2.8
+          "averageGrade": 2.99
         },
-        "2020": {
-          "year": 2020,
-          "totalStudents": 34802,
-          "totalCourses": 61,
+        "2013": {
+          "year": 2013,
+          "totalStudents": 46574,
+          "totalCourses": 1106,
           "distribution": [
             {
               "grade": "A",
-              "count": 1789,
-              "percentage": 5
+              "count": 4017,
+              "percentage": 9
             },
             {
               "grade": "B",
-              "count": 3521,
-              "percentage": 10
+              "count": 10956,
+              "percentage": 24
             },
             {
               "grade": "C",
-              "count": 3651,
-              "percentage": 10
+              "count": 13117,
+              "percentage": 28
             },
             {
               "grade": "D",
-              "count": 1768,
-              "percentage": 5
+              "count": 6154,
+              "percentage": 13
             },
             {
               "grade": "E",
-              "count": 678,
-              "percentage": 2
+              "count": 2375,
+              "percentage": 5
             },
             {
               "grade": "F",
-              "count": 571,
-              "percentage": 2
+              "count": 2762,
+              "percentage": 6
             },
             {
               "grade": "Bestått",
-              "count": 20594,
-              "percentage": 59
+              "count": 7092,
+              "percentage": 15
             },
             {
               "grade": "Ikke bestått",
-              "count": 2230,
-              "percentage": 6
+              "count": 101,
+              "percentage": 0
             }
           ],
-          "averageGrade": 2.87
+          "averageGrade": 2.99
         },
-        "2021": {
-          "year": 2021,
-          "totalStudents": 33820,
-          "totalCourses": 66,
+        "2014": {
+          "year": 2014,
+          "totalStudents": 48011,
+          "totalCourses": 1128,
           "distribution": [
             {
               "grade": "A",
-              "count": 3545,
-              "percentage": 10
+              "count": 4132,
+              "percentage": 9
             },
             {
               "grade": "B",
-              "count": 6310,
-              "percentage": 19
+              "count": 10929,
+              "percentage": 23
             },
             {
               "grade": "C",
-              "count": 6309,
-              "percentage": 19
-            },
-            {
-              "grade": "D",
-              "count": 3481,
-              "percentage": 10
-            },
-            {
-              "grade": "E",
-              "count": 1758,
-              "percentage": 5
-            },
-            {
-              "grade": "F",
-              "count": 1683,
-              "percentage": 5
-            },
-            {
-              "grade": "Bestått",
-              "count": 9687,
+              "count": 13909,
               "percentage": 29
             },
             {
+              "grade": "D",
+              "count": 6330,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2649,
+              "percentage": 6
+            },
+            {
+              "grade": "F",
+              "count": 2949,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 6979,
+              "percentage": 15
+            },
+            {
               "grade": "Ikke bestått",
-              "count": 1047,
-              "percentage": 3
+              "count": 134,
+              "percentage": 0
             }
           ],
-          "averageGrade": 2.95
+          "averageGrade": 2.96
         },
-        "2022": {
-          "year": 2022,
-          "totalStudents": 33519,
-          "totalCourses": 72,
+        "2015": {
+          "year": 2015,
+          "totalStudents": 51976,
+          "totalCourses": 1168,
           "distribution": [
             {
               "grade": "A",
-              "count": 3535,
-              "percentage": 11
+              "count": 4553,
+              "percentage": 9
             },
             {
               "grade": "B",
-              "count": 7491,
+              "count": 11538,
               "percentage": 22
             },
             {
               "grade": "C",
-              "count": 8838,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 5348,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 3171,
-              "percentage": 9
-            },
-            {
-              "grade": "F",
-              "count": 2994,
-              "percentage": 9
-            },
-            {
-              "grade": "Bestått",
-              "count": 2056,
-              "percentage": 6
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 86,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.81
-        },
-        "2023": {
-          "year": 2023,
-          "totalStudents": 36796,
-          "totalCourses": 79,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 3617,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 7421,
-              "percentage": 20
-            },
-            {
-              "grade": "C",
-              "count": 8923,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 5996,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 3759,
-              "percentage": 10
-            },
-            {
-              "grade": "F",
-              "count": 3766,
-              "percentage": 10
-            },
-            {
-              "grade": "Bestått",
-              "count": 3153,
-              "percentage": 9
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 161,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.71
-        },
-        "2024": {
-          "year": 2024,
-          "totalStudents": 47096,
-          "totalCourses": 86,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 5386,
-              "percentage": 11
-            },
-            {
-              "grade": "B",
-              "count": 9914,
-              "percentage": 21
-            },
-            {
-              "grade": "C",
-              "count": 11368,
-              "percentage": 24
-            },
-            {
-              "grade": "D",
-              "count": 7879,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 4732,
-              "percentage": 10
-            },
-            {
-              "grade": "F",
-              "count": 4195,
-              "percentage": 9
-            },
-            {
-              "grade": "Bestått",
-              "count": 3401,
-              "percentage": 7
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 221,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.79
-        },
-        "2025": {
-          "year": 2025,
-          "totalStudents": 19266,
-          "totalCourses": 52,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 2526,
-              "percentage": 13
-            },
-            {
-              "grade": "B",
-              "count": 4769,
-              "percentage": 25
-            },
-            {
-              "grade": "C",
-              "count": 5202,
-              "percentage": 27
-            },
-            {
-              "grade": "D",
-              "count": 2813,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 1468,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 1529,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 946,
-              "percentage": 5
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 13,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.97
-        }
-      },
-      "generatedAt": "2025-11-25T20:15:56.893Z"
-    },
-    "UiB": {
-      "institution": "UiB",
-      "institutionCode": "1120",
-      "institutionName": "Universitetet i Bergen",
-      "totalCourses": 100,
-      "totalStudents": 218133,
-      "coursesWithData": 100,
-      "yearRange": {
-        "min": 2004,
-        "max": 2025
-      },
-      "overallDistribution": [
-        {
-          "grade": "A",
-          "count": 19272,
-          "percentage": 9
-        },
-        {
-          "grade": "B",
-          "count": 48784,
-          "percentage": 22
-        },
-        {
-          "grade": "C",
-          "count": 62452,
-          "percentage": 29
-        },
-        {
-          "grade": "D",
-          "count": 30134,
-          "percentage": 14
-        },
-        {
-          "grade": "E",
-          "count": 12346,
-          "percentage": 6
-        },
-        {
-          "grade": "F",
-          "count": 12761,
-          "percentage": 6
-        },
-        {
-          "grade": "Bestått",
-          "count": 29462,
-          "percentage": 14
-        },
-        {
-          "grade": "Ikke bestått",
-          "count": 2922,
-          "percentage": 1
-        }
-      ],
-      "averageGrade": 2.93,
-      "yearlyStats": {
-        "2004": {
-          "year": 2004,
-          "totalStudents": 4861,
-          "totalCourses": 27,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 542,
-              "percentage": 11
-            },
-            {
-              "grade": "B",
-              "count": 1510,
-              "percentage": 31
-            },
-            {
-              "grade": "C",
-              "count": 1408,
+              "count": 14817,
               "percentage": 29
             },
             {
               "grade": "D",
-              "count": 688,
+              "count": 7131,
               "percentage": 14
             },
             {
               "grade": "E",
-              "count": 285,
+              "count": 2929,
               "percentage": 6
             },
             {
               "grade": "F",
-              "count": 428,
+              "count": 3331,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 7586,
+              "percentage": 15
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 91,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.95
+        },
+        "2016": {
+          "year": 2016,
+          "totalStudents": 54065,
+          "totalCourses": 1243,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 4840,
               "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 12478,
+              "percentage": 23
+            },
+            {
+              "grade": "C",
+              "count": 15125,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 7251,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 2822,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3424,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 7986,
+              "percentage": 15
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 139,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2017": {
+          "year": 2017,
+          "totalStudents": 58290,
+          "totalCourses": 1244,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 5279,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 13161,
+              "percentage": 23
+            },
+            {
+              "grade": "C",
+              "count": 16324,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 7826,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 3232,
+              "percentage": 6
+            },
+            {
+              "grade": "F",
+              "count": 3641,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 8665,
+              "percentage": 15
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 162,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 2.97
+        },
+        "2018": {
+          "year": 2018,
+          "totalStudents": 61480,
+          "totalCourses": 1277,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6041,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 14598,
+              "percentage": 24
+            },
+            {
+              "grade": "C",
+              "count": 17166,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 7918,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 3128,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3551,
+              "percentage": 6
+            },
+            {
+              "grade": "Bestått",
+              "count": 8882,
+              "percentage": 14
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 196,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.02
+        },
+        "2019": {
+          "year": 2019,
+          "totalStudents": 64274,
+          "totalCourses": 1309,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6492,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 14546,
+              "percentage": 23
+            },
+            {
+              "grade": "C",
+              "count": 18034,
+              "percentage": 28
+            },
+            {
+              "grade": "D",
+              "count": 8515,
+              "percentage": 13
+            },
+            {
+              "grade": "E",
+              "count": 3402,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3483,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 9645,
+              "percentage": 15
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 157,
+              "percentage": 0
+            }
+          ],
+          "averageGrade": 3.02
+        },
+        "2020": {
+          "year": 2020,
+          "totalStudents": 69669,
+          "totalCourses": 1334,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 6808,
+              "percentage": 10
+            },
+            {
+              "grade": "B",
+              "count": 13873,
+              "percentage": 20
+            },
+            {
+              "grade": "C",
+              "count": 16484,
+              "percentage": 24
+            },
+            {
+              "grade": "D",
+              "count": 7260,
+              "percentage": 10
+            },
+            {
+              "grade": "E",
+              "count": 2501,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 2093,
+              "percentage": 3
+            },
+            {
+              "grade": "Bestått",
+              "count": 19807,
+              "percentage": 28
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 843,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.09
+        },
+        "2021": {
+          "year": 2021,
+          "totalStudents": 76302,
+          "totalCourses": 1386,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 7225,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 16448,
+              "percentage": 22
+            },
+            {
+              "grade": "C",
+              "count": 19119,
+              "percentage": 25
+            },
+            {
+              "grade": "D",
+              "count": 8322,
+              "percentage": 11
+            },
+            {
+              "grade": "E",
+              "count": 3006,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 2438,
+              "percentage": 3
+            },
+            {
+              "grade": "Bestått",
+              "count": 19316,
+              "percentage": 25
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 428,
+              "percentage": 1
+            }
+          ],
+          "averageGrade": 3.1
+        },
+        "2022": {
+          "year": 2022,
+          "totalStudents": 74511,
+          "totalCourses": 1487,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 7064,
+              "percentage": 9
+            },
+            {
+              "grade": "B",
+              "count": 15556,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 19115,
+              "percentage": 26
+            },
+            {
+              "grade": "D",
+              "count": 9105,
+              "percentage": 12
+            },
+            {
+              "grade": "E",
+              "count": 3882,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3716,
+              "percentage": 5
+            },
+            {
+              "grade": "Bestått",
+              "count": 15662,
+              "percentage": 21
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 411,
+              "percentage": 1
             }
           ],
           "averageGrade": 3.01
         },
-        "2005": {
-          "year": 2005,
-          "totalStudents": 5010,
-          "totalCourses": 28,
+        "2023": {
+          "year": 2023,
+          "totalStudents": 78490,
+          "totalCourses": 1572,
           "distribution": [
             {
               "grade": "A",
-              "count": 483,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 1574,
-              "percentage": 31
-            },
-            {
-              "grade": "C",
-              "count": 1535,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 712,
-              "percentage": 14
-            },
-            {
-              "grade": "E",
-              "count": 311,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 395,
-              "percentage": 8
-            }
-          ],
-          "averageGrade": 3
-        },
-        "2006": {
-          "year": 2006,
-          "totalStudents": 5793,
-          "totalCourses": 29,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 494,
+              "count": 7219,
               "percentage": 9
             },
             {
               "grade": "B",
-              "count": 1730,
-              "percentage": 30
-            },
-            {
-              "grade": "C",
-              "count": 1876,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 891,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 398,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 404,
-              "percentage": 7
-            }
-          ],
-          "averageGrade": 2.97
-        },
-        "2007": {
-          "year": 2007,
-          "totalStudents": 5846,
-          "totalCourses": 29,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 589,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 1637,
-              "percentage": 28
-            },
-            {
-              "grade": "C",
-              "count": 1935,
-              "percentage": 33
-            },
-            {
-              "grade": "D",
-              "count": 859,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 402,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 424,
-              "percentage": 7
-            }
-          ],
-          "averageGrade": 2.98
-        },
-        "2008": {
-          "year": 2008,
-          "totalStudents": 5762,
-          "totalCourses": 30,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 578,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 1616,
-              "percentage": 28
-            },
-            {
-              "grade": "C",
-              "count": 1913,
-              "percentage": 33
-            },
-            {
-              "grade": "D",
-              "count": 864,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 377,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 414,
-              "percentage": 7
-            }
-          ],
-          "averageGrade": 2.98
-        },
-        "2009": {
-          "year": 2009,
-          "totalStudents": 6065,
-          "totalCourses": 30,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 643,
-              "percentage": 11
-            },
-            {
-              "grade": "B",
-              "count": 1723,
-              "percentage": 28
-            },
-            {
-              "grade": "C",
-              "count": 1970,
-              "percentage": 32
-            },
-            {
-              "grade": "D",
-              "count": 915,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 376,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 438,
-              "percentage": 7
-            }
-          ],
-          "averageGrade": 3
-        },
-        "2010": {
-          "year": 2010,
-          "totalStudents": 6089,
-          "totalCourses": 32,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 596,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 1656,
-              "percentage": 27
-            },
-            {
-              "grade": "C",
-              "count": 2065,
-              "percentage": 34
-            },
-            {
-              "grade": "D",
-              "count": 971,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 406,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 395,
-              "percentage": 6
-            }
-          ],
-          "averageGrade": 2.98
-        },
-        "2011": {
-          "year": 2011,
-          "totalStudents": 6196,
-          "totalCourses": 33,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 517,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 1634,
-              "percentage": 26
-            },
-            {
-              "grade": "C",
-              "count": 2160,
-              "percentage": 35
-            },
-            {
-              "grade": "D",
-              "count": 1041,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 451,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 393,
-              "percentage": 6
-            }
-          ],
-          "averageGrade": 2.93
-        },
-        "2012": {
-          "year": 2012,
-          "totalStudents": 6350,
-          "totalCourses": 33,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 564,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 1687,
-              "percentage": 27
-            },
-            {
-              "grade": "C",
-              "count": 2124,
-              "percentage": 33
-            },
-            {
-              "grade": "D",
-              "count": 1083,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 403,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 489,
-              "percentage": 8
-            }
-          ],
-          "averageGrade": 2.91
-        },
-        "2013": {
-          "year": 2013,
-          "totalStudents": 6280,
-          "totalCourses": 33,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 550,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 1674,
-              "percentage": 27
-            },
-            {
-              "grade": "C",
-              "count": 2104,
-              "percentage": 34
-            },
-            {
-              "grade": "D",
-              "count": 1003,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 438,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 511,
-              "percentage": 8
-            }
-          ],
-          "averageGrade": 2.9
-        },
-        "2014": {
-          "year": 2014,
-          "totalStudents": 6825,
-          "totalCourses": 38,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 616,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 1534,
+              "count": 17102,
               "percentage": 22
             },
             {
               "grade": "C",
-              "count": 2311,
-              "percentage": 34
+              "count": 19752,
+              "percentage": 25
             },
             {
               "grade": "D",
-              "count": 1107,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 530,
-              "percentage": 8
-            },
-            {
-              "grade": "F",
-              "count": 608,
-              "percentage": 9
-            },
-            {
-              "grade": "Bestått",
-              "count": 119,
-              "percentage": 2
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.82
-        },
-        "2015": {
-          "year": 2015,
-          "totalStudents": 7687,
-          "totalCourses": 40,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 566,
-              "percentage": 7
-            },
-            {
-              "grade": "B",
-              "count": 1640,
-              "percentage": 21
-            },
-            {
-              "grade": "C",
-              "count": 2518,
-              "percentage": 33
-            },
-            {
-              "grade": "D",
-              "count": 1344,
-              "percentage": 17
-            },
-            {
-              "grade": "E",
-              "count": 545,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 719,
-              "percentage": 9
-            },
-            {
-              "grade": "Bestått",
-              "count": 355,
-              "percentage": 5
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.76
-        },
-        "2016": {
-          "year": 2016,
-          "totalStudents": 8565,
-          "totalCourses": 46,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 753,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 1999,
-              "percentage": 23
-            },
-            {
-              "grade": "C",
-              "count": 2695,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 1386,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 531,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 747,
-              "percentage": 9
-            },
-            {
-              "grade": "Bestått",
-              "count": 451,
-              "percentage": 5
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 3,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.86
-        },
-        "2017": {
-          "year": 2017,
-          "totalStudents": 10154,
-          "totalCourses": 54,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 871,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 2203,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 3157,
-              "percentage": 31
-            },
-            {
-              "grade": "D",
-              "count": 1660,
-              "percentage": 16
-            },
-            {
-              "grade": "E",
-              "count": 662,
-              "percentage": 7
-            },
-            {
-              "grade": "F",
-              "count": 814,
-              "percentage": 8
-            },
-            {
-              "grade": "Bestått",
-              "count": 787,
-              "percentage": 8
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 0,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.85
-        },
-        "2018": {
-          "year": 2018,
-          "totalStudents": 11532,
-          "totalCourses": 59,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1157,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2804,
-              "percentage": 24
-            },
-            {
-              "grade": "C",
-              "count": 3484,
-              "percentage": 30
-            },
-            {
-              "grade": "D",
-              "count": 1710,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 612,
-              "percentage": 5
-            },
-            {
-              "grade": "F",
-              "count": 795,
-              "percentage": 7
-            },
-            {
-              "grade": "Bestått",
-              "count": 965,
-              "percentage": 8
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 5,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.98
-        },
-        "2019": {
-          "year": 2019,
-          "totalStudents": 12102,
-          "totalCourses": 60,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1195,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2686,
-              "percentage": 22
-            },
-            {
-              "grade": "C",
-              "count": 3683,
-              "percentage": 30
-            },
-            {
-              "grade": "D",
-              "count": 1844,
-              "percentage": 15
-            },
-            {
-              "grade": "E",
-              "count": 748,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 792,
-              "percentage": 7
-            },
-            {
-              "grade": "Bestått",
-              "count": 1151,
-              "percentage": 10
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 3,
-              "percentage": 0
-            }
-          ],
-          "averageGrade": 2.95
-        },
-        "2020": {
-          "year": 2020,
-          "totalStudents": 13539,
-          "totalCourses": 61,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1380,
-              "percentage": 10
-            },
-            {
-              "grade": "B",
-              "count": 2632,
-              "percentage": 19
-            },
-            {
-              "grade": "C",
-              "count": 3466,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 1578,
+              "count": 9094,
               "percentage": 12
             },
             {
               "grade": "E",
-              "count": 573,
+              "count": 3814,
+              "percentage": 5
+            },
+            {
+              "grade": "F",
+              "count": 3228,
               "percentage": 4
             },
             {
-              "grade": "F",
-              "count": 407,
-              "percentage": 3
-            },
-            {
               "grade": "Bestått",
-              "count": 3272,
-              "percentage": 24
+              "count": 17812,
+              "percentage": 23
             },
             {
               "grade": "Ikke bestått",
-              "count": 231,
-              "percentage": 2
-            }
-          ],
-          "averageGrade": 3.06
-        },
-        "2021": {
-          "year": 2021,
-          "totalStudents": 15872,
-          "totalCourses": 64,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1394,
-              "percentage": 9
-            },
-            {
-              "grade": "B",
-              "count": 3205,
-              "percentage": 20
-            },
-            {
-              "grade": "C",
-              "count": 4027,
-              "percentage": 25
-            },
-            {
-              "grade": "D",
-              "count": 1933,
-              "percentage": 12
-            },
-            {
-              "grade": "E",
-              "count": 752,
-              "percentage": 5
-            },
-            {
-              "grade": "F",
-              "count": 532,
-              "percentage": 3
-            },
-            {
-              "grade": "Bestått",
-              "count": 3989,
-              "percentage": 25
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 40,
-              "percentage": 0
+              "count": 469,
+              "percentage": 1
             }
           ],
           "averageGrade": 3.05
         },
-        "2022": {
-          "year": 2022,
-          "totalStudents": 16257,
-          "totalCourses": 73,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1337,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 2959,
-              "percentage": 18
-            },
-            {
-              "grade": "C",
-              "count": 4270,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 2095,
-              "percentage": 13
-            },
-            {
-              "grade": "E",
-              "count": 962,
-              "percentage": 6
-            },
-            {
-              "grade": "F",
-              "count": 907,
-              "percentage": 6
-            },
-            {
-              "grade": "Bestått",
-              "count": 3616,
-              "percentage": 22
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 111,
-              "percentage": 1
-            }
-          ],
-          "averageGrade": 2.91
-        },
-        "2023": {
-          "year": 2023,
-          "totalStudents": 18365,
-          "totalCourses": 78,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1401,
-              "percentage": 8
-            },
-            {
-              "grade": "B",
-              "count": 3662,
-              "percentage": 20
-            },
-            {
-              "grade": "C",
-              "count": 4806,
-              "percentage": 26
-            },
-            {
-              "grade": "D",
-              "count": 2202,
-              "percentage": 12
-            },
-            {
-              "grade": "E",
-              "count": 928,
-              "percentage": 5
-            },
-            {
-              "grade": "F",
-              "count": 719,
-              "percentage": 4
-            },
-            {
-              "grade": "Bestått",
-              "count": 4414,
-              "percentage": 24
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 233,
-              "percentage": 1
-            }
-          ],
-          "averageGrade": 2.98
-        },
         "2024": {
           "year": 2024,
-          "totalStudents": 23744,
-          "totalCourses": 85,
+          "totalStudents": 85120,
+          "totalCourses": 1662,
           "distribution": [
             {
               "grade": "A",
-              "count": 1719,
-              "percentage": 7
-            },
-            {
-              "grade": "B",
-              "count": 4100,
-              "percentage": 17
-            },
-            {
-              "grade": "C",
-              "count": 5484,
-              "percentage": 23
-            },
-            {
-              "grade": "D",
-              "count": 2672,
-              "percentage": 11
-            },
-            {
-              "grade": "E",
-              "count": 1045,
-              "percentage": 4
-            },
-            {
-              "grade": "F",
-              "count": 857,
-              "percentage": 4
-            },
-            {
-              "grade": "Bestått",
-              "count": 6427,
-              "percentage": 27
-            },
-            {
-              "grade": "Ikke bestått",
-              "count": 1440,
-              "percentage": 6
-            }
-          ],
-          "averageGrade": 2.83
-        },
-        "2025": {
-          "year": 2025,
-          "totalStudents": 15239,
-          "totalCourses": 70,
-          "distribution": [
-            {
-              "grade": "A",
-              "count": 1327,
+              "count": 7997,
               "percentage": 9
             },
             {
               "grade": "B",
-              "count": 2919,
-              "percentage": 19
+              "count": 17596,
+              "percentage": 21
             },
             {
               "grade": "C",
-              "count": 3461,
-              "percentage": 23
+              "count": 20147,
+              "percentage": 24
             },
             {
               "grade": "D",
-              "count": 1576,
-              "percentage": 10
+              "count": 9514,
+              "percentage": 11
             },
             {
               "grade": "E",
-              "count": 611,
+              "count": 3809,
               "percentage": 4
             },
             {
               "grade": "F",
-              "count": 573,
+              "count": 3404,
               "percentage": 4
             },
             {
               "grade": "Bestått",
-              "count": 3916,
-              "percentage": 26
+              "count": 20950,
+              "percentage": 25
             },
             {
               "grade": "Ikke bestått",
-              "count": 856,
-              "percentage": 6
+              "count": 1703,
+              "percentage": 2
             }
           ],
-          "averageGrade": 2.9
+          "averageGrade": 3.01
+        },
+        "2025": {
+          "year": 2025,
+          "totalStudents": 50172,
+          "totalCourses": 1171,
+          "distribution": [
+            {
+              "grade": "A",
+              "count": 5371,
+              "percentage": 11
+            },
+            {
+              "grade": "B",
+              "count": 10744,
+              "percentage": 21
+            },
+            {
+              "grade": "C",
+              "count": 11665,
+              "percentage": 23
+            },
+            {
+              "grade": "D",
+              "count": 5020,
+              "percentage": 10
+            },
+            {
+              "grade": "E",
+              "count": 1920,
+              "percentage": 4
+            },
+            {
+              "grade": "F",
+              "count": 1862,
+              "percentage": 4
+            },
+            {
+              "grade": "Bestått",
+              "count": 12571,
+              "percentage": 25
+            },
+            {
+              "grade": "Ikke bestått",
+              "count": 1019,
+              "percentage": 2
+            }
+          ],
+          "averageGrade": 3.08
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.074Z"
+      "generatedAt": "2025-11-25T21:18:53.116Z"
     },
     "NHH": {
       "institution": "NHH",
@@ -4248,7 +4458,7 @@
           "averageGrade": 3.78
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.227Z"
+      "generatedAt": "2025-11-25T21:18:53.255Z"
     },
     "BI": {
       "institution": "BI",
@@ -5212,7 +5422,7 @@
           "averageGrade": 2.96
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.489Z"
+      "generatedAt": "2025-11-25T21:18:53.388Z"
     },
     "OsloMet": {
       "institution": "OsloMet",
@@ -5654,7 +5864,7 @@
           "averageGrade": 2.81
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.637Z"
+      "generatedAt": "2025-11-25T21:18:53.525Z"
     },
     "Nord": {
       "institution": "Nord",
@@ -6192,7 +6402,7 @@
           "averageGrade": 2.84
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.791Z"
+      "generatedAt": "2025-11-25T21:18:53.656Z"
     },
     "NMBU": {
       "institution": "NMBU",
@@ -6826,7 +7036,7 @@
           "averageGrade": 2.76
         }
       },
-      "generatedAt": "2025-11-25T20:15:57.943Z"
+      "generatedAt": "2025-11-25T21:18:53.805Z"
     },
     "UiA": {
       "institution": "UiA",
@@ -7748,7 +7958,7 @@
           "averageGrade": 2.88
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.099Z"
+      "generatedAt": "2025-11-25T21:18:53.958Z"
     },
     "INN": {
       "institution": "INN",
@@ -7854,7 +8064,7 @@
           "averageGrade": 2.9
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.251Z"
+      "generatedAt": "2025-11-25T21:18:54.094Z"
     },
     "UiS": {
       "institution": "UiS",
@@ -8910,7 +9120,7 @@
           "averageGrade": 2.7
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.389Z"
+      "generatedAt": "2025-11-25T21:18:54.243Z"
     },
     "USN": {
       "institution": "USN",
@@ -9352,7 +9562,7 @@
           "averageGrade": 2.44
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.519Z"
+      "generatedAt": "2025-11-25T21:18:54.394Z"
     },
     "UiT": {
       "institution": "UiT",
@@ -10406,7 +10616,7 @@
           "averageGrade": 2.87
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.656Z"
+      "generatedAt": "2025-11-25T21:18:54.541Z"
     },
     "NMH": {
       "institution": "NMH",
@@ -11520,7 +11730,7 @@
           "averageGrade": 2.98
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.791Z"
+      "generatedAt": "2025-11-25T21:18:54.683Z"
     },
     "NIH": {
       "institution": "NIH",
@@ -12538,7 +12748,7 @@
           "averageGrade": 3.3
         }
       },
-      "generatedAt": "2025-11-25T20:15:58.924Z"
+      "generatedAt": "2025-11-25T21:18:54.829Z"
     },
     "KHIO": {
       "institution": "KHIO",
@@ -13220,7 +13430,7 @@
           "averageGrade": 2.97
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.057Z"
+      "generatedAt": "2025-11-25T21:18:54.964Z"
     },
     "HIM": {
       "institution": "HIM",
@@ -14046,7 +14256,7 @@
           "averageGrade": 2.72
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.189Z"
+      "generatedAt": "2025-11-25T21:18:55.087Z"
     },
     "AHO": {
       "institution": "AHO",
@@ -14986,7 +15196,7 @@
           "averageGrade": 3.19
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.317Z"
+      "generatedAt": "2025-11-25T21:18:55.222Z"
     },
     "SH": {
       "institution": "SH",
@@ -15812,7 +16022,7 @@
           "averageGrade": 3.7
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.466Z"
+      "generatedAt": "2025-11-25T21:18:55.343Z"
     },
     "HiØ": {
       "institution": "HiØ",
@@ -15898,7 +16108,7 @@
           "averageGrade": 1.57
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.605Z"
+      "generatedAt": "2025-11-25T21:18:55.467Z"
     },
     "HVO": {
       "institution": "HVO",
@@ -16952,7 +17162,7 @@
           "averageGrade": 3.09
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.738Z"
+      "generatedAt": "2025-11-25T21:18:55.596Z"
     },
     "HVL": {
       "institution": "HVL",
@@ -17442,7 +17652,7 @@
           "averageGrade": 2.77
         }
       },
-      "generatedAt": "2025-11-25T20:15:59.874Z"
+      "generatedAt": "2025-11-25T21:18:55.717Z"
     },
     "VID": {
       "institution": "VID",
@@ -17980,7 +18190,7 @@
           "averageGrade": 2.82
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.011Z"
+      "generatedAt": "2025-11-25T21:18:55.846Z"
     },
     "MF": {
       "institution": "MF",
@@ -18854,7 +19064,7 @@
           "averageGrade": 2.85
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.142Z"
+      "generatedAt": "2025-11-25T21:18:55.978Z"
     },
     "AHS": {
       "institution": "AHS",
@@ -19574,7 +19784,7 @@
           "averageGrade": 3.11
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.276Z"
+      "generatedAt": "2025-11-25T21:18:56.100Z"
     },
     "BD": {
       "institution": "BD",
@@ -19968,7 +20178,7 @@
           "averageGrade": 3.11
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.418Z"
+      "generatedAt": "2025-11-25T21:18:56.226Z"
     },
     "DMMH": {
       "institution": "DMMH",
@@ -20698,7 +20908,7 @@
           "averageGrade": 3.03
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.672Z"
+      "generatedAt": "2025-11-25T21:18:56.480Z"
     },
     "FIH": {
       "institution": "FIH",
@@ -21378,7 +21588,7 @@
           "averageGrade": 3.08
         }
       },
-      "generatedAt": "2025-11-25T20:16:00.804Z"
+      "generatedAt": "2025-11-25T21:18:56.604Z"
     },
     "HK": {
       "institution": "HK",
@@ -21800,7 +22010,7 @@
           "averageGrade": 3.18
         }
       },
-      "generatedAt": "2025-11-25T20:16:01.333Z"
+      "generatedAt": "2025-11-25T21:18:57.093Z"
     },
     "LDH": {
       "institution": "LDH",
@@ -22578,7 +22788,7 @@
           "averageGrade": 3.09
         }
       },
-      "generatedAt": "2025-11-25T20:16:01.471Z"
+      "generatedAt": "2025-11-25T21:18:57.216Z"
     },
     "NLA": {
       "institution": "NLA",
@@ -23344,7 +23554,7 @@
           "averageGrade": 2.63
         }
       },
-      "generatedAt": "2025-11-25T20:16:01.613Z"
+      "generatedAt": "2025-11-25T21:18:57.345Z"
     },
     "VGS": {
       "institution": "VGS",
@@ -23772,7 +23982,7 @@
           "averageGrade": 4.46
         }
       },
-      "generatedAt": "2025-11-25T20:16:01.782Z"
+      "generatedAt": "2025-11-25T21:18:57.504Z"
     }
   }
 }
