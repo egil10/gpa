@@ -493,28 +493,18 @@ export default function BottomSearchBar({
                           const normalizedCode = stripCourseCodeSuffix(course.code).toUpperCase().trim();
                           const normalizedName = course.name?.toUpperCase().trim() || '';
                           
-                          // If name starts with the code, only show name (name already contains code)
-                          // Otherwise, show code and name separately
-                          const nameContainsCode = normalizedName && (
-                            normalizedName === normalizedCode ||
-                            normalizedName.startsWith(normalizedCode + ' ') ||
-                            normalizedName.startsWith(normalizedCode + '-')
-                          );
+                          // Always show the code
+                          // Only show name if it exists and is different from the code
+                          const nameIsDifferent = normalizedName && normalizedName !== normalizedCode;
                           
-                          if (nameContainsCode) {
-                            // Name already contains code - only show name
-                            return <div className={styles.suggestionName}>{course.name}</div>;
-                          } else {
-                            // Show code and name separately
-                            return (
-                              <>
-                                <div className={styles.suggestionCode}>{normalizedCode}</div>
-                                {course.name && course.name.trim() && (
-                                  <div className={styles.suggestionName}>{course.name}</div>
-                                )}
-                              </>
-                            );
-                          }
+                          return (
+                            <>
+                              <div className={styles.suggestionCode}>{normalizedCode}</div>
+                              {nameIsDifferent && course.name && course.name.trim() && (
+                                <div className={styles.suggestionName}>{course.name}</div>
+                              )}
+                            </>
+                          );
                         })()}
                       </div>
                       <div className={styles.suggestionInstitution}>

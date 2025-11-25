@@ -11,13 +11,22 @@ interface GPACalculatorProps {
   initialSystem?: GradeSystem;
 }
 
-// Example courses to pre-populate
-const EXAMPLE_COURSES: Course[] = [
-  { id: '1', name: 'Algoritmer og datastrukturer', grade: 'B', credits: 7.5, system: 'university' },
-  { id: '2', name: 'Objektorientert programmering', grade: 'A', credits: 7.5, system: 'university' },
-  { id: '3', name: 'Databaser', grade: 'C', credits: 7.5, system: 'university' },
-  { id: '4', name: 'Kalkulus', grade: 'B', credits: 7.5, system: 'university' },
-  { id: '5', name: 'Sannsynlighetsregning', grade: 'C', credits: 7.5, system: 'university' },
+// Example courses for university
+const EXAMPLE_COURSES_UNI: Course[] = [
+  { id: '1', name: 'INF100', grade: 'B', credits: 7.5, system: 'university' },
+  { id: '2', name: 'INF101', grade: 'A', credits: 7.5, system: 'university' },
+  { id: '3', name: 'INF102', grade: 'C', credits: 7.5, system: 'university' },
+  { id: '4', name: 'MATH111', grade: 'B', credits: 7.5, system: 'university' },
+  { id: '5', name: 'STAT110', grade: 'C', credits: 7.5, system: 'university' },
+];
+
+// Example courses for high school
+const EXAMPLE_COURSES_VGS: Course[] = [
+  { id: '1', name: 'Matematikk R1', grade: '5', credits: 1, system: 'highschool' },
+  { id: '2', name: 'Fysikk', grade: '6', credits: 1, system: 'highschool' },
+  { id: '3', name: 'Kjemi', grade: '4', credits: 1, system: 'highschool' },
+  { id: '4', name: 'Norsk', grade: '5', credits: 1, system: 'highschool' },
+  { id: '5', name: 'Engelsk', grade: '5', credits: 1, system: 'highschool' },
 ];
 
 export default function GPACalculator({ initialSystem = 'university' }: GPACalculatorProps) {
@@ -32,26 +41,18 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
       const hasSeenExamples = localStorage.getItem('gpa-has-seen-examples');
       if (!hasSeenExamples && courses.length === 0) {
         localStorage.setItem('gpa-has-seen-examples', 'true');
-        setCourses(EXAMPLE_COURSES.map(c => ({ ...c, system: initialSystem })));
+        const examples = initialSystem === 'university' ? EXAMPLE_COURSES_UNI : EXAMPLE_COURSES_VGS;
+        setCourses(examples.map(c => ({ ...c })));
       }
     }
   }, [initialSystem, courses.length]);
 
   const handleSystemChange = useCallback((newSystem: GradeSystem) => {
+    // Completely reset when switching systems
     setSystem(newSystem);
-    // Reset bonus points when switching systems
-    if (newSystem === 'university') {
-      setBonusPoints({ realfag: 0, other: 0 });
-    }
-    // Update all courses to new system with default values
-    setCourses((prev) =>
-      prev.map((course) => ({
-        ...course,
-        system: newSystem,
-        grade: newSystem === 'university' ? 'C' : '4',
-        credits: newSystem === 'university' ? 7.5 : 1,
-      }))
-    );
+    setCourses([]); // Clear all courses
+    setHasCalculated(false); // Reset calculation
+    setBonusPoints({ realfag: 0, other: 0 }); // Reset bonus points
   }, []);
 
   const totalBonusPoints = useMemo(() => {
@@ -456,12 +457,10 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
             <button 
               onClick={() => {
                 setHasCalculated(false);
-                const examples = EXAMPLE_COURSES.map((c, i) => ({
+                const examples = (system === 'university' ? EXAMPLE_COURSES_UNI : EXAMPLE_COURSES_VGS).map((c, i) => ({
                   ...c,
                   id: Date.now().toString() + i,
                   system,
-                  grade: system === 'university' ? c.grade : '4',
-                  credits: system === 'university' ? 7.5 : 1,
                 }));
                 setCourses(examples);
               }}

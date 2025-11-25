@@ -84,9 +84,12 @@
   border-radius: 0.5rem;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
   overflow: hidden;
-  z-index: 50;
+  z-index: 1000; /* Higher z-index to ensure it appears above other elements */
   animation: fadeIn 0.15s ease;
   backdrop-filter: blur(0); /* Ensure no transparency */
+  max-height: min(50vh, 300px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
   .suggestionItem {

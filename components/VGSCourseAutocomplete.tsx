@@ -145,6 +145,13 @@ export default function VGSCourseAutocomplete({
       'fellesfag': 'Fellesfag',
       'realfag': 'Realfag',
       'språk-samfunnsfag-økonomi': 'Språk, samfunnsfag og økonomi',
+      'idrettsfag': 'Idrettsfag',
+      'kunst-design-arkitektur': 'Kunst, design og arkitektur',
+      'medier-kommunikasjon': 'Medier og kommunikasjon',
+      'musikk-dans-drama': 'Musikk, dans og drama',
+      'dans': 'Dans',
+      'drama': 'Drama',
+      'musikk': 'Musikk',
       'andre-programfag': 'Andre programfag',
     };
     return labels[category] || category;

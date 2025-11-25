@@ -65,7 +65,8 @@
     "analyze-detailed": "tsx scripts/analyze-detailed.ts",
     "analyze-all-institutions": "tsx scripts/analyze-all-institutions.ts",
     "fix-duplicates": "tsx scripts/fix-duplicates.ts",
-    "normalize-codes": "tsx scripts/normalize-course-codes.ts"
+    "normalize-codes": "tsx scripts/normalize-course-codes.ts",
+    "discover-udir-vgs": "tsx scripts/discover-udir-vgs-courses.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
