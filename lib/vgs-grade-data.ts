@@ -67,9 +67,17 @@ async function loadVGSGradeData(): Promise<VGSGradeDataFile> {
       // Only use cached data if version matches
       if (cachedVersion === VGS_CACHE_VERSION && cachedData) {
         try {
-          cachedVGSData = JSON.parse(cachedData);
-          console.log('[VGS Cache] ✅ Loaded from localStorage');
-          return cachedVGSData;
+          const parsed = JSON.parse(cachedData) as VGSGradeDataFile;
+          // Basic validation - check if it has the expected structure
+          if (parsed && parsed.metadata && parsed.gradeData && Array.isArray(parsed.gradeData)) {
+            cachedVGSData = parsed;
+            console.log('[VGS Cache] ✅ Loaded from localStorage');
+            return cachedVGSData;
+          } else {
+            // Invalid structure, clear cache
+            localStorage.removeItem(VGS_DATA_CACHE_KEY);
+            localStorage.removeItem(VGS_COURSES_CACHE_KEY);
+          }
         } catch (error) {
           // Invalid cache, clear it
           localStorage.removeItem(VGS_DATA_CACHE_KEY);
@@ -96,21 +104,29 @@ async function loadVGSGradeData(): Promise<VGSGradeDataFile> {
     try {
       const response = await fetch(path);
       if (response.ok) {
-        cachedVGSData = await response.json();
+        const data = await response.json() as VGSGradeDataFile;
         
-        // Cache in localStorage (client-side only)
-        if (typeof window !== 'undefined') {
-          try {
-            localStorage.setItem(VGS_DATA_CACHE_KEY, JSON.stringify(cachedVGSData));
-            localStorage.setItem(VGS_CACHE_VERSION_KEY, VGS_CACHE_VERSION);
-            console.log('[VGS Cache] 💾 Cached to localStorage');
-          } catch (error) {
-            // localStorage quota exceeded or not available
-            console.warn('[VGS Cache] Could not cache to localStorage:', error);
+        // Validate the fetched data structure
+        if (data && data.metadata && data.gradeData && Array.isArray(data.gradeData)) {
+          cachedVGSData = data;
+          
+          // Cache in localStorage (client-side only)
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(VGS_DATA_CACHE_KEY, JSON.stringify(cachedVGSData));
+              localStorage.setItem(VGS_CACHE_VERSION_KEY, VGS_CACHE_VERSION);
+              console.log('[VGS Cache] 💾 Cached to localStorage');
+            } catch (error) {
+              // localStorage quota exceeded or not available
+              console.warn('[VGS Cache] Could not cache to localStorage:', error);
+            }
           }
+          
+          return cachedVGSData;
+        } else {
+          console.warn(`[VGS Cache] Invalid data structure from ${path}`);
+          continue;
         }
-        
-        return cachedVGSData;
       }
     } catch (error) {
       // Try next path
@@ -214,9 +230,16 @@ export async function getAllVGSCourses(): Promise<Array<{
       
       if (cachedVersion === VGS_CACHE_VERSION && cachedCourses) {
         try {
-          cachedCourseList = JSON.parse(cachedCourses);
-          console.log('[VGS Cache] ✅ Loaded course list from localStorage');
-          return cachedCourseList;
+          const parsed = JSON.parse(cachedCourses);
+          // Validate that parsed data is an array with expected structure
+          if (Array.isArray(parsed)) {
+            cachedCourseList = parsed;
+            console.log('[VGS Cache] ✅ Loaded course list from localStorage');
+            return cachedCourseList;
+          } else {
+            // Invalid structure, clear it
+            localStorage.removeItem(VGS_COURSES_CACHE_KEY);
+          }
         } catch (error) {
           // Invalid cache, clear it
           localStorage.removeItem(VGS_COURSES_CACHE_KEY);

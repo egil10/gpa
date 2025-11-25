@@ -153,7 +153,9 @@ export default function VGSCourseAutocomplete({
   };
 
   const getCategoryLabel = (category: VGSCourse['category']) => {
-    const labels: Record<VGSCourse['category'], string> = {
+    if (!category) return '';
+    
+    const labels: Record<NonNullable<VGSCourse['category']>, string> = {
       'fellesfag': 'Fellesfag',
       'realfag': 'Realfag',
       'språk-samfunnsfag-økonomi': 'Språk, samfunnsfag og økonomi',
