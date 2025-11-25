@@ -361,6 +361,33 @@ async function fetchCourseGradeData(
         
         // Always try formatCourseCode result
         codeFormats.push(formatCourseCode(cleaned, institution));
+    } else if (institution === 'NLA') {
+        // NLA (NLA Høgskolen): Some codes have a "4" prefix that might be a year/level indicator
+        // Examples: "4BLBAB" -> "BLBAB", "4BLKO1AB" -> "BLKO1AB", "4MGL1BEG" -> "MGL1BEG"
+        // Try as-is first
+        codeFormats.push(cleaned);
+        
+        // If code starts with "4" followed by letters, try without the "4"
+        if (/^4[A-Z]/.test(cleaned)) {
+            const without4 = cleaned.substring(1);
+            codeFormats.push(without4);
+            codeFormats.push(`${without4}-1`);
+        }
+        
+        // If code has a dash, try variations
+        if (cleaned.includes('-')) {
+            const parts = cleaned.split('-');
+            if (parts.length > 1) {
+                codeFormats.push(parts[0]);
+                codeFormats.push(`${parts[0]}-1`);
+            }
+        } else {
+            // No dash: try with -1
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
