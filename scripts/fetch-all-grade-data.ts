@@ -295,6 +295,35 @@ async function fetchCourseGradeData(
         
         // Always try formatCourseCode result
         codeFormats.push(formatCourseCode(cleaned, institution));
+    } else if (institution === 'HLT') {
+        // HLT (Høyskolen for ledelse og teologi): Old format uses dashes (KRIS-101, KRL-101)
+        // New format is without dashes (KRI1011, KRI1012, PAL1020, PRA1010)
+        // Try as-is first
+        codeFormats.push(cleaned);
+        
+        // If code has a dash with numeric suffix (e.g., "KRIS-101", "KRL-101")
+        if (cleaned.includes('-')) {
+            const parts = cleaned.split('-');
+            if (parts.length > 1 && /^\d+$/.test(parts[1])) {
+                // Try removing dash and padding to 4 digits (e.g., "KRIS-101" -> "KRIS0101")
+                const base = parts[0];
+                const num = parts[1].padStart(4, '0');
+                codeFormats.push(`${base}${num}`);
+                codeFormats.push(`${base}${num}-1`);
+                // Also try without padding (e.g., "KRIS-101" -> "KRIS101")
+                codeFormats.push(`${base}${parts[1]}`);
+                codeFormats.push(`${base}${parts[1]}-1`);
+            }
+            // Try just the base
+            codeFormats.push(parts[0]);
+            codeFormats.push(`${parts[0]}-1`);
+        } else {
+            // No dash: try with -1
+            codeFormats.push(`${cleaned}-1`);
+        }
+        
+        // Always try formatCourseCode result
+        codeFormats.push(formatCourseCode(cleaned, institution));
     } else {
         // Standard format: Use formatCourseCode (adds -1 suffix for most)
         codeFormats.push(formatCourseCode(courseCode, institution));
