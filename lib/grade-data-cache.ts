@@ -182,7 +182,8 @@ export async function getGradeDataFromCache(
       const basePath = window.location.pathname.startsWith('/gpa') ? '/gpa' : '';
       
       // Normalize course code for storage (matches fetch-all-grade-data.ts logic)
-      // Remove spaces, uppercase, remove all non-alphanumeric characters
+      // Clean the course code: remove spaces, uppercase, remove all non-alphanumeric characters
+      const cleaned = courseCode.toUpperCase().replace(/\s/g, '');
       const normalizedForStorage = cleaned.replace(/[^A-Z0-9]/g, '').toUpperCase();
       
       // Try multiple normalized formats
