@@ -67,6 +67,8 @@
   pointer-events: none;
   -webkit-user-drag: none;
   user-drag: none;
+  filter: var(--logo-filter);
+  transition: filter 0.2s ease;
 }
 
 .heroTitleText {

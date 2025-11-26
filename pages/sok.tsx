@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import BottomSearchBar from '@/components/BottomSearchBar';
 import MultiYearChart from '@/components/MultiYearChart';
+import TrendChart, { TrendPoint } from '@/components/TrendChart';
 import { fetchAllYearsData, UNIVERSITIES, formatCourseCode } from '@/lib/api';
 import { markCourseAsUnavailable } from '@/lib/course-availability';
 import { processMultiYearData } from '@/lib/utils';
@@ -19,6 +20,46 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [allYearsStats, setAllYearsStats] = useState<Record<number, CourseStats>>({});
   const loadingRef = useRef<string | null>(null); // Track what's currently loading
+
+  const sortedYears = React.useMemo(
+    () => Object.keys(allYearsStats).map(Number).sort((a, b) => a - b),
+    [allYearsStats]
+  );
+
+  const averageTrend = React.useMemo<TrendPoint[]>(() => {
+    if (!sortedYears.length) return [];
+    return sortedYears
+      .map((year) => {
+        const stats = allYearsStats[year];
+        if (!stats || typeof stats.averageGrade !== 'number') return null;
+        return { year, value: stats.averageGrade };
+      })
+      .filter((point): point is TrendPoint => point !== null);
+  }, [allYearsStats, sortedYears]);
+
+  const failTrend = React.useMemo<TrendPoint[]>(() => {
+    if (!sortedYears.length) return [];
+    return sortedYears
+      .map((year) => {
+        const stats = allYearsStats[year];
+        if (!stats || !stats.totalStudents) {
+          return null;
+        }
+        const failCount = stats.distributions.reduce((sum, dist) => {
+          if (dist.grade === 'F' || dist.grade === 'Ikke bestått' || dist.grade === '1') {
+            return sum + dist.count;
+          }
+          return sum;
+        }, 0);
+        const percentage =
+          stats.totalStudents > 0 ? Number(((failCount / stats.totalStudents) * 100).toFixed(2)) : null;
+        if (percentage === null) {
+          return null;
+        }
+        return { year, value: percentage };
+      })
+      .filter((point): point is TrendPoint => point !== null);
+  }, [allYearsStats, sortedYears]);
 
   // Handle URL query parameters
   useEffect(() => {
@@ -270,6 +311,23 @@ export default function SearchPage() {
                     {UNIVERSITIES[institution]?.name || institution}
                   </p>
                 </div>
+              </div>
+
+              <div className={styles.trendGrid}>
+                <TrendChart
+                  title="Gjennomsnitt"
+                  data={averageTrend}
+                  yLabel="Snitt"
+                  emptyMessage="Ingen snittdata per år"
+                />
+                <TrendChart
+                  title="Strykprosent"
+                  data={failTrend}
+                  unit="%"
+                  yLabel="Prosent"
+                  emptyMessage="Ingen strykdata per år"
+                  precision={1}
+                />
               </div>
               
               {institution === 'VGS' && (

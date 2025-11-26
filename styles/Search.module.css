@@ -432,6 +432,13 @@
   margin-top: var(--space-xl);
 }
 
+.trendGrid {
+  margin-top: var(--space-2xl);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
 .dataSource {
   margin-top: var(--space-lg);
   padding-top: var(--space-lg);
@@ -614,6 +621,11 @@
   }
   
   .additionalStats {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .trendGrid {
     grid-template-columns: 1fr;
     gap: var(--space-md);
   }

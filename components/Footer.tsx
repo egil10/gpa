@@ -1,9 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
-import { Github, Calculator, Home, BookOpen, BarChart3 } from 'lucide-react';
+import { Github, Calculator, Home, BookOpen, BarChart3, SunDim, Moon } from 'lucide-react';
+import { ThemeMode } from '@/types/theme';
 import styles from './Footer.module.css';
 
-export default function Footer() {
+interface FooterProps {
+  theme: ThemeMode;
+  onThemeChange: (theme: ThemeMode) => void;
+}
+
+export default function Footer({ theme, onThemeChange }: FooterProps) {
   const currentYear = new Date().getFullYear();
   
   return (
@@ -71,7 +77,52 @@ export default function Footer() {
           </div>
         </div>
         <div className={styles.footerBottom}>
-          <p className="text-light">© {currentYear} Karakterfordeling</p>
+          <div className={styles.footerMeta}>
+            <div className={styles.themeToggleWrapper}>
+              <fieldset className={styles.themeToggle}>
+                <legend className={styles.srOnly}>Velg tema</legend>
+                <label
+                  className={`${styles.themeOption} ${
+                    theme === 'light' ? styles.themeOptionActive : ''
+                  }`}
+                >
+                  <input
+                    id="theme-light"
+                    type="radio"
+                    name="theme"
+                    value="light"
+                    checked={theme === 'light'}
+                    onChange={() => onThemeChange('light')}
+                    aria-label="Lyst tema"
+                  />
+                  <span className={styles.themeIcon} aria-hidden="true">
+                    <SunDim size={18} />
+                  </span>
+                  <span className={styles.srOnly}>Lyst</span>
+                </label>
+                <label
+                  className={`${styles.themeOption} ${
+                    theme === 'blackout' ? styles.themeOptionActive : ''
+                  }`}
+                >
+                  <input
+                    id="theme-dark"
+                    type="radio"
+                    name="theme"
+                    value="blackout"
+                    checked={theme === 'blackout'}
+                    onChange={() => onThemeChange('blackout')}
+                    aria-label="Mørkt tema"
+                  />
+                  <span className={styles.themeIcon} aria-hidden="true">
+                    <Moon size={18} />
+                  </span>
+                  <span className={styles.srOnly}>Blackout</span>
+                </label>
+              </fieldset>
+            </div>
+            <p className="text-light">© {currentYear} Karakterfordeling</p>
+          </div>
           <div className={styles.footerLinks}>
             <Link
               href={{ pathname: '/', query: { reset: '1' } }}
