@@ -370,6 +370,8 @@
     padding: var(--space-lg);
     gap: var(--space-lg);
     border-radius: 1.25rem;
+    /* Better mobile spacing */
+    margin: 0 var(--space-md);
   }
 
   .controlGroup {
@@ -386,11 +388,18 @@
     width: 100%;
     min-width: unset;
     font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 48px;
+    min-height: 52px;
     padding: 0.875rem 1rem;
     padding-right: 2.5rem;
     touch-action: manipulation;
     border-radius: 0.875rem;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    /* Better touch feedback */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .select:active {
+    border-color: var(--accent);
   }
 
   .radioGroup {
@@ -458,6 +467,18 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0 var(--space-md);
+    /* Better mobile scrolling */
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .trendChart::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .trendChart::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
   }
 
   .trendTableHeader {
@@ -499,10 +520,12 @@
   }
 
   .trendRow {
-    min-height: 60px; /* Better touch target */
+    min-height: 64px; /* Better touch target */
     touch-action: manipulation;
     border-radius: 0.75rem;
     margin-bottom: var(--space-xs);
+    /* Better touch feedback */
+    transition: background-color 0.15s ease, transform 0.1s ease;
   }
 
   .trendRow:active {
@@ -541,6 +564,7 @@
     padding: var(--space-md);
     gap: var(--space-md);
     border-radius: 1.25rem;
+    margin: 0 var(--space-sm);
   }
 
   .controlLabel {
@@ -548,9 +572,10 @@
   }
 
   .select {
-    min-height: 48px;
+    min-height: 52px;
     padding: 0.875rem 1rem;
     font-size: 16px;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   }
 
   .radioLabel {

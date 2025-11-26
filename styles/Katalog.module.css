@@ -303,10 +303,17 @@
     padding: var(--space-xs) var(--space-sm);
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
     touch-action: manipulation;
+    min-height: 48px;
+    /* Better touch feedback */
+    transition: opacity 0.15s ease, transform 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .courseItem:active {
     opacity: 0.7;
+    transform: scale(0.98);
   }
 
   .courseCode {
@@ -381,6 +388,7 @@
 
   .courseItem {
     padding: var(--space-sm) var(--space-xs);
+    min-height: 44px;
   }
 
   .resultsInfo {
