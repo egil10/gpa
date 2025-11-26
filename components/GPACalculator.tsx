@@ -211,7 +211,10 @@ export default function GPACalculator({ initialSystem = 'university' }: GPACalcu
   return (
     <div className={styles.calculator}>
       <div className={styles.header}>
-        <h2 className={styles.title}>GPA Kalkulator</h2>
+        <h1>GPA Kalkulator</h1>
+        <p className={styles.subtitle}>
+          Beregn din GPA med ECTS-poeng. Støtter både universitets- og videregående karakterer.
+        </p>
         <div className={styles.controls}>
           <div className={styles.systemSelector}>
             <button

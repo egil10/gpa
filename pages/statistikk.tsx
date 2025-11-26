@@ -3,7 +3,7 @@ import Layout from '@/components/Layout';
 import GradeChart from '@/components/GradeChart';
 import { UNIVERSITIES } from '@/lib/api';
 import { normalizeGradeDistribution, normalizeVGSGradeDistribution, VGS_GRADE_ORDER } from '@/lib/utils';
-import { Building2, Calendar, BarChart3, TrendingUp, Users, BookOpen, Award, Loader2 } from 'lucide-react';
+import { Building2, Calendar, TrendingUp, Users, BookOpen, Award, Loader2 } from 'lucide-react';
 import styles from '@/styles/Statistics.module.css';
 
 interface InstitutionStatistics {
@@ -50,8 +50,7 @@ export default function StatisticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedInstitution, setSelectedInstitution] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'overall' | 'yearly'>('overall');
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string>('all'); // 'all' or year string
 
   useEffect(() => {
     async function loadStatistics() {
@@ -87,37 +86,43 @@ export default function StatisticsPage() {
     ? Object.keys(selectedStats.yearlyStats).map(Number).sort((a, b) => b - a)
     : [];
 
-  // Get current distribution based on view mode
+  // Get current distribution based on selected year
   const currentDistribution = selectedStats ? (() => {
-    if (viewMode === 'overall') {
+    if (selectedYear === 'all') {
       return selectedStats.overallDistribution;
-    } else if (viewMode === 'yearly' && selectedYear && selectedStats.yearlyStats[selectedYear]) {
-      return selectedStats.yearlyStats[selectedYear].distribution;
+    } else {
+      const yearNum = parseInt(selectedYear, 10);
+      if (selectedStats.yearlyStats[yearNum]) {
+        return selectedStats.yearlyStats[yearNum].distribution;
+      }
+      return selectedStats.overallDistribution;
     }
-    return selectedStats.overallDistribution;
   })() : null;
 
   // Get current stats for display
   const currentStats = selectedStats ? (() => {
-    if (viewMode === 'overall') {
+    if (selectedYear === 'all') {
       return {
         totalStudents: selectedStats.totalStudents,
         totalCourses: selectedStats.totalCourses,
         averageGrade: selectedStats.averageGrade,
       };
-    } else if (viewMode === 'yearly' && selectedYear && selectedStats.yearlyStats[selectedYear]) {
-      const yearStats = selectedStats.yearlyStats[selectedYear];
+    } else {
+      const yearNum = parseInt(selectedYear, 10);
+      if (selectedStats.yearlyStats[yearNum]) {
+        const yearStats = selectedStats.yearlyStats[yearNum];
+        return {
+          totalStudents: yearStats.totalStudents,
+          totalCourses: yearStats.totalCourses,
+          averageGrade: yearStats.averageGrade,
+        };
+      }
       return {
-        totalStudents: yearStats.totalStudents,
-        totalCourses: yearStats.totalCourses,
-        averageGrade: yearStats.averageGrade,
+        totalStudents: selectedStats.totalStudents,
+        totalCourses: selectedStats.totalCourses,
+        averageGrade: selectedStats.averageGrade,
       };
     }
-    return {
-      totalStudents: selectedStats.totalStudents,
-      totalCourses: selectedStats.totalCourses,
-      averageGrade: selectedStats.averageGrade,
-    };
   })() : null;
 
   if (loading) {
@@ -176,74 +181,42 @@ export default function StatisticsPage() {
                   value={selectedInstitution || ''}
                   onChange={(e) => {
                     setSelectedInstitution(e.target.value);
-                    setSelectedYear(null);
+                    setSelectedYear('all');
                   }}
                   className={styles.select}
                 >
-                  {Object.entries(data.institutions).map(([key, stats]) => (
-                    <option key={key} value={key}>
-                      {stats.institutionName} ({stats.totalCourses} emner)
-                    </option>
-                  ))}
+                  {Object.entries(data.institutions)
+                    .sort(([, a], [, b]) => a.institutionName.localeCompare(b.institutionName, 'no'))
+                    .map(([key, stats]) => (
+                      <option key={key} value={key}>
+                        {stats.institutionName} ({stats.totalCourses} emner)
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
 
             <div className={styles.controlGroup}>
-              <label className={styles.controlLabel}>
-                <BarChart3 size={16} />
-                <span>Visning</span>
+              <label htmlFor="year-select" className={styles.controlLabel}>
+                <Calendar size={16} />
+                <span>År</span>
               </label>
-              <div className={styles.radioGroup}>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="view-mode"
-                    value="overall"
-                    checked={viewMode === 'overall'}
-                    onChange={() => {
-                      setViewMode('overall');
-                      setSelectedYear(null);
-                    }}
-                  />
-                  <span>Alle år</span>
-                </label>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="view-mode"
-                    value="yearly"
-                    checked={viewMode === 'yearly'}
-                    onChange={() => setViewMode('yearly')}
-                  />
-                  <span>Per år</span>
-                </label>
+              <div className={styles.selectWrapper}>
+                <select
+                  id="year-select"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className={styles.select}
+                >
+                  <option value="all">Alle år</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year.toString()}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-
-            {viewMode === 'yearly' && availableYears.length > 0 && (
-              <div className={styles.controlGroup}>
-                <label htmlFor="year-select" className={styles.controlLabel}>
-                  <Calendar size={16} />
-                  <span>År</span>
-                </label>
-                <div className={styles.selectWrapper}>
-                  <select
-                    id="year-select"
-                    value={selectedYear || ''}
-                    onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value, 10) : null)}
-                    className={styles.select}
-                  >
-                    <option value="">Velg år...</option>
-                    {availableYears.map(year => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
           </div>
 
           {selectedStats && currentDistribution && currentStats && (
@@ -270,7 +243,7 @@ export default function StatisticsPage() {
                   <h3>Gjennomsnittlig karakter</h3>
                   <p className={styles.statValue}>{currentStats.averageGrade.toFixed(2)}</p>
                 </div>
-                {viewMode === 'overall' && (
+                {selectedYear === 'all' && (
                   <div className={styles.statCard}>
                     <div className={styles.statIcon}>
                       <Calendar size={20} />
@@ -285,11 +258,9 @@ export default function StatisticsPage() {
 
               <div className={styles.chartContainer}>
                 <h2>
-                  {viewMode === 'overall' 
+                  {selectedYear === 'all' 
                     ? 'Karakterfordeling (alle år)'
-                    : selectedYear 
-                      ? `Karakterfordeling ${selectedYear}`
-                      : 'Velg et år for å se fordeling'}
+                    : `Karakterfordeling ${selectedYear}`}
                 </h2>
                 {currentDistribution && currentDistribution.length > 0 ? (
                   <GradeChart
@@ -301,7 +272,7 @@ export default function StatisticsPage() {
                 )}
               </div>
 
-              {viewMode === 'yearly' && availableYears.length > 0 && (
+              {availableYears.length > 0 && (
                 <div className={styles.trendSection}>
                   <div className={styles.trendHeader}>
                     <TrendingUp size={20} />
@@ -329,13 +300,13 @@ export default function StatisticsPage() {
                     {availableYears.map(year => {
                       const yearStats = selectedStats.yearlyStats[year];
                       if (!yearStats) return null;
+                      const isSelected = selectedYear === year.toString();
                       return (
                         <div 
                           key={year} 
-                          className={`${styles.trendRow} ${selectedYear === year ? styles.trendRowSelected : ''}`}
+                          className={`${styles.trendRow} ${isSelected ? styles.trendRowSelected : ''}`}
                           onClick={() => {
-                            setSelectedYear(year);
-                            setViewMode('yearly');
+                            setSelectedYear(year.toString());
                           }}
                         >
                           <div className={styles.trendCell}>

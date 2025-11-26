@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'reac
 import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
-import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions, getPopularCourses } from '@/lib/all-courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { isCourseUnavailable } from '@/lib/course-availability';
 import styles from './BottomSearchBar.module.css';
@@ -143,19 +143,34 @@ export default function BottomSearchBar({
   }, [isFloating]);
 
   // Search with debouncing and immediate cache check
-  const performSearch = useCallback((searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
     const trimmedQuery = searchQuery.trim();
     
-    // Immediate check for empty query
+    // Show popular courses when query is empty
     if (trimmedQuery.length === 0) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      setSelectedCourse(null);
-      setNotFoundMessage(null);
+      getPopularCourses(undefined, 3).then(popular => {
+        const filtered = popular.filter(
+          course => !isCourseUnavailable(course.code, course.institution)
+        );
+        setSuggestions(filtered.slice(0, 3));
+        // Show suggestions if we have results and input is focused
+        if (filtered.length > 0 && isFocused) {
+          setShowSuggestions(true);
+        } else {
+          setShowSuggestions(false);
+        }
+        setSelectedCourse(null);
+        setNotFoundMessage(null);
+      }).catch(() => {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setSelectedCourse(null);
+        setNotFoundMessage(null);
+      });
       return;
     }
 
@@ -240,7 +255,7 @@ export default function BottomSearchBar({
       }
       setSelectedIndex(-1);
     }, 200); // Reduced debounce to 200ms since we have immediate cache feedback
-  }, []);
+  }, [isFocused]);
 
   // Perform search when query changes (debounced)
   useEffect(() => {
@@ -370,8 +385,12 @@ export default function BottomSearchBar({
   };
 
   const handleFocus = () => {
-    if (query.trim().length > 0 && suggestions.length > 0) {
+    setIsFocused(true);
+    if (suggestions.length > 0) {
       setShowSuggestions(true);
+    } else if (query.trim().length === 0) {
+      // Trigger search to get popular courses when focusing on empty input
+      performSearch('');
     }
   };
 
@@ -474,7 +493,7 @@ export default function BottomSearchBar({
                 <div ref={suggestionsRef} className={styles.suggestions}>
                   {query.trim().length === 0 && (
                     <div className={styles.suggestionsHeader}>
-                      <span>Flest kandidater akkurat nå</span>
+                      <span>Populære emner</span>
                     </div>
                   )}
                   {suggestions.map((course, index) => (

@@ -191,31 +191,31 @@
   background: var(--text-muted);
 }
 
-/* Suggestions dropdown */
+/* Suggestions dropdown - appears above the search bar */
 .suggestions {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  bottom: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background: var(--surface);
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   max-height: 20rem;
   overflow-y: auto;
   z-index: 50;
-  margin-top: 0.5rem;
-  /* Smooth fade-in animation */
-  animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  margin-bottom: 0.5rem;
+  /* Smooth fade-in animation from above */
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-@keyframes fadeInUp {
+@keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-8px) translateZ(0);
+    transform: translateY(8px) translateZ(0);
   }
   to {
     opacity: 1;
@@ -293,10 +293,10 @@
   flex-shrink: 0;
 }
 
-/* Not found message */
+/* Not found message - appears above the search bar */
 .notFoundMessage {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  bottom: calc(100% + 0.5rem);
   left: 0;
   right: 0;
   background: var(--surface);
@@ -308,16 +308,17 @@
   text-align: center;
   z-index: 50;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  animation: slideDownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
+  margin-bottom: 0.5rem;
 }
 
-@keyframes slideDownFade {
+@keyframes slideUpFade {
   from {
     opacity: 0;
-    transform: translateY(-8px) translateZ(0);
+    transform: translateY(8px) translateZ(0);
   }
   to {
     opacity: 1;
@@ -382,7 +383,8 @@
 
   .suggestions {
     max-height: min(65vh, 22rem);
-    top: calc(100% + 0.75rem);
+    bottom: calc(100% + 0.75rem);
+    top: auto;
     border-radius: 1.25rem;
     /* Better mobile scrolling */
     -webkit-overflow-scrolling: touch;
@@ -392,6 +394,8 @@
     width: calc(100% + env(safe-area-inset-left) + env(safe-area-inset-right));
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
     border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+    margin-top: 0;
   }
   
   .suggestionItem {
@@ -417,7 +421,8 @@
   }
 
   .notFoundMessage {
-    top: calc(100% + 0.75rem);
+    bottom: calc(100% + 0.75rem);
+    top: auto;
     padding: 1.125rem 1.5rem;
     font-size: var(--text-base);
     border-radius: 1.25rem;
@@ -425,6 +430,8 @@
     margin-right: calc(-1 * env(safe-area-inset-right));
     width: calc(100% + env(safe-area-inset-left) + env(safe-area-inset-right));
     line-height: 1.5;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
   }
 }
 

@@ -43,11 +43,7 @@ export default function KatalogPage() {
       filtered = filtered.filter(c => {
         const codeMatch = c.code.toUpperCase().includes(query);
         const nameMatch = c.name && c.name.toUpperCase().includes(query);
-        const institutionName = UNIVERSITIES[c.institution]?.name?.toUpperCase() || '';
-        const institutionShort = UNIVERSITIES[c.institution]?.shortName?.toUpperCase() || '';
-        const institutionMatch =
-          institutionName.includes(query) || institutionShort.includes(query);
-        return codeMatch || nameMatch || institutionMatch;
+        return codeMatch || nameMatch;
       });
     }
 
@@ -74,7 +70,7 @@ export default function KatalogPage() {
       <div className={styles.katalogPage}>
         <div className="container">
           <div className={styles.header}>
-            <h1 className={styles.title}>Emnekatalog</h1>
+            <h1>Emnekatalog</h1>
             <p className={styles.subtitle}>
               Bla gjennom alle emnekoder fra alle universiteter og videregående skoler. Søk etter emnekode eller navn.
             </p>
