@@ -1468,7 +1468,7 @@ export default function Home() {
               />
               <span className={styles.heroTitleText}>Karakterfordeling</span>
             </h1>
-            <BottomSearchBar initialPlaceholderCode={heroPlaceholderCode || undefined} />
+            <BottomSearchBar initialPlaceholderCode={heroPlaceholderCode || undefined} suggestionsPosition="below" />
           </div>
         </div>
       </div>

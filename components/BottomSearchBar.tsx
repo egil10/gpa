@@ -12,6 +12,7 @@ interface BottomSearchBarProps {
   className?: string;
   initialPlaceholderCode?: string;
   variantType?: 'search' | 'discover';
+  suggestionsPosition?: 'above' | 'below'; // Control where suggestions appear
 }
 
 export default function BottomSearchBar({
@@ -19,6 +20,7 @@ export default function BottomSearchBar({
   className = '',
   initialPlaceholderCode,
   variantType = 'search',
+  suggestionsPosition = 'above', // Default to above for subpages
 }: BottomSearchBarProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<CourseInfo[]>([]);
@@ -484,13 +486,18 @@ export default function BottomSearchBar({
               
               {/* Not found message */}
               {notFoundMessage && (
-                <div className={styles.notFoundMessage}>
+                <div 
+                  className={`${styles.notFoundMessage} ${suggestionsPosition === 'below' ? styles.notFoundBelow : styles.notFoundAbove}`}
+                >
                   {notFoundMessage}
                 </div>
               )}
               
               {showSuggestions && suggestions.length > 0 && searchBarOpacity > 0.3 && (
-                <div ref={suggestionsRef} className={styles.suggestions}>
+                <div 
+                  ref={suggestionsRef} 
+                  className={`${styles.suggestions} ${suggestionsPosition === 'below' ? styles.suggestionsBelow : styles.suggestionsAbove}`}
+                >
                   {query.trim().length === 0 && (
                     <div className={styles.suggestionsHeader}>
                       <span>Populære emner</span>

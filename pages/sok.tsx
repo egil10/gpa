@@ -225,7 +225,7 @@ export default function SearchPage() {
         )}
         <div className="container">
           <div className={styles.inlineSearchBar}>
-            <BottomSearchBar variant="inline" />
+            <BottomSearchBar variant="inline" suggestionsPosition="below" />
           </div>
           {loading && (
             <div className={styles.loading}>
