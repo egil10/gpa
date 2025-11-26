@@ -202,11 +202,16 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   max-height: 20rem;
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 50;
   /* Smooth fade-in animation */
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
+  /* Clean, simple layout - no extra padding */
+  padding: 0;
+  /* Only show scrollbar when needed */
+  overflow-y: auto;
 }
 
 /* Suggestions above (for subpages) */
@@ -247,22 +252,7 @@
   }
 }
 
-  .suggestionsHeader {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    border-bottom: none;
-  }
-  
-  @media (max-width: 768px) {
-    .suggestionsHeader {
-      padding: 0.75rem 1rem;
-      font-size: 0.75rem;
-    }
-  }
+  /* Removed suggestionsHeader - not needed for clean layout */
 
 .suggestionItem {
   display: flex;
@@ -273,14 +263,18 @@
   text-align: left;
   background: transparent;
   border: none;
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-  border-bottom: none;
   /* GPU acceleration */
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
 }
 
 .suggestionItem:hover,
