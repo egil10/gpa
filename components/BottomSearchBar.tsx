@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect, useCallback, FormEvent } from 'reac
 import { Search, X, ArrowUp } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { CourseInfo } from '@/lib/courses';
-import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions, getPopularCourses } from '@/lib/all-courses';
+import { searchAllCourses, getCourseByCode, preloadInstitutionCourses, stripCourseCodeSuffix, getAvailableInstitutions } from '@/lib/all-courses';
 import { UNIVERSITIES, formatInstitutionLabel } from '@/lib/api';
 import { isCourseUnavailable } from '@/lib/course-availability';
+import { loadHomepageTopCourses, mapTopCourseToCourseInfo } from '@/lib/homepage-data';
 import styles from './BottomSearchBar.module.css';
 
 interface BottomSearchBarProps {
@@ -29,6 +30,7 @@ export default function BottomSearchBar({
   const [selectedCourse, setSelectedCourse] = useState<CourseInfo | null>(null);
   const [searchBarOpacity, setSearchBarOpacity] = useState(1);
   const [notFoundMessage, setNotFoundMessage] = useState<string | null>(null);
+  const [placeholderCourses, setPlaceholderCourses] = useState<CourseInfo[]>([]);
   const uppercasePlaceholderCode = initialPlaceholderCode?.toUpperCase();
   const initialPlaceholder = uppercasePlaceholderCode
     ? `Prøv å søke etter ${uppercasePlaceholderCode}...`
@@ -47,6 +49,43 @@ export default function BottomSearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
+
+  // Function to load and pick random placeholder courses
+  const loadRandomPlaceholderCourses = useCallback(async () => {
+    try {
+      const data = await loadHomepageTopCourses();
+      if (data && data.topCourseCodes && data.topCourseCodes.length > 0) {
+        // Pick 3 random courses from the topCourseCodes
+        const shuffled = [...data.topCourseCodes].sort(() => Math.random() - 0.5);
+        const selectedCodes = shuffled.slice(0, 3);
+        
+        // Convert to CourseInfo by finding them in the courses array
+        const courses: CourseInfo[] = [];
+        selectedCodes.forEach(code => {
+          const course = data.courses.find(c => c.courseCode === code);
+          if (course) {
+            courses.push(mapTopCourseToCourseInfo(course));
+          }
+        });
+        
+        // Filter out unavailable courses
+        const filtered = courses.filter(
+          course => !isCourseUnavailable(course.code, course.institution)
+        );
+        
+        setPlaceholderCourses(filtered);
+        return filtered;
+      }
+    } catch {
+      // Silently fail - we'll just not show placeholder suggestions
+    }
+    return [];
+  }, []);
+
+  // Load placeholder courses from homepage data on mount
+  useEffect(() => {
+    loadRandomPlaceholderCourses();
+  }, [loadRandomPlaceholderCourses]);
 
   // Preload courses from all institutions on mount (for better search performance)
   useEffect(() => {
@@ -152,27 +191,18 @@ export default function BottomSearchBar({
 
     const trimmedQuery = searchQuery.trim();
     
-    // Show popular courses when query is empty
+    // Show placeholder courses when query is empty
     if (trimmedQuery.length === 0) {
-      getPopularCourses(undefined, 3).then(popular => {
-        const filtered = popular.filter(
-          course => !isCourseUnavailable(course.code, course.institution)
-        );
-        setSuggestions(filtered.slice(0, 3));
-        // Show suggestions if we have results and input is focused
-        if (filtered.length > 0 && isFocused) {
-          setShowSuggestions(true);
-        } else {
-          setShowSuggestions(false);
-        }
-        setSelectedCourse(null);
-        setNotFoundMessage(null);
-      }).catch(() => {
-        setSuggestions([]);
+      // Use placeholder courses (from homepage top courses) - already filtered
+      setSuggestions(placeholderCourses);
+      // Show suggestions if we have results and input is focused
+      if (placeholderCourses.length > 0 && isFocused) {
+        setShowSuggestions(true);
+      } else {
         setShowSuggestions(false);
-        setSelectedCourse(null);
-        setNotFoundMessage(null);
-      });
+      }
+      setSelectedCourse(null);
+      setNotFoundMessage(null);
       return;
     }
 
@@ -262,7 +292,7 @@ export default function BottomSearchBar({
   // Perform search when query changes (debounced)
   useEffect(() => {
     performSearch(query);
-  }, [query, performSearch]);
+  }, [query, performSearch, placeholderCourses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
@@ -386,13 +416,17 @@ export default function BottomSearchBar({
     }
   };
 
-  const handleFocus = () => {
+  const handleFocus = async () => {
     setIsFocused(true);
-    if (suggestions.length > 0) {
+    if (query.trim().length === 0) {
+      // Pick new random placeholder courses when focusing on empty input
+      const courses = await loadRandomPlaceholderCourses();
+      if (courses.length > 0) {
+        setSuggestions(courses);
+        setShowSuggestions(true);
+      }
+    } else if (suggestions.length > 0) {
       setShowSuggestions(true);
-    } else if (query.trim().length === 0) {
-      // Trigger search to get popular courses when focusing on empty input
-      performSearch('');
     }
   };
 
@@ -498,11 +532,7 @@ export default function BottomSearchBar({
                   ref={suggestionsRef} 
                   className={`${styles.suggestions} ${suggestionsPosition === 'below' ? styles.suggestionsBelow : styles.suggestionsAbove}`}
                 >
-                  {query.trim().length === 0 && (
-                    <div className={styles.suggestionsHeader}>
-                      <span>Populære emner</span>
-                    </div>
-                  )}
+                  {/* No header for placeholder courses - they're just examples */}
                   {suggestions.map((course, index) => (
                     <button
                       key={`${course.code}-${course.institution}`}
