@@ -13,9 +13,10 @@ export default function Footer() {
           <div className={styles.footerSection}>
             <h4>Om</h4>
             <p>
-              Karakterstatistikk er en plattform for å utforske karakterfordelinger 
-              for emner ved norske universiteter. Plattformen gir deg innsikt i 
-              hvordan karakterer er fordelt på tvers av ulike emner og institusjoner.
+              Karakterfordeling er en gratis plattform som gir deg innsikt i karakterfordelinger 
+              for emner ved norske universiteter og videregående skoler. Utforsk hvordan karakterer 
+              er fordelt på tvers av ulike emner, institusjoner og år, og bruk vår GPA-kalkulator 
+              for å beregne ditt gjennomsnitt.
             </p>
           </div>
           <div className={styles.footerSection}>
@@ -49,10 +50,7 @@ export default function Footer() {
               >
                 Norsk lisens for offentlige data (NLOD)
               </a>
-              .
-            </p>
-            <p>
-              VGS-data er fra{' '}
+              . VGS-data er fra{' '}
               <a 
                 href="https://www.udir.no/tall-og-forskning/statistikk/statistikk-videregaaende-skole/karakterer-vgs/" 
                 target="_blank" 
@@ -73,7 +71,7 @@ export default function Footer() {
           </div>
         </div>
         <div className={styles.footerBottom}>
-          <p className="text-light">© {currentYear} Karakterstatistikk</p>
+          <p className="text-light">© {currentYear} Karakterfordeling</p>
           <div className={styles.footerLinks}>
             <Link
               href={{ pathname: '/', query: { reset: '1' } }}

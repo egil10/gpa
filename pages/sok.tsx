@@ -211,7 +211,7 @@ export default function SearchPage() {
   }, [router.isReady, router.query.code, router]);
 
   return (
-    <Layout title={courseCode || 'Emne'} description={`Karakterstatistikk for ${courseCode}`}>
+    <Layout title={courseCode || 'Emne'} description={`Karakterfordeling for ${courseCode}`}>
       <div className={styles.searchPage}>
         {courseCode && (
           <div className={styles.courseHeader}>

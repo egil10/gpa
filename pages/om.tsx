@@ -4,16 +4,16 @@ import styles from '@/styles/About.module.css';
 
 export default function AboutPage() {
   return (
-    <Layout title="Om" description="Om Karakterstatistikk">
+    <Layout title="Om" description="Om Karakterfordeling">
       <div className={styles.aboutPage}>
         <div className="container">
           <div className={styles.content}>
-            <h1>Om Karakterstatistikk</h1>
+            <h1>Om Karakterfordeling</h1>
             
             <section className={styles.section}>
               <h2>Hva er dette?</h2>
               <p>
-                Karakterstatistikk er en plattform for å utforske karakterfordelinger 
+                Karakterfordeling er en plattform for å utforske karakterfordelinger 
                 for emner ved norske universiteter og videregående skoler. Plattformen gir deg innsikt i 
                 hvordan karakterer er fordelt på tvers av ulike emner og institusjoner.
               </p>

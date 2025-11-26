@@ -16,9 +16,9 @@ export default function Layout({ children, title, description }: LayoutProps) {
   const router = useRouter();
   const isSearchPage = router.pathname === '/sok';
   const isHomePage = router.pathname === '/';
-  const siteTitle = title ? `${title} | Karakterstatistikk` : 'Karakterstatistikk';
+  const siteTitle = title ? `${title} | Karakterfordeling` : 'Karakterfordeling';
   const siteDescription = description || 
-    'Utforsk karakterstatistikk for norske universitetsemner. Data fra NSD.';
+    'Utforsk karakterfordelinger for norske universitetsemner. Data fra NSD.';
 
   return (
     <>
