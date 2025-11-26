@@ -244,7 +244,14 @@ export default function CourseAutocomplete({
               className={`${styles.suggestionItem} ${
                 index === selectedIndex ? styles.selected : ''
               }`}
-              onClick={() => handleSelectCourse(course)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                handleSelectCourse(course);
+              }}
+              onClick={(e) => {
+                e.preventDefault(); // Extra safety
+                handleSelectCourse(course);
+              }}
               onMouseEnter={() => setSelectedIndex(index)}
             >
               {(() => {

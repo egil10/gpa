@@ -266,8 +266,14 @@ export default function CourseNameAutocomplete({
                 index === selectedIndex ? styles.selected : ''
               }`}
               onMouseEnter={() => setSelectedIndex(index)}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => handleSelectCourse(course)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                handleSelectCourse(course);
+              }}
+              onClick={(e) => {
+                e.preventDefault(); // Extra safety
+                handleSelectCourse(course);
+              }}
               role="option"
               aria-selected={index === selectedIndex}
             >

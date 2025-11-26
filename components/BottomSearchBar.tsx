@@ -314,12 +314,8 @@ export default function BottomSearchBar({
   };
 
   const handleSuggestionClick = (course: CourseInfo) => {
-    // Just fill in the input, don't navigate yet
-    setQuery(course.code);
-    setSelectedCourse(course);
-    setShowSuggestions(false);
-    setNotFoundMessage(null);
-    inputRef.current?.focus();
+    // Navigate directly to the course (same as handleSelectCourse)
+    handleSelectCourse(course);
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -540,7 +536,14 @@ export default function BottomSearchBar({
                       className={`${styles.suggestionItem} ${
                         index === selectedIndex ? styles.selected : ''
                       }`}
-                      onClick={() => handleSuggestionClick(course)}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent input blur
+                        handleSuggestionClick(course);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault(); // Extra safety
+                        handleSuggestionClick(course);
+                      }}
                       onMouseEnter={() => setSelectedIndex(index)}
                     >
                       <div className={styles.suggestionContent}>

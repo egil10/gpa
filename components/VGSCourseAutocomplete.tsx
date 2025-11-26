@@ -205,7 +205,14 @@ export default function VGSCourseAutocomplete({
             <button
               key={`${course.name}-${index}`}
               type="button"
-              onClick={() => handleSelectCourse(course)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                handleSelectCourse(course);
+              }}
+              onClick={(e) => {
+                e.preventDefault(); // Extra safety
+                handleSelectCourse(course);
+              }}
               className={`${styles.suggestionItem} ${
                 index === selectedIndex ? styles.selected : ''
               }`}
